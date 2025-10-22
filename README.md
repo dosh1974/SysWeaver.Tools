@@ -21,7 +21,7 @@
 > ⚠️ **DISCLAIMER**  
 >         SysWeaver is used in my personal and proffesional work.  
 >         It's **not** intended for wide public consumption.  
->         I move fast, refactor and break things regulary.
+>         I move fast, refactor and break things regulary.  
 >         Use at your own risk!  
 
 # OVERVIEW
