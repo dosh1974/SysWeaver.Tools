@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SysWeaver\Serialization\SysWeaver.Serialization.NewtonsoftJson\SysWeaver.Serialization.NewtonsoftJson.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.CommandLine\SysWeaver.CommandLine.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Common\SysWeaver.Common.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Compression.BrotliNativeNET\SysWeaver.Compression.BrotliNativeNET.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Compression.ZstdSharp\SysWeaver.Compression.ZstdSharp.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Compression\SysWeaver.Compression.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Serialization\SysWeaver.Serialization.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.Storage\SysWeaver.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tools\glsl_optimizer.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\minify.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\preprocessor.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\shader_minifier.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\ZopfliPng.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
