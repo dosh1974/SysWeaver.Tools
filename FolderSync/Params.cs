@@ -2,6 +2,8 @@
 
 namespace FolderSync
 {
+
+
     public sealed class Params
     {
 
@@ -31,9 +33,19 @@ namespace FolderSync
         public bool NoSwitch { get; set; }
 
         /// <summary>
+        /// One or more (separated by a ;) patterns of files to ignore
+        /// </summary>
+        public String Ignore { get; set; }
+
+        /// <summary>
         /// An optional comment
         /// </summary>
         public String Comment { get; set; }
+
+        /// <summary>
+        /// If true, do NOT use content dependent chunking
+        /// </summary>
+        public bool NoCdc { get; set; }
 
     }
 }

@@ -43,10 +43,29 @@ namespace FolderSync
                     Password = opt.Password,
                     IgnoreCertErrors = opt.IgnoreCertErrors,
                 };
+                Func<String, bool> ignore = null;
+                var ig = opt.Ignore;
+                if (!String.IsNullOrEmpty(ig))
+                {
+                    var ip = ig.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    if (ip.Length > 0)
+                    {
+                        ignore = name =>
+                        {
+                            foreach (var x in ip)
+                            {
+                                if (Wildcard.Match(name, x))
+                                    return true;
+                            }
+                            return false;
+                        };
+                    }
+                }
+
 
                 using var syncher = new FolderSyncer(p);
                 Console.Write("Scanning \"" + srcFolder + "\"");
-                var res = await syncher.SyncFolder(srcFolder, name, !opt.NoSwitch, (ev, data) =>
+                var res = await syncher.SyncFolder(srcFolder, name, !opt.NoSwitch, !opt.NoCdc, ignore , (ev, data) =>
                 {
                     switch (ev)
                     {
@@ -84,6 +103,11 @@ namespace FolderSync
                         Console.WriteLine("Files: " + V(res.Uploaded) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.Uploaded / Math.Max(1, res.SourceFiles)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
                         Console.WriteLine("Source bytes: " + V(res.UploadedSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.UploadedSourceBytes / Math.Max(1, res.SourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
                         Console.WriteLine("Network bytes: " + V(res.UploadedNetworkBytes) + " / " + V(res.UploadedSourceBytes) + "  ( " + (100M * res.UploadedNetworkBytes / Math.Max(1, res.UploadedSourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                        if (res.ChunkCount > 0)
+                        {
+                            Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.NewChunkCount)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                            Console.WriteLine("New chunk bytes: " + V(res.NewChunkSize));
+                        }
                     }
                 }
                 else
