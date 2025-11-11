@@ -33,7 +33,7 @@ namespace FolderSync
         public bool NoSwitch { get; set; }
 
         /// <summary>
-        /// One or more (separated by a ;) patterns of files to ignore
+        /// One or more (separated by a ;) wild card patterns of files to ignore
         /// </summary>
         public String Ignore { get; set; }
 

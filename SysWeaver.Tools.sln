@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SysWeaver", "SysWeaver", "{43CD38CA-BE7A-42EE-843A-D39BA97FEDF9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SysWeaver", "_SysWeaver", "{43CD38CA-BE7A-42EE-843A-D39BA97FEDF9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SysWeaver.Common", "..\SysWeaver\SysWeaver.Common\SysWeaver.Common.csproj", "{377B547B-8EBA-4DF3-A3DC-DB8F01F4C12B}"
 EndProject
@@ -177,6 +177,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnDuplicates", "OnDuplicates\OnDuplicates.csproj", "{A78E275E-90B1-4C72-BDCD-F5A314906067}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SysWeaver.Storage.Cdc", "..\SysWeaver\SysWeaver.Storage.Cdc\SysWeaver.Storage.Cdc.csproj", "{EBF0F9F6-D704-41C0-9337-2EE41B639542}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SwSyncTool", "SwSyncTool\SwSyncTool.csproj", "{17070D40-0A84-496E-9E2C-83FB9349DA28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1232,6 +1234,18 @@ Global
 		{EBF0F9F6-D704-41C0-9337-2EE41B639542}.Release|x64.Build.0 = Release|Any CPU
 		{EBF0F9F6-D704-41C0-9337-2EE41B639542}.Release|x86.ActiveCfg = Release|Any CPU
 		{EBF0F9F6-D704-41C0-9337-2EE41B639542}.Release|x86.Build.0 = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|x64.Build.0 = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Debug|x86.Build.0 = Debug|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|x64.ActiveCfg = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|x64.Build.0 = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|x86.ActiveCfg = Release|Any CPU
+		{17070D40-0A84-496E-9E2C-83FB9349DA28}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
