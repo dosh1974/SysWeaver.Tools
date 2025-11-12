@@ -316,7 +316,7 @@ namespace SwSyncTool
                     Console.WriteLine("Network bytes: " + V(res.UploadedNetworkBytes) + " / " + V(res.UploadedSourceBytes) + "  ( " + (100M * res.UploadedNetworkBytes / Math.Max(1, res.UploadedSourceBytes)).ToValueString() + " % )");
                     if (res.ChunkCount > 0)
                     {
-                        Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.NewChunkCount)).ToValueString() + " % )");
+                        Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.ChunkCount)).ToValueString() + " % )");
                         Console.WriteLine("New chunk bytes: " + V(res.NewChunkSize));
                     }
                 }
@@ -735,6 +735,7 @@ namespace SwSyncTool
 
         static async Task<int> Main(string[] argsC)
         {
+            var start = DateTime.UtcNow;
             CommandLine cmd;
             Params p;
             try
@@ -775,8 +776,10 @@ namespace SwSyncTool
                 var res = await op.Func(argsC, props, p);
                 if (res != 0)
                     return Usage(null, res, op);
+                var took = DateTime.UtcNow - start;
                 Console.ResetColor();
                 Console.WriteLine();
+                Console.WriteLine(took.TotalSeconds.ToValueString(2, "All done! Took: ", " seconds"));
                 return 0;
             }
             catch (Exception ex)
