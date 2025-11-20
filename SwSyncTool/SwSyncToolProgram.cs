@@ -15,12 +15,20 @@ namespace SwSyncTool
             new Op(
                 Report,
                 "Report",
-                "Report the current usage"
+                "Report the current usage.\nArgument is the number of days a chunk have to be unused before considered old (default 400).",
+                0, 1
                 ),
             new Op(
                 QuickReport,
                 "QuickReport",
-                "Report the current usage (but skipping chunk decompression)"
+                "Report the current usage (but skipping chunk decompression).\nArgument is the number of days a chunk have to be unused before considered old (default 400).",
+                0, 1
+                ),
+            new Op(
+                Prune,
+                "Prune",
+                "PERMANENTLY remove chunks that is considered old (haven't been used for X days).\nArgument is the number of days a chunk have to be unused before considered old (default 400).",
+                0, 1
                 ),
             new Op(
                 Add,
@@ -38,6 +46,12 @@ namespace SwSyncTool
                 Verify,
                 "Verify",
                 "Verify .swcompact file(s).\nArguments are .swcompact files.\nWildcards are supported.",
+                1, 10000
+                ),
+            new Op(
+                Touch,
+                "Touch",
+                "Mark all chunks used by some .swcompact file(s) as being in use.\nArguments are .swcompact files.\nWildcards are supported.",
                 1, 10000
                 ),
             new Op(
@@ -88,6 +102,23 @@ namespace SwSyncTool
                 Console.WriteLine();
         }
 
+
+        static void DumpTime(String prefix, DateTime time, bool utc = true, String suffix = null)
+        {
+            var val = (utc ? time : time.ToLocalTime()).ToString("yyyy-MM-dd HH:mm");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(String.Concat("   ", prefix, ':').PadRight(MaxHeader));
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(val);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(utc ? " UTC" : " local");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            if (suffix != null)
+                Console.WriteLine(" (" + suffix + ")");
+            else
+                Console.WriteLine();
+        }
+
         static void DumpSection(String name)
         {
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -113,6 +144,15 @@ namespace SwSyncTool
                 Console.WriteLine(" (" + suffix + ")");
             else
                 Console.WriteLine();
+        }
+
+
+        static void DumpError(String prefix, String val)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(String.Concat("   ", prefix, ':').PadRight(MaxHeader));
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(val);
         }
 
         static void DumpPercentage(String prefix, Decimal value, String suffix = null)
@@ -152,12 +192,51 @@ namespace SwSyncTool
                 DumpCount("Other count", oc);
                 DumpSize("Other size", stats.OtherSize);
             }
+            DumpTime("Older than", stats.Old);
+            oc = stats.OldCount;
+            if (oc > 0)
+            {
+                DumpCount("Old file count", oc);
+                DumpSize("Old disc size", stats.OldSize, "estimated");
+            }
             Console.WriteLine();
         }
 
-        static async ValueTask<int> Report(String[] args, CdcProps props, Params p)
+        static void DumpFolder(CdcPruneStats stats)
         {
-            var stats = await ContentDependentChunking.GetFolderStats(true, props);
+            DumpSection(stats.Folder);
+            DumpTime("Older than", stats.Old);
+            var size = stats.BeforeDiscSize;
+            var count = stats.BeforeFileCount;
+            DumpCount("Before count", count);
+            DumpSize("Before size", size, "estimated");
+            var errCount = stats.DeleteErrors;
+            if (errCount > 0)
+            {
+                DumpCount("Delete errors", errCount);
+                DumpError("First error", stats.DeleteErr);
+            }
+            var deleteCount = stats.PruneFileCount;
+            if (deleteCount > 0)
+            {
+                var deleteSize = stats.PruneDiscSize;
+                DumpCount("Deleted count", deleteCount);
+                DumpSize("Deleted size", deleteSize, "estimated");
+                DumpPercentage("Deleted count", (100M * deleteCount) / count);
+                DumpPercentage("Deleted size", (100M * deleteSize) / size);
+                DumpCount("After count", count - deleteCount);
+                DumpSize("After size", size - deleteSize, "estimated");
+            }
+            Console.WriteLine();
+        }
+
+        static async ValueTask<int> InternalReport(String[] args, CdcProps props, Params p, bool uncompress)
+        {
+            int days = args.Length > 1 ? int.Parse(args[1]) : 400;
+            if (days < 3)
+                throw new Exception("The minimum number of days accpeted is 3");
+            var old = DateTime.UtcNow.AddDays(-days).ToStartOfDay(12);
+            var stats = await ContentDependentChunking.GetFolderStats(uncompress, old, props);
             CdcFolderStats merged = null;
             foreach (var s in stats)
             {
@@ -168,11 +247,23 @@ namespace SwSyncTool
                 DumpFolder(merged);
             return 0;
         }
+        
+        static ValueTask<int> Report(String[] args, CdcProps props, Params p)
+            => InternalReport(args, props, p, true);
 
-        static async ValueTask<int> QuickReport(String[] args, CdcProps props, Params p)
+        static ValueTask<int> QuickReport(String[] args, CdcProps props, Params p)
+            => InternalReport(args, props, p, false);
+
+
+        static async ValueTask<int> Prune(String[] args, CdcProps props, Params p)
         {
-            var stats = await ContentDependentChunking.GetFolderStats(false, props);
-            CdcFolderStats merged = null;
+            int days = args.Length > 1 ? int.Parse(args[1]) : 400;
+            if (days < 3)
+                throw new Exception("The minimum number of days accpeted is 3");
+            var old = DateTime.UtcNow.AddDays(-days).ToStartOfDay(12);
+            
+            var stats = await ContentDependentChunking.Prune(old, props);
+            CdcPruneStats merged = null;
             foreach (var s in stats)
             {
                 DumpFolder(s);
@@ -192,10 +283,7 @@ namespace SwSyncTool
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
             for (int i = 1; i < al; ++ i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                     h.Add(file);
                 foreach (var folder in Directory.GetDirectories(dir, name))
@@ -357,10 +445,7 @@ namespace SwSyncTool
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
             for (int i = 1; i < al; ++i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
                     Console.Write(String.Concat("File: \"", file, '"'));
@@ -384,10 +469,7 @@ namespace SwSyncTool
             Exception exl = null;
             for (int i = 1; i < al; ++i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -495,7 +577,13 @@ namespace SwSyncTool
             => 
             WriteStatsSummary(s.MissingChunks, s.BrokenFiles, s.TotalMissing, s.ChunkCount, s.UniqueChunks.Count, s.FileCount, 0, 0, tab);
 
-        static async ValueTask<int> Verify(String[] args, CdcProps props, Params p)
+        static ValueTask<int> Verify(String[] args, CdcProps props, Params p)
+            => InternalVerify(args, props, p, false);
+
+        static ValueTask<int> Touch(String[] args, CdcProps props, Params p)
+            => InternalVerify(args, props, p, true);
+
+        static async ValueTask<int> InternalVerify(String[] args, CdcProps props, Params p, bool touch)
         {
             var al = args.Length;
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
@@ -510,10 +598,7 @@ namespace SwSyncTool
             long failedArcCount = 0;
             for (int i = 1; i < al; ++i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
                     ++arcCount;
@@ -525,7 +610,7 @@ namespace SwSyncTool
                     Console.Write("\"");
                     try
                     {
-                        var res = await ContentDependentChunking.Verify(file, props);
+                        var res = await ContentDependentChunking.Verify(file, props, touch);
                         fileCount += res.FileCount;
                         chunkCount += res.ChunkCount;
                         foreach (var uc in res.UniqueChunks)
@@ -561,8 +646,6 @@ namespace SwSyncTool
             return 0;
         }
 
-
-
         static async ValueTask<int> Recover(String[] args, CdcProps props, Params p)
         {
             var al = args.Length;
@@ -577,10 +660,7 @@ namespace SwSyncTool
             long failedArcCount = 0;
             for (int i = 1; i < al; ++i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
                     ++arcCount;
@@ -626,7 +706,6 @@ namespace SwSyncTool
             return 0;
         }
 
-
         static async ValueTask<int> Stats(String[] args, CdcProps props, Params p)
         {
             var al = args.Length;
@@ -642,10 +721,7 @@ namespace SwSyncTool
             long failedArcCount = 0;
             for (int i = 1; i < al; ++i)
             {
-                var f = args[i];
-                var x = f.LastIndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar]) + 1;
-                var dir = Path.GetFullPath(f.Substring(0, x));
-                var name = f.Substring(x);
+                var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
                     ++arcCount;
