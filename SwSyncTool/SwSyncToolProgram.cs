@@ -5,6 +5,8 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using SysWeaver.FolderSync;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace SwSyncTool
 {
@@ -499,18 +501,13 @@ namespace SwSyncTool
             return 0;
         }
 
-        static void WriteStatsSummary(
-            IReadOnlyCollection<String> missingChunks,
-            IReadOnlyCollection<String> brokenFiles,
-            long totalMissing,
-            long chunkCount,
-            long uniqueChunkCount,
-            long fileCount,
+        static void WriteStatsSummary(CdcChunkStats stats,
             long arcCount,
             long failedArcCount,
             String tab = null
             )
         {
+            var uniqueChunkCount = stats.UniqueChunks.Count;
             bool isSummary = tab == null;
             tab = tab ?? "   ";
             if (isSummary)
@@ -531,24 +528,24 @@ namespace SwSyncTool
                 }
                 DumpSection("SUMMARY");
             }
-            if (totalMissing > 0)
+            if (stats.TotalMissing > 0)
             {
                 if (!isSummary)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(tab + "Missing chunks:");
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    foreach (var x in missingChunks.OrderBy(x => x))
+                    foreach (var x in stats.MissingChunks.OrderBy(x => x))
                         Console.WriteLine(tab + "  " + x);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(tab + "Broken files:");
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    foreach (var x in brokenFiles.OrderBy(x => x))
+                    foreach (var x in stats.BrokenFiles.OrderBy(x => x))
                         Console.WriteLine(tab + "  " + x);
                 }
-                DumpCount("Total missing chunk", totalMissing, (100M * totalMissing) / chunkCount);
-                DumpCount("Unique missing chunks", missingChunks.Count, (100M * missingChunks.Count) / uniqueChunkCount);
-                DumpCount("Total broken files", brokenFiles.Count, (100M * brokenFiles.Count) / fileCount);
+                DumpCount("Total missing chunk", stats.TotalMissing, (100M * stats.TotalMissing) / stats.ChunkCount);
+                DumpCount("Unique missing chunks", stats.MissingChunks.Count, (100M * stats.MissingChunks.Count) / uniqueChunkCount);
+                DumpCount("Total broken files", stats.BrokenFiles.Count, (100M * stats.BrokenFiles.Count) / stats.FileCount);
             }
             if (isSummary && (failedArcCount > 0))
             {
@@ -557,51 +554,120 @@ namespace SwSyncTool
             {
                 if (isSummary)
                     DumpCount("Total archives", arcCount);
-                DumpCount("Total files", fileCount);
-                DumpCount("Total chunks", chunkCount);
+                DumpCount("Total files", stats.FileCount);
+                DumpCount("Total chunks", stats.ChunkCount);
                 if (uniqueChunkCount > 0)
                 {
                     DumpCount("Unique chunks", uniqueChunkCount);
-                    DumpPercentage("Chunk reuse", 100M - (100M * uniqueChunkCount) / chunkCount);
+                    DumpPercentage("Chunk reuse", 100M - (100M * uniqueChunkCount) / stats.ChunkCount);
+                }
+                DumpSize("Total compressed", stats.ChunkCompSize);
+                if (stats.ChunkExpSize > 0)
+                {
+                    DumpSize("Total expanded", stats.ChunkExpSize);
+                    DumpPercentage("Compression ratio", (100M * stats.ChunkCompSize) / stats.ChunkExpSize);
                 }
             }
-            if (isSummary && (failedArcCount <= 0) && (totalMissing <= 0))
+            if (isSummary && (failedArcCount <= 0) && (stats.TotalMissing <= 0))
             {
-
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("All files are ok!");
             }
         }
 
+        static void WriteStatsSummary(StatsSum sum)
+            => WriteStatsSummary(sum.Get(out var a, out var b, out var _), a, b);
+
         static void WriteStats(CdcChunkStats s, String tab = "   ")
             => 
-            WriteStatsSummary(s.MissingChunks, s.BrokenFiles, s.TotalMissing, s.ChunkCount, s.UniqueChunks.Count, s.FileCount, 0, 0, tab);
+            WriteStatsSummary(s, 0, 0, tab);
 
         static ValueTask<int> Verify(String[] args, CdcProps props, Params p)
             => InternalVerify(args, props, p, false);
 
         static ValueTask<int> Touch(String[] args, CdcProps props, Params p)
             => InternalVerify(args, props, p, true);
+        sealed class StatsSum
+        {
+            readonly ConcurrentDictionary<String, int> MissingChunks = new(StringComparer.Ordinal);
+            readonly ConcurrentDictionary<String, int> UniqueChunks = new(StringComparer.Ordinal);
+            readonly ConcurrentDictionary<String, int> BrokenFiles = new(StringComparer.Ordinal);
+            readonly ConcurrentDictionary<String, CdcChunkFileStats> FileData = new(StringComparer.Ordinal);
+            long TotalMissing = 0;
+            long FileCount = 0;
+            long ChunkCount = 0;
+            long ChunkCompSize = 0;
+            long ChunkSize = 0;
+            long ArcCount = 0;
+            long FailedArcCount = 0;
+            long FileSize = 0;
+            String FirstEx;
+
+            public void Add(String filePrefix, CdcChunkStats res)
+            {
+                Interlocked.Increment(ref ArcCount);
+                Interlocked.Add(ref FileSize, res.FileSize);
+                Interlocked.Add(ref FileCount, res.FileCount);
+                Interlocked.Add(ref ChunkCount, res.ChunkCount);
+                Interlocked.Add(ref ChunkCompSize, res.ChunkCompSize);
+                Interlocked.Add(ref ChunkSize, res.ChunkExpSize);
+                var fileData = FileData;
+                foreach (var x in res.Files)
+                    fileData.TryAdd(filePrefix + x.Name, x);
+                var uniqueChunks = UniqueChunks;
+                foreach (var x in res.UniqueChunks)
+                    uniqueChunks.TryAdd(x, 0);
+                if (res.TotalMissing > 0)
+                {
+                    Interlocked.Add(ref TotalMissing, res.TotalMissing);
+                    var missingChunks = MissingChunks;
+                    foreach (var m in res.MissingChunks)
+                        missingChunks.TryAdd(m, 0);
+                    var brokenFiles = BrokenFiles;
+                    foreach (var m in res.BrokenFiles)
+                        brokenFiles.TryAdd(filePrefix + m, 0);
+                    Interlocked.Increment(ref FailedArcCount);
+                }
+            }
+
+            public void OnException(Exception ex)
+            {
+                Interlocked.CompareExchange(ref FirstEx, ex.Message, null);
+                Interlocked.Increment(ref ArcCount);
+                Interlocked.Increment(ref FailedArcCount);
+            }
+
+            public CdcChunkStats Get(out long arcCount, out long failedArcCount, out string firstException)
+            {
+                arcCount = ArcCount;
+                failedArcCount = FailedArcCount;
+                firstException = FirstEx;
+                return new CdcChunkStats(
+                    FileSize,
+                    FileCount,
+                    ChunkCount,
+                    TotalMissing,
+                    ChunkCompSize,
+                    ChunkSize,
+                    MissingChunks.Keys.ToList(),
+                    BrokenFiles.Keys.ToList(),
+                    UniqueChunks.Keys.ToList(),
+                    FileData.Values.ToList()
+                    );
+            }
+        }
 
         static async ValueTask<int> InternalVerify(String[] args, CdcProps props, Params p, bool touch)
         {
             var al = args.Length;
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
             Exception exl = null;
-            var missingChunks = new HashSet<String>(StringComparer.Ordinal);
-            var brokenFiles = new HashSet<String>(StringComparer.Ordinal);
-            var uniqueChunks = new HashSet<String>(StringComparer.Ordinal);
-            long totalMissing = 0;
-            long fileCount = 0;
-            long chunkCount = 0;
-            long arcCount = 0;
-            long failedArcCount = 0;
+            var sum = new StatsSum();
             for (int i = 1; i < al; ++i)
             {
                 var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
-                    ++arcCount;
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write("\"");
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -611,19 +677,11 @@ namespace SwSyncTool
                     try
                     {
                         var res = await ContentDependentChunking.Verify(file, props, touch);
-                        fileCount += res.FileCount;
-                        chunkCount += res.ChunkCount;
-                        foreach (var uc in res.UniqueChunks)
-                            uniqueChunks.Add(uc);
+                        sum.Add(Path.GetFileNameWithoutExtension(file) + "/", res);
                         if (res.TotalMissing > 0)
                         {
-                            totalMissing += res.TotalMissing;
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine(" missing " + res.TotalMissing.ToValueString() + " (" + res.MissingChunks.Count.ToValueString() + " unique) in " + res.BrokenFiles.Count.ToValueString());
-                            foreach (var m in res.MissingChunks)
-                                missingChunks.Add(m);
-                            foreach (var m in res.BrokenFiles)
-                                brokenFiles.Add(m);
                         }
                         else
                         {
@@ -633,37 +691,30 @@ namespace SwSyncTool
                     }
                     catch (Exception ex)
                     {
-                        ++failedArcCount;
+                        sum.OnException(ex);
                         exl = exl ?? ex;
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine(" error: " + ex.Message);
                     }
                 }
             }
-            WriteStatsSummary(missingChunks, brokenFiles, totalMissing, chunkCount, uniqueChunks.Count, fileCount, arcCount, failedArcCount);
+            WriteStatsSummary(sum);
             if (exl != null)
                 return -1;
             return 0;
         }
 
+
         static async ValueTask<int> Recover(String[] args, CdcProps props, Params p)
         {
             var al = args.Length;
-            var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
             Exception exl = null;
-            var missingChunks = new HashSet<String>(StringComparer.Ordinal);
-            var brokenFiles = new HashSet<String>(StringComparer.Ordinal);
-            long totalMissing = 0;
-            long fileCount = 0;
-            long chunkCount = 0;
-            long arcCount = 0;
-            long failedArcCount = 0;
+            var sum = new StatsSum();
             for (int i = 1; i < al; ++i)
             {
                 var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
-                    ++arcCount;
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write("\"");
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -673,17 +724,11 @@ namespace SwSyncTool
                     try
                     {
                         var res = await ContentDependentChunking.Recover(file, GetTargetFolder(file, p), props);
-                        fileCount += res.FileCount;
-                        chunkCount += res.ChunkCount;
+                        sum.Add(Path.GetFileNameWithoutExtension(file) + "/", res);
                         if (res.TotalMissing > 0)
                         {
-                            totalMissing += res.TotalMissing;
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine(" missing " + res.TotalMissing.ToValueString() + " (" + res.MissingChunks.Count.ToValueString() + " unique) in " + res.BrokenFiles.Count.ToValueString());
-                            foreach (var m in res.MissingChunks)
-                                missingChunks.Add(m);
-                            foreach (var m in res.BrokenFiles)
-                                brokenFiles.Add(m);
                         }
                         else
                         {
@@ -693,14 +738,14 @@ namespace SwSyncTool
                     }
                     catch (Exception ex)
                     {
-                        ++failedArcCount;
+                        sum.OnException(ex);
                         exl = exl ?? ex;
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine(" error: " + ex.Message);
                     }
                 }
             }
-            WriteStatsSummary(missingChunks, brokenFiles, totalMissing, chunkCount, -1, fileCount, arcCount, failedArcCount);
+            WriteStatsSummary(sum);
             if (exl != null)
                 return -1;
             return 0;
@@ -709,44 +754,23 @@ namespace SwSyncTool
         static async ValueTask<int> Stats(String[] args, CdcProps props, Params p)
         {
             var al = args.Length;
-            var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
             Exception exl = null;
-            var missingChunks = new HashSet<String>(StringComparer.Ordinal);
-            var brokenFiles = new HashSet<String>(StringComparer.Ordinal);
-            var uniqueChunks = new HashSet<String>(StringComparer.Ordinal);
-            long totalMissing = 0;
-            long fileCount = 0;
-            long chunkCount = 0;
-            long arcCount = 0;
-            long failedArcCount = 0;
+            var sum = new StatsSum();
             for (int i = 1; i < al; ++i)
             {
                 var dir = PathExt.GetDirectoryAndMask(args[i], out var name);
                 foreach (var file in Directory.GetFiles(dir, name))
                 {
-                    ++arcCount;
                     DumpSection(file);
                     try
                     {
-                        var res = await ContentDependentChunking.Verify(file, props);
-                        fileCount += res.FileCount;
-                        chunkCount += res.ChunkCount;
-                        foreach (var uc in res.UniqueChunks)
-                            uniqueChunks.Add(uc);
+                        var res = await ContentDependentChunking.Verify(file, props, false, true);
+                        sum.Add(Path.GetFileNameWithoutExtension(file) + "/", res);
                         WriteStats(res);
-                        if (res.TotalMissing > 0)
-                        {
-                            totalMissing += res.TotalMissing;
-                            foreach (var xx in res.BrokenFiles)
-                                brokenFiles.Add(xx);
-                            foreach (var xx in res.MissingChunks)
-                                missingChunks.Add(xx);
-                            ++failedArcCount;
-                        }
                     }
                     catch (Exception ex)
                     {
-                        ++failedArcCount;
+                        sum.OnException(ex);
                         exl = exl ?? ex;
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("   Error: " + ex.Message);
@@ -754,7 +778,7 @@ namespace SwSyncTool
                     Console.WriteLine();
                 }
             }
-            WriteStatsSummary(missingChunks, brokenFiles, totalMissing, chunkCount, uniqueChunks.Count, fileCount, arcCount, failedArcCount);
+            WriteStatsSummary(sum);
             if (exl != null)
                 return -1;
             return 0;
