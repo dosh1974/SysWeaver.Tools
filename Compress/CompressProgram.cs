@@ -437,6 +437,8 @@ namespace SysWeaver
             var destFilename = Path.Combine(destFolder, filename);
             var srcSize = new FileInfo(sourceFile).Length;
             var key = Path.GetExtension(sourceFile).FastToLower();
+            var mime = MimeTypeMap.GetMimeType(key);
+
             foreach (var typeComp in opt.TypeCompressors)
             {
                 if (typeComp.Item2.TryGetValue(key, out var comp))
@@ -463,13 +465,16 @@ namespace SysWeaver
                     break;
                 }
             }
-            if (copyOriginal)
+            var uncompressable = !mime.Item2;
+            if (copyOriginal || uncompressable)
             {
                 if (!String.Equals(destFolder, Path.GetDirectoryName(sourceFile), StringComparison.OrdinalIgnoreCase))
                 {
                     if (Copy(sourceFile, destFilename))
                         msg.AddMessage(relSource.ToQuoted() + " copied");
                 }
+                if (uncompressable)
+                    return 0;
             }
             var methods = opt.CompTypes;
             if (methods.Length <= 0)
