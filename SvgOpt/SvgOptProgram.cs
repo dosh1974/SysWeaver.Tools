@@ -1097,9 +1097,19 @@ namespace SysWeaver
                     var idHist = data.Item1;
                     foreach (var ids in data.Item2)
                     {
-                        TryReadId(ids.Name.LocalName, ids.Value, out var id);
-                        if (idHist[id] == 1)
-                            RemoveId(ids);
+                        if (TryReadId(ids.Name.LocalName, ids.Value, out var aids))
+                        {
+                            foreach (var id in aids)
+                            {
+                                if (idHist[id] == 1)
+                                { 
+                                    RemoveId(ids, id);
+                                    break;
+                                }
+                            }
+                        }
+
+
                     }
                 }
 
@@ -1120,10 +1130,13 @@ namespace SysWeaver
                         foreach (var ids in data.Item2)
                         {
                             var name = ids.Name.LocalName;
-                            TryReadId(name, ids.Value, out var id);
-                            if (idHist[id] != 1)
-                                if (map.TryGetValue(id, out var newId))
-                                    ids.Value = FormatNewId(name, newId);
+                            TryReadId(name, ids.Value, out var aids);
+                            foreach (var id in aids)
+                            {
+                                if (idHist[id] != 1)
+                                    if (map.TryGetValue(id, out var newId))
+                                        ids.Value = FormatNewId(ids.Value, id, name, newId);
+                            }
                         }
                     }
                 }
@@ -1522,42 +1535,56 @@ namespace SysWeaver
             {
                 foreach (var attr in element.Attributes())
                 {
-                    if (!TryReadId(attr.Name.LocalName, attr.Value, out var id))
+                    if (!TryReadId(attr.Name.LocalName, attr.Value, out var aids))
                         continue;
                     allIds.Add(attr);
-                    idHist.TryGetValue(id, out var c);
-                    ++c;
-                    idHist[id] = c;
+                    foreach (var id in aids)
+                    {
+                        idHist.TryGetValue(id, out var c);
+                        ++c;
+                        idHist[id] = c;
+                    }
                 }
             });
             return Tuple.Create(idHist, allIds);
         }
 
-        static bool TryReadId(String attr, String value, out String id)
+        static bool TryReadId(String attr, String value, out String[] id)
         {
             value = value.Trim();
             if (attr == "id")
             {
-                id = value;
+                id = [value];
                 return true;
             }
             if (attr == "href")
             {
                 if (value.StartsWith("#"))
                 {
-                    id = value.Substring(1);
+                    id = [value.Substring(1)];
                     return true;
                 }
                 id = null;
                 return false;
             }
-            if (value.StartsWith("url(#"))
+
+            List<String> cids = new List<string>();
+            for (int s = 0; ;)
             {
-                if (value.EndsWith(')'))
-                {
-                    id = value.Substring(5, value.Length - 6).Trim();
-                    return true;
-                }
+                var f = value.IndexOf("url(#", s);
+                if (f < 0)
+                    break;
+                s = f + 5;
+                var e = value.IndexOf(')', s);
+                if (e < 0)
+                    break;
+                cids.Add(value.Substring(s, e - s).Trim());
+                s = e + 1;
+            }
+            if (cids.Count > 0)
+            {
+                id = cids.ToArray();
+                return true;
             }
             id = null;
             return false;
@@ -1569,7 +1596,7 @@ namespace SysWeaver
             "fill", "stroke",
         };
 
-        static void RemoveId(XAttribute x)
+        static void RemoveId(XAttribute x, String idName)
         {
             var name = x.Name.LocalName.Trim();
             if (Keep.Contains(name))
@@ -1580,13 +1607,36 @@ namespace SysWeaver
             x.Remove();
         }
 
-        static String FormatNewId(String attr, String newId)
+        static String FormatNewId(String value, String oldId, String attr, String newId)
         {
             if (attr == "id")
                 return newId;
             if (attr == "href")
                 return "#" + newId;
-            return String.Join(newId, "url(#", ')');
+            var sb = new StringBuilder(value.Length);
+            int s = 0;
+            for (; ;)
+            {
+                var f = value.IndexOf("url(#", s);
+                if (f < 0)
+                    break;
+                s = f + 5;
+                sb.Append(value, s, f - s);
+                var e = value.IndexOf(')', s);
+                if (e < 0)
+                    break;
+                var id = value.Substring(s, e - s).Trim();
+                if (id.FastEquals(oldId))
+                    sb.Append(newId);
+                else
+                    sb.Append(id);
+                sb.Append(')');
+                s = e + 1;
+            }
+            var l = value.Length;
+            if (s < l)
+                sb.Append(value, s, l - s);
+            return sb.ToString();
         }
 
 
