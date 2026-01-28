@@ -75,10 +75,16 @@ namespace SwSyncTool
                 1, 10000
                 ),
             new Op(
-                Sync,
-                "Sync",
-                "Synchronize one or more folders with a remote folder sync service.\nArguments are: [ServerPrefix] [RepoName] [Folders..]",
+                Push,
+                "Push",
+                "Update a folder on a remote folder sync service from one or more local folders.\nArguments are: [ServerPrefix] [RepoName] [LocalFolders..]",
                 3, 10000
+                ),
+            new Op(
+                Pull,
+                "Pull",
+                "Update a local folders from a remote folder sync service.\nArguments are: [ServerPrefix] [RepoName] [LocalFolder]",
+                3, 3
                 ),
             ];
 
@@ -232,7 +238,7 @@ namespace SwSyncTool
             Console.WriteLine();
         }
 
-        static async ValueTask<int> InternalReport(String[] args, CdcProps props, Params p, bool uncompress)
+        static async ValueTask<int> InternalReport(String[] args, CdcProps props, SyncToolParmas p, bool uncompress)
         {
             int days = args.Length > 1 ? int.Parse(args[1]) : 400;
             if (days < 3)
@@ -250,14 +256,14 @@ namespace SwSyncTool
             return 0;
         }
         
-        static ValueTask<int> Report(String[] args, CdcProps props, Params p)
+        static ValueTask<int> Report(String[] args, CdcProps props, SyncToolParmas p)
             => InternalReport(args, props, p, true);
 
-        static ValueTask<int> QuickReport(String[] args, CdcProps props, Params p)
+        static ValueTask<int> QuickReport(String[] args, CdcProps props, SyncToolParmas p)
             => InternalReport(args, props, p, false);
 
 
-        static async ValueTask<int> Prune(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Prune(String[] args, CdcProps props, SyncToolParmas p)
         {
             int days = args.Length > 1 ? int.Parse(args[1]) : 400;
             if (days < 3)
@@ -277,7 +283,7 @@ namespace SwSyncTool
         }
 
 
-        static async ValueTask<int> Add(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Add(String[] args, CdcProps props, SyncToolParmas p)
         {
             var al = args.Length;
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -316,7 +322,7 @@ namespace SwSyncTool
 
         static String V(long value) => value.ToValueString();
 
-        static async ValueTask<int> Sync(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Push(String[] args, CdcProps props, SyncToolParmas p)
         {
             var server = args[1];
             var name = args[2];
@@ -366,7 +372,7 @@ namespace SwSyncTool
             }
             var fs = String.Join(';', folders.OrderBy(x => x));
             Console.Write("Scanning \"" + fs + "\"");
-            var res = await syncher.SyncFolder(fs, name, !p.NoActivate, !p.NoCdc, ignore, (ev, data) =>
+            var res = await syncher.PushFolders(fs, name, !p.NoActivate, !p.NoCdc, ignore, (ev, data) =>
             {
                 switch (ev)
                 {
@@ -381,7 +387,7 @@ namespace SwSyncTool
                         Console.WriteLine();
                         Console.Write("Uploading");
                         break;
-                    case FolderSyncEvents.Uploaded:
+                    case FolderSyncEvents.Comnpleted:
                         Console.Write(".");
                         break;
 
@@ -393,7 +399,7 @@ namespace SwSyncTool
             if (exs == null)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                if (res.Uploaded <= 0)
+                if (res.TransferredCount <= 0)
                 {
                     Console.WriteLine("Everything is up to date!");
                     Console.WriteLine("Source files: " + V(res.SourceFiles));
@@ -401,9 +407,9 @@ namespace SwSyncTool
                 }
                 else
                 {
-                    Console.WriteLine("Files: " + V(res.Uploaded) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.Uploaded / Math.Max(1, res.SourceFiles)).ToValueString() + " % )");
-                    Console.WriteLine("Source bytes: " + V(res.UploadedSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.UploadedSourceBytes / Math.Max(1, res.SourceBytes)).ToValueString() + " % )");
-                    Console.WriteLine("Network bytes: " + V(res.UploadedNetworkBytes) + " / " + V(res.UploadedSourceBytes) + "  ( " + (100M * res.UploadedNetworkBytes / Math.Max(1, res.UploadedSourceBytes)).ToValueString() + " % )");
+                    Console.WriteLine("Files: " + V(res.TransferredCount) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.TransferredCount / Math.Max(1, res.SourceFiles)).ToValueString() + " % )");
+                    Console.WriteLine("Source bytes: " + V(res.TransferredSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.TransferredSourceBytes / Math.Max(1, res.SourceBytes)).ToValueString() + " % )");
+                    Console.WriteLine("Network bytes: " + V(res.TransferredNetworkSize) + " / " + V(res.TransferredSourceBytes) + "  ( " + (100M * res.TransferredNetworkSize / Math.Max(1, res.TransferredSourceBytes)).ToValueString() + " % )");
                     if (res.ChunkCount > 0)
                     {
                         Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.ChunkCount)).ToValueString() + " % )");
@@ -425,7 +431,82 @@ namespace SwSyncTool
             return 0;
         }
 
-        static String GetArchFilename(String fileOrFolder, Params p)
+        static async ValueTask<int> Pull(String[] args, CdcProps props, SyncToolParmas p)
+        {
+            var server = args[1];
+            var name = args[2];
+            var folder = args[3];
+            using var syncher = new FolderSyncer(new FolderSyncerParams
+            {
+                CredFile = p.CredFile,
+                Password = p.Password,
+                User = p.User,
+                IgnoreCertErrors = p.IgnoreCertErrors,
+                MaxConcurrency = p.MaxConcurrency,
+                Server = server,
+            });
+            Console.Write("Scanning \"" + folder + "\"");
+            var res = await syncher.PullFolders(name, folder, !p.NoActivate, !p.NoCdc, (ev, data) =>
+            {
+                switch (ev)
+                {
+                    case FolderSyncEvents.Hashed:
+                        Console.Write(".");
+                        break;
+                    case FolderSyncEvents.Scanned:
+                        Console.WriteLine();
+                        Console.Write("Checking against repo \"" + name + "\" at \"" + server + "\"");
+                        break;
+                    case FolderSyncEvents.Checked:
+                        Console.WriteLine();
+                        Console.Write("Downloading");
+                        break;
+                    case FolderSyncEvents.Comnpleted:
+                        Console.Write(".");
+                        break;
+
+                }
+            });
+            Console.WriteLine();
+            Console.WriteLine();
+            var exs = res.Errors;
+            if (exs == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                if (res.TransferredCount <= 0)
+                {
+                    Console.WriteLine("Everything is up to date!");
+                    Console.WriteLine("Source files: " + V(res.SourceFiles));
+                    Console.WriteLine("Source bytes: " + V(res.SourceBytes));
+                }
+                else
+                {
+                    Console.WriteLine("Files: " + V(res.TransferredCount) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.TransferredCount / Math.Max(1, res.SourceFiles)).ToValueString() + " % )");
+                    Console.WriteLine("Source bytes: " + V(res.TransferredSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.TransferredSourceBytes / Math.Max(1, res.SourceBytes)).ToValueString() + " % )");
+                    Console.WriteLine("Network bytes: " + V(res.TransferredNetworkSize) + " / " + V(res.TransferredSourceBytes) + "  ( " + (100M * res.TransferredNetworkSize / Math.Max(1, res.TransferredSourceBytes)).ToValueString() + " % )");
+                    if (res.ChunkCount > 0)
+                    {
+                        Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.ChunkCount)).ToValueString() + " % )");
+                        Console.WriteLine("New chunk bytes: " + V(res.NewChunkSize));
+                    }
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Errors:");
+                int i = 0;
+                foreach (var ex in exs)
+                {
+                    ++i;
+                    Console.WriteLine(i.ToString().PadLeft(4) + ": " + ex.Message);
+                }
+            }
+            return 0;
+        }
+
+
+        static String GetArchFilename(String fileOrFolder, SyncToolParmas p)
         {
             var d = p.OutputDir;
             if (d == null)
@@ -433,7 +514,7 @@ namespace SwSyncTool
             return Path.Combine(d, Path.GetFileName(fileOrFolder) + ContentDependentChunking.DotFileExt);
         }
 
-        static String GetTargetFolder(String file, Params p)
+        static String GetTargetFolder(String file, SyncToolParmas p)
         {
             var d = p.OutputDir;
             if (d == null)
@@ -441,7 +522,7 @@ namespace SwSyncTool
             return Path.Combine(d, Path.GetFileNameWithoutExtension(file));
         }
 
-        static async ValueTask<int> Compact(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Compact(String[] args, CdcProps props, SyncToolParmas p)
         {
             var al = args.Length;
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
@@ -464,7 +545,7 @@ namespace SwSyncTool
             return 0;
         }
 
-        static async ValueTask<int> Expand(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Expand(String[] args, CdcProps props, SyncToolParmas p)
         {
             var al = args.Length;
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
@@ -582,10 +663,10 @@ namespace SwSyncTool
             => 
             WriteStatsSummary(s, 0, 0, tab);
 
-        static ValueTask<int> Verify(String[] args, CdcProps props, Params p)
+        static ValueTask<int> Verify(String[] args, CdcProps props, SyncToolParmas p)
             => InternalVerify(args, props, p, false);
 
-        static ValueTask<int> Touch(String[] args, CdcProps props, Params p)
+        static ValueTask<int> Touch(String[] args, CdcProps props, SyncToolParmas p)
             => InternalVerify(args, props, p, true);
         sealed class StatsSum
         {
@@ -657,7 +738,7 @@ namespace SwSyncTool
             }
         }
 
-        static async ValueTask<int> InternalVerify(String[] args, CdcProps props, Params p, bool touch)
+        static async ValueTask<int> InternalVerify(String[] args, CdcProps props, SyncToolParmas p, bool touch)
         {
             var al = args.Length;
             var h = new HashSet<String>(StringComparer.OrdinalIgnoreCase);
@@ -705,7 +786,7 @@ namespace SwSyncTool
         }
 
 
-        static async ValueTask<int> Recover(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Recover(String[] args, CdcProps props, SyncToolParmas p)
         {
             var al = args.Length;
             Exception exl = null;
@@ -751,7 +832,7 @@ namespace SwSyncTool
             return 0;
         }
 
-        static async ValueTask<int> Stats(String[] args, CdcProps props, Params p)
+        static async ValueTask<int> Stats(String[] args, CdcProps props, SyncToolParmas p)
         {
             var al = args.Length;
             Exception exl = null;
@@ -793,7 +874,7 @@ namespace SwSyncTool
                 Console.WriteLine(err);
             }
             Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var t in CommandLine.SyntaxObject<Params>(Args, CommandLine.OptionMembers.All))
+            foreach (var t in CommandLine.SyntaxObject<SyncToolParmas>(Args, CommandLine.OptionMembers.All))
                 Console.WriteLine(t);
             /*Console.Write("Use: ");
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -837,10 +918,10 @@ namespace SwSyncTool
         {
             var start = DateTime.UtcNow;
             CommandLine cmd;
-            Params p;
+            SyncToolParmas p;
             try
             {
-                cmd = CommandLine.ParseObject<Params>(out p, argsC, Args, CommandLine.OptionMembers.All);
+                cmd = CommandLine.ParseObject<SyncToolParmas>(out p, argsC, Args, CommandLine.OptionMembers.All);
                 if (cmd == null)
                     return Usage();
             }
@@ -852,7 +933,7 @@ namespace SwSyncTool
             var al = args.Length;
             if (al <= 0)
             {
-                foreach (var t in CommandLine.SyntaxObject<Params>(Args, CommandLine.OptionMembers.All))
+                foreach (var t in CommandLine.SyntaxObject<SyncToolParmas>(Args, CommandLine.OptionMembers.All))
                     Console.WriteLine(t);
                 return Usage();
             }

@@ -8,7 +8,7 @@ namespace SwSyncTool
         
         #pragma warning disable CS0649
 
-        sealed class Params : CredentialParams
+        sealed class SyncToolParmas : CredentialParams
         {
             /// <summary>
             /// [Sync]
@@ -65,7 +65,7 @@ namespace SwSyncTool
         }
 
         #pragma warning restore CS0649
-
+        
     }
 
 

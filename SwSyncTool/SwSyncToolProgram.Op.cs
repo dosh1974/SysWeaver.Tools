@@ -12,9 +12,9 @@ namespace SwSyncTool
             public readonly int MinArgs;
             public readonly int MaxArgs;
             public readonly String Description;
-            public Func<String[], CdcProps, Params, ValueTask<int>> Func;
+            public Func<String[], CdcProps, SyncToolParmas, ValueTask<int>> Func;
 
-            public Op(Func<String[], CdcProps, Params, ValueTask<int>> func, string name, string description, int minArgs = 0, int maxArgs = 0)
+            public Op(Func<String[], CdcProps, SyncToolParmas, ValueTask<int>> func, string name, string description, int minArgs = 0, int maxArgs = 0)
             {
                 Func = func;
                 Name = name;

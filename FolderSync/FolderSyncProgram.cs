@@ -65,7 +65,7 @@ namespace FolderSync
 
                 using var syncher = new FolderSyncer(p);
                 Console.Write("Scanning \"" + srcFolder + "\"");
-                var res = await syncher.SyncFolder(srcFolder, name, !opt.NoSwitch, !opt.NoCdc, ignore , (ev, data) =>
+                var res = await syncher.PushFolders(srcFolder, name, !opt.NoSwitch, !opt.NoCdc, ignore , (ev, data) =>
                 {
                     switch (ev)
                     {
@@ -80,7 +80,7 @@ namespace FolderSync
                             Console.WriteLine();
                             Console.Write("Uploading");
                             break;
-                        case FolderSyncEvents.Uploaded:
+                        case FolderSyncEvents.Comnpleted:
                             Console.Write(".");
                             break;
 
@@ -92,7 +92,7 @@ namespace FolderSync
                 if (exs == null)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    if (res.Uploaded <= 0)
+                    if (res.TransferredCount <= 0)
                     {
                         Console.WriteLine("Everything is up to date!");
                         Console.WriteLine("Source files: " + V(res.SourceFiles));
@@ -100,9 +100,9 @@ namespace FolderSync
                     }
                     else
                     {
-                        Console.WriteLine("Files: " + V(res.Uploaded) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.Uploaded / Math.Max(1, res.SourceFiles)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
-                        Console.WriteLine("Source bytes: " + V(res.UploadedSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.UploadedSourceBytes / Math.Max(1, res.SourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
-                        Console.WriteLine("Network bytes: " + V(res.UploadedNetworkBytes) + " / " + V(res.UploadedSourceBytes) + "  ( " + (100M * res.UploadedNetworkBytes / Math.Max(1, res.UploadedSourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                        Console.WriteLine("Files: " + V(res.TransferredCount) + " / " + V(res.SourceFiles) + "  ( " + (100M * res.TransferredCount / Math.Max(1, res.SourceFiles)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                        Console.WriteLine("Source bytes: " + V(res.TransferredSourceBytes) + " / " + V(res.SourceBytes) + "  ( " + (100M * res.TransferredSourceBytes / Math.Max(1, res.SourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                        Console.WriteLine("Network bytes: " + V(res.TransferredNetworkSize) + " / " + V(res.TransferredSourceBytes) + "  ( " + (100M * res.TransferredNetworkSize / Math.Max(1, res.TransferredSourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
                         if (res.ChunkCount > 0)
                         {
                             Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.NewChunkCount)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
