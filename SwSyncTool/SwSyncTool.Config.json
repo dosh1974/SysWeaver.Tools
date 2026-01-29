@@ -1,0 +1,20 @@
+/*
+ * Config to use for this application
+ */
+
+{
+  "AllFolders": "D:\\Temp\\SysWeaver_Data\\SysWeaver",
+}
+
+/* Members that can be overridden
+ * ==============================
+
+ * "AllFolders" : String
+ *                One or more paths to use for data (common to all users).
+ *                Separate multiple path with semi colon (;).
+ *
+ * "UserFolders" : String
+ *                 One or more paths to use for user specific data.
+ *                 Separate multiple path with semi colon (;).
+ *
+*/

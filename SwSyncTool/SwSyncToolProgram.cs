@@ -446,7 +446,7 @@ namespace SwSyncTool
                 Server = server,
             });
             Console.Write("Scanning \"" + folder + "\"");
-            var res = await syncher.PullFolders(name, folder, !p.NoActivate, !p.NoCdc, (ev, data) =>
+            var res = await syncher.PullFolder(name, folder, !p.NoActivate, !p.NoCdc, (ev, data) =>
             {
                 switch (ev)
                 {
@@ -917,6 +917,10 @@ namespace SwSyncTool
         static async Task<int> Main(string[] argsC)
         {
             var start = DateTime.UtcNow;
+            Console.WriteLine("AllSharedFolders: \"" + String.Join("\", \"", Folders.AllSharedFolders) + '"');
+            Console.WriteLine("AllAppFolders: \"" + String.Join("\", \"", Folders.AllAppFolders) + '"');
+
+
             CommandLine cmd;
             SyncToolParmas p;
             try

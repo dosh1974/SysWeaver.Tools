@@ -17,4 +17,10 @@
     <ProjectReference Include="..\..\SysWeaver\SysWeaver.Storage.Cdc\SysWeaver.Storage.Cdc.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SwSyncTool.Config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
