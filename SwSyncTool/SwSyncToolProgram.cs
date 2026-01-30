@@ -83,7 +83,7 @@ namespace SwSyncTool
             new Op(
                 Pull,
                 "Pull",
-                "Update a local folders from a shared folder on a remote sync service.\nArguments are: [ServerPrefix] [RepoName] [LocalFolder]",
+                "Update a local folder from a shared folder on a remote sync service.\nArguments are: [ServerPrefix] [RepoName] [LocalFolder]",
                 3, 3
                 ),
             ];

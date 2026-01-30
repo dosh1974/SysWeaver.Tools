@@ -11,37 +11,37 @@ namespace SwSyncTool
         sealed class SyncToolParmas : CredentialParams
         {
             /// <summary>
-            /// [Sync]
+            /// [Push]
             /// Optional comment to use when synching to a remote repository.
             /// </summary>
             public String Comment;
 
             /// <summary>
-            /// [Sync]
+            /// [Push]
             /// One or more (separated by a ;) wild card patterns of files to ignore ("*.pdb" for instance).
             /// </summary>
             public String Ignore;
 
             /// <summary>
-            /// [Sync]
+            /// [Push, Pull]
             /// If true, and server cert errors are ignored. NOT reccomended!
             /// </summary>
             public bool IgnoreCertErrors;
 
             /// <summary>
-            /// [Sync]
+            /// [Push, Pull]
             /// The maximum concurrency to use, zero or negative is based on the number of hardware threads.
             /// </summary>
             public int MaxConcurrency = -1;
 
             /// <summary>
-            /// [Sync]
+            /// [Push, Pull]
             /// If true, the synched folder won't be activated.
             /// </summary>
             public bool NoActivate;
 
             /// <summary>
-            /// [Sync]
+            /// [Push, Pull]
             /// If true, Content Dependency Chunking optimizations won't be used.
             /// </summary>
             public bool NoCdc;
