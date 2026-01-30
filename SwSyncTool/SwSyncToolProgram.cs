@@ -77,13 +77,13 @@ namespace SwSyncTool
             new Op(
                 Push,
                 "Push",
-                "Update a folder on a remote folder sync service from one or more local folders.\nArguments are: [ServerPrefix] [RepoName] [LocalFolders..]",
+                "Update a managed folder on a remote sync service from one or more local folders.\nArguments are: [ServerPrefix] [RepoName] [LocalFolders..]",
                 3, 10000
                 ),
             new Op(
                 Pull,
                 "Pull",
-                "Update a local folders from a remote folder sync service.\nArguments are: [ServerPrefix] [RepoName] [LocalFolder]",
+                "Update a local folders from a shared folder on a remote sync service.\nArguments are: [ServerPrefix] [RepoName] [LocalFolder]",
                 3, 3
                 ),
             ];
@@ -387,7 +387,7 @@ namespace SwSyncTool
                         Console.WriteLine();
                         Console.Write("Uploading");
                         break;
-                    case FolderSyncEvents.Comnpleted:
+                    case FolderSyncEvents.Completed:
                         Console.Write(".");
                         break;
 
@@ -461,7 +461,7 @@ namespace SwSyncTool
                         Console.WriteLine();
                         Console.Write("Downloading");
                         break;
-                    case FolderSyncEvents.Comnpleted:
+                    case FolderSyncEvents.Completed:
                         Console.Write(".");
                         break;
 
@@ -917,10 +917,6 @@ namespace SwSyncTool
         static async Task<int> Main(string[] argsC)
         {
             var start = DateTime.UtcNow;
-            Console.WriteLine("AllSharedFolders: \"" + String.Join("\", \"", Folders.AllSharedFolders) + '"');
-            Console.WriteLine("AllAppFolders: \"" + String.Join("\", \"", Folders.AllAppFolders) + '"');
-
-
             CommandLine cmd;
             SyncToolParmas p;
             try

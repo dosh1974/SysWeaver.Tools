@@ -80,7 +80,7 @@ namespace FolderSync
                             Console.WriteLine();
                             Console.Write("Uploading");
                             break;
-                        case FolderSyncEvents.Comnpleted:
+                        case FolderSyncEvents.Completed:
                             Console.Write(".");
                             break;
 
