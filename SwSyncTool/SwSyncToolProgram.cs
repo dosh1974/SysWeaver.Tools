@@ -399,11 +399,13 @@ namespace SwSyncTool
             if (exs == null)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
+                String apiCall = null;
                 if (res.TransferredCount <= 0)
                 {
                     Console.WriteLine("Everything is up to date!");
                     Console.WriteLine("Source files: " + V(res.SourceFiles));
                     Console.WriteLine("Source bytes: " + V(res.SourceBytes));
+                    apiCall = p.OnNop;
                 }
                 else
                 {
@@ -414,6 +416,26 @@ namespace SwSyncTool
                     {
                         Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.ChunkCount)).ToValueString() + " % )");
                         Console.WriteLine("New chunk bytes: " + V(res.NewChunkSize));
+                    }
+                    apiCall = p.OnNew;
+                }
+                apiCall = apiCall?.Trim()?.TrimStart('/');
+                if (!String.IsNullOrEmpty(apiCall))
+                {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    apiCall = String.Concat(server.TrimEnd('/'), '/', apiCall);
+                    Console.Write(String.Concat("Invoking end-point \"", apiCall, '"'));
+                    try
+                    {
+                        using var onNewRes = await syncher.Client.GetAsync(apiCall);
+                        Console.ForegroundColor = onNewRes.IsSuccessStatusCode ? ConsoleColor.Green : ConsoleColor.Red;
+                        var code = onNewRes.StatusCode;
+                        Console.WriteLine(String.Concat(" [", (int)code, "] ", code.ToString().RemoveCamelCase()));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(String.Concat(" error: ", ex.Message));
                     }
                 }
             }

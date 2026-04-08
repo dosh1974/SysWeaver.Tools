@@ -186,6 +186,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysWeaver.MicroService.Medi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysWeaver.MicroService.ServerManager", "..\SysWeaver\SysWeaver.MicroService.ServerManager\SysWeaver.MicroService.ServerManager.csproj", "{41DBC8E7-73A7-EF81-3841-29D157943838}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwCurl", "SwCurl\SwCurl.csproj", "{6F2803B6-9471-425D-A2A1-A42F38A332DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1288,6 +1290,18 @@ Global
 		{41DBC8E7-73A7-EF81-3841-29D157943838}.Release|x64.Build.0 = Release|Any CPU
 		{41DBC8E7-73A7-EF81-3841-29D157943838}.Release|x86.ActiveCfg = Release|Any CPU
 		{41DBC8E7-73A7-EF81-3841-29D157943838}.Release|x86.Build.0 = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|x64.Build.0 = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|x64.ActiveCfg = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|x64.Build.0 = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F2803B6-9471-425D-A2A1-A42F38A332DA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -62,6 +62,21 @@ namespace SwSyncTool
             /// </summary>
             public int ChunkSize;
 
+            /// <summary>
+            /// [Push]
+            /// An optional end point (API) to call when new data have been pushed, the API is on the server and relative to server root.
+            /// It's using a GET request.
+            /// The API is called with the same credentials (same session) as the Push operation.
+            /// </summary>
+            public String OnNew;
+
+            /// <summary>
+            /// [Push]
+            /// An optional end point (API) to call when NO new data have been pushed (already up to date), the API is on the server and relative to server root.
+            /// It's using a GET request.
+            /// The API is called with the same credentials (same session) as the Push operation.
+            /// </summary>
+            public String OnNop;
         }
 
         #pragma warning restore CS0649
