@@ -9,14 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-	  <PackageReference Include="Svg" Version="3.4.7" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.CommandLine\SysWeaver.CommandLine.csproj" />
 	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.Common\SysWeaver.Common.csproj" />
 	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.Compression\SysWeaver.Compression.csproj" />
+	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.Minifier.Svg\SysWeaver.Minifier.Svg.csproj" />
 	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.Serialization\SysWeaver.Serialization.csproj" />
 	  <ProjectReference Include="..\..\SysWeaver\SysWeaver.Storage\SysWeaver.Storage.csproj" />
 	</ItemGroup>
