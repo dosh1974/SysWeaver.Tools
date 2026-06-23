@@ -291,7 +291,7 @@ namespace SysWeaver
                     source = temp;
                 }
             }
-            return ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 -o " + dest.ToQuoted() + " " + source.ToQuoted());
+            return ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
         }
 
         static readonly Dictionary<String, TypeCompressor> ImageCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
