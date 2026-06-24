@@ -12,7 +12,7 @@ namespace SysWeaver
         /// </summary>
         public String Compare;
 
-        const Char Version = 'k';
+        const Char Version = 'l';
 
         public String CacheKey => String.Concat(
             Version,
