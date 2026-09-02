@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace SysWeaver
 {
@@ -264,7 +265,7 @@ namespace SysWeaver
                 int o = 0;
                 bool inDebug = false;
                 var whiteSpaces = WhiteSpaces;
-                for (int i = 0; i < c; ++ i)
+                for (int i = 0; i < c; ++i)
                 {
                     var t = l[i];
                     var x = t.RemoveChars(whiteSpaces);
@@ -291,15 +292,21 @@ namespace SysWeaver
                     source = temp;
                 }
             }
+            if (Path.GetFileName(source).FastEquals("typescript.js"))
+            { 
+                File.Copy(source, dest, true);
+                return 0;
+            }
+//            return ExternalProcess.Run(ToolMinify, "--js-keep-var-names --js-version 2019 --html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
             return ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
         }
 
-        static readonly Dictionary<String, TypeCompressor> ImageCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
+        static readonly IReadOnlyDictionary<String, TypeCompressor> ImageCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
         {
             { ".png", CompressPng },
-        };
+        }.Freeze();
 
-        static readonly Dictionary<String, TypeCompressor> WebCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
+        static readonly IReadOnlyDictionary<String, TypeCompressor> WebCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
         {
             { ".js", Minimize },
             { ".css", Minimize },
@@ -312,13 +319,22 @@ namespace SysWeaver
             { ".webmanifest", Minimize },
             { ".xhtml", Minimize },
             { ".xml", Minimize },
-        };
+        }.Freeze();
 
-        static readonly Dictionary<String, TypeCompressor> ShadersCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
+        static readonly IReadOnlyDictionary<String, TypeCompressor> ShadersCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
         {
             { ".glsl", OptimizeShaders },
             { ".frag", OptimizeShaders },
-        };
+        }.Freeze();
+
+
+        static readonly IReadOnlyDictionary<String, bool> ForcedCompression = new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            { ".jpg", true },
+            { ".ico", true },
+            { ".jpeg", true },
+        }.Freeze();
+
         sealed class CompMeta
         {
             public long SrcSize { get; set; }
@@ -466,6 +482,8 @@ namespace SysWeaver
                 }
             }
             var uncompressable = !mime.Item2;
+            if (ForcedCompression.TryGetValue(key, out var forceComp))
+                uncompressable = !forceComp;
             if (copyOriginal || uncompressable)
             {
                 if (!String.Equals(destFolder, Path.GetDirectoryName(sourceFile), StringComparison.OrdinalIgnoreCase))
@@ -561,7 +579,7 @@ namespace SysWeaver
                     hs.Add(comp);
             }
             opt.CompTypes = hs.OrderBy(x => x.HttpCode).ToArray();
-            var tc = new List<Tuple<bool, Dictionary<string, TypeCompressor>>>();
+            var tc = new List<Tuple<bool, IReadOnlyDictionary<string, TypeCompressor>>>();
             opt.TypeCompressors = tc;
             if (opt.RecompressImages)
                 tc.Add(Tuple.Create(true, ImageCompressors));

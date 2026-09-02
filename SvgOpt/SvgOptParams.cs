@@ -28,6 +28,8 @@ namespace SysWeaver
             RemoveMetadata ? 'M' : '_',
             RemoveTitle ? 'T' : '_',
             RemoveAttributeSpaces ? 'A' : '_',
+            RemoveNonSvg ? 'N' : '_',
+            RemoveNamespaces ? 'N' : '_',
             RemoveClipRule ? 'C' : '_',
             RemoveFillRule ? 'F' : '_',
             RemoveBackground ? 'B' : '_',

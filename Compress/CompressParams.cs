@@ -51,7 +51,7 @@ namespace SysWeaver
 
         internal ICompType[] CompTypes;
 
-        internal List<Tuple<bool, Dictionary<String, CompressProgram.TypeCompressor>>> TypeCompressors;
+        internal List<Tuple<bool, IReadOnlyDictionary<String, CompressProgram.TypeCompressor>>> TypeCompressors;
 
 
         public String CacheKey => String.Concat(
