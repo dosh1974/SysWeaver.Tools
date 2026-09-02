@@ -308,13 +308,13 @@ namespace SwSyncTool
             Console.Write("Processing");
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             var l = new AsyncLock(Math.Max(1, Environment.ProcessorCount - 1));
-            async ValueTask AddOne(String f)
+            async Task AddOne(String f)
             {
                 using var _ = await l.Lock().ConfigureAwait(false);
                 await ContentDependentChunking.Add(f, props).ConfigureAwait(false);
                 Console.Write('.');
             }
-            await h.ToList().ProcessAsyncValue(AddOne);
+            await h.ToList().ProcessAsync(AddOne);
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine("ok!");
             return 0;
