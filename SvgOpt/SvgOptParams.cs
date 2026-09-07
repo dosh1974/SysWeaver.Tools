@@ -28,8 +28,6 @@ namespace SysWeaver
             RemoveMetadata ? 'M' : '_',
             RemoveTitle ? 'T' : '_',
             RemoveAttributeSpaces ? 'A' : '_',
-            RemoveNonSvg ? 'N' : '_',
-            RemoveNamespaces ? 'N' : '_',
             RemoveClipRule ? 'C' : '_',
             RemoveFillRule ? 'F' : '_',
             RemoveBackground ? 'B' : '_',
@@ -43,6 +41,8 @@ namespace SysWeaver
             RemoveIds ? 'I' : '_',
             RemoveUseSize ? 'U' : '_',
             RenameIds ? 'R' : '_',
+            RemoveNonSvg ? 'N' : '_',
+            RemoveNamespaces ? 'N' : '_',
             MaxDecimalRes < 0 ? "0" : MaxDecimalRes.ToString(), '_',
             MaxDecimals < 0 ? "" : MaxDecimals.ToString()
             );
