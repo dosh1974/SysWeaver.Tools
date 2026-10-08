@@ -693,9 +693,9 @@ namespace SwSyncTool
         sealed class StatsSum
         {
             readonly ConcurrentDictionary<String, int> MissingChunks = new(StringComparer.Ordinal);
-            readonly ConcurrentDictionary<String, int> UniqueChunks = new(StringComparer.Ordinal);
+            readonly LowAllocConcurrentDictionary<String, int> UniqueChunks = new(StringComparer.Ordinal);
             readonly ConcurrentDictionary<String, int> BrokenFiles = new(StringComparer.Ordinal);
-            readonly ConcurrentDictionary<String, CdcChunkFileStats> FileData = new(StringComparer.Ordinal);
+            readonly LowAllocConcurrentDictionary<String, CdcChunkFileStats> FileData = new(StringComparer.Ordinal);
             long TotalMissing = 0;
             long FileCount = 0;
             long ChunkCount = 0;
