@@ -16,8 +16,75 @@ namespace SwCurl
     static partial class SwCurlProgram
     {
 
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
+        //  The HTTP status code is written to the console (unless -Silent) and to the -Save file.
 
-        static int Usage(String err = null, int retCode = 0)
+        /// <summary>
+        /// Exit code: success, a 2xx HTTP status (also returned when help was requested).
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error (an exception, ex: failed to read the payload file or to write the -Save file).
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line arguments.
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+        /// <summary>
+        /// Exit code: the server responded with a 4xx HTTP status (client error).
+        /// </summary>
+        const int ExitHttpClientError = 3;
+        /// <summary>
+        /// Exit code: the server responded with a 5xx HTTP status (server error).
+        /// </summary>
+        const int ExitHttpServerError = 4;
+        /// <summary>
+        /// Exit code: the server responded with some other non successful HTTP status (1xx or 3xx).
+        /// </summary>
+        const int ExitHttpOtherStatus = 5;
+        /// <summary>
+        /// Exit code: the request failed without a response (connection refused, name resolution, TLS errors etc).
+        /// </summary>
+        const int ExitRequestFailed = 6;
+        /// <summary>
+        /// Exit code: the request timed out.
+        /// </summary>
+        const int ExitTimeout = 7;
+
+        static readonly String[] ExitCodeHelp =
+        [
+            "Exit codes:",
+            "  0  Success (a 2xx status), or help requested",
+            "  1  Generic error",
+            "  2  Invalid command line",
+            "  3  HTTP 4xx status (client error)",
+            "  4  HTTP 5xx status (server error)",
+            "  5  Other non successful HTTP status (1xx, 3xx)",
+            "  6  Request failed (connection, name resolution, TLS etc)",
+            "  7  Request timed out",
+        ];
+
+        static int GetExitCode(int httpStatus)
+        {
+            if ((httpStatus >= 400) && (httpStatus < 500))
+                return ExitHttpClientError;
+            if ((httpStatus >= 500) && (httpStatus < 600))
+                return ExitHttpServerError;
+            return ExitHttpOtherStatus;
+        }
+
+        static int GetExitCode(Exception ex)
+        {
+            if ((ex is TimeoutException) || ((ex is TaskCanceledException) && (ex.InnerException is TimeoutException)))
+                return ExitTimeout;
+            if (ex is HttpRequestException)
+                return ExitRequestFailed;
+            return ExitGenericError;
+        }
+
+        static int Usage(String err = null, int retCode = ExitSuccess)
         {
             if (err != null)
             {
@@ -26,6 +93,8 @@ namespace SwCurl
             }
             Console.ForegroundColor = ConsoleColor.Gray;
             foreach (var t in CommandLine.SyntaxObject<SwCurlParmas>(Args, CommandLine.OptionMembers.All))
+                Console.WriteLine(t);
+            foreach (var t in ExitCodeHelp)
                 Console.WriteLine(t);
             Console.ResetColor();
             return retCode;
@@ -163,13 +232,21 @@ namespace SwCurl
             }
             catch (Exception ex)
             {
-                return Usage(ex.Message, -1);
+                return Usage(ex.Message, ExitInvalidArguments);
             }
             var args = cmd.Arguments;
             var al = args.Length;
             if (al <= 0)
-                return Usage();
-            var textEncoding = Encoding.GetEncoding(p.Encoding);
+                return Usage(null, ExitInvalidArguments);
+            Encoding textEncoding;
+            try
+            {
+                textEncoding = Encoding.GetEncoding(p.Encoding);
+            }
+            catch (Exception ex)
+            {
+                return Usage(ex.Message, ExitInvalidArguments);
+            }
             IUnmanagedReadOnlyMemory<Byte> mem = null;
             HttpContent content = null;
             try
@@ -194,7 +271,7 @@ namespace SwCurl
                 else { 
                     if (httpMethod == SwMethods.GET)
                         if (p.AuthMethod != RemoteAuthMethod.SysWeaverLogin)
-                            throw new Exception("Can't have a payload with the GET method!");
+                            return Usage("Can't have a payload with the GET method!", ExitInvalidArguments);
                     if (httpMethod == SwMethods.Auto)
                         if (p.AuthMethod != RemoteAuthMethod.SysWeaverLogin)
                             httpMethod = SwMethods.POST;
@@ -493,19 +570,19 @@ namespace SwCurl
                         Console.ResetColor();
                         Console.WriteLine();
                     }
-                    return (int)res.StatusCode;
+                    return GetExitCode((int)res.StatusCode);
                 }
             }
             catch (Exception ex)
             {
-                return Usage(ex.Message, -2);
+                return Usage(ex.Message, GetExitCode(ex));
             }
             finally
             {
                 content?.Dispose();
                 mem?.Dispose();
             }
-            return 0;
+            return ExitSuccess;
         }
 
     }

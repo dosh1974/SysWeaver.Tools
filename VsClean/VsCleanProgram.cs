@@ -46,7 +46,10 @@ namespace VsClean
                     Console.Write("  \"" + d + '"');
                     Console.ResetColor();
                     if (ex != null)
+                    {
+                        ++FailedCount;
                         Console.WriteLine(" - " + ex.Message);
+                    }
                     else
                         Console.WriteLine();
                 }else
@@ -56,28 +59,65 @@ namespace VsClean
             }
         }
 
-        static void Main(string[] args)
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
+
+        /// <summary>
+        /// Exit code: success (also returned when help was requested).
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error, an exception.
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line (no arguments).
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+        /// <summary>
+        /// Exit code: one or more folders couldn't be deleted (the others are deleted).
+        /// </summary>
+        const int ExitDeleteFailed = 3;
+
+        static int FailedCount;
+
+        static bool IsHelp(String arg) => arg is "-?" or "/?" or "-h" or "-help" or "--help" or "/help";
+
+        static int Main(string[] args)
         {
-            if (args.Length <= 0)
+            var al = args.Length;
+            if ((al <= 0) || ((al == 1) && IsHelp(args[0])))
             {
                 Console.WriteLine("VsClean.exe [Directory] <Directory1> <Directory...>");
                 Console.WriteLine("Directories can contain wild cards.");
-                return;
+                Console.WriteLine("Exit codes: 0 = success or help, 1 = error, 2 = invalid command line, 3 = failed to delete some folders");
+                return al <= 0 ? ExitInvalidArguments : ExitSuccess;
             }
-            foreach (var x in args)
+            try
             {
-                var path = PathExt.GetDirectoryAndMask(x, out var mask);
-                if (Directory.Exists(path))
+                foreach (var x in args)
                 {
-                    foreach (var d in Directory.GetDirectories(path, mask))
+                    var path = PathExt.GetDirectoryAndMask(x, out var mask);
+                    if (Directory.Exists(path))
                     {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine("Cleaning \"" + d + "\"");
-                        Console.ResetColor();
-                        CleanPathRec(d);
+                        foreach (var d in Directory.GetDirectories(path, mask))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("Cleaning \"" + d + "\"");
+                            Console.ResetColor();
+                            CleanPathRec(d);
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(ex.Message);
+                Console.ResetColor();
+                return ExitGenericError;
+            }
+            return FailedCount > 0 ? ExitDeleteFailed : ExitSuccess;
         }
     }
 }

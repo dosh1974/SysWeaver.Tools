@@ -82,6 +82,8 @@ namespace SysWeaver
                 {
                     msg.AddMessage("Failed to read or process svg, using a copy of the original", ex, MessageLevels.Warning);
                     Copy(sourceFile, dest);
+                    //  The copy is the output (svg-cov-52: was left at 0, so the file was reported as 0 bytes and processed again on every run)
+                    data.Size = new FileInfo(dest).Length;
                 }
                 didProcces = true;
                 return data;
@@ -121,7 +123,12 @@ namespace SysWeaver
             "-000.000", "0",
         ];
 
-        
+
+        /// <summary>
+        /// Process exit codes (from SysWeaver.CommandLine FilesToFolderTool), 0 = success, non-zero (1-255) = failure:
+        /// 0 = success or help requested, 1 = an exception while processing, 2 = invalid command line.
+        /// A file that fails to optimize is only reported, it doesn't change the exit code.
+        /// </summary>
         static async Task<int> Main(string[] args)
         {
             CompGZipNET.Register();
@@ -200,11 +207,18 @@ namespace SysWeaver
 #else//DEBUG
             ret = await FilesToFolderTool.OnFilesParallelAsync<SvgOptParams>(args, proc, Setup).ConfigureAwait(false);
 #endif//DEBUG 
-            var c = p.Compare;
-            if (c != null) 
+            //  p is null if help was requested or the command line is invalid
+            var c = p?.Compare;
+            if ((c != null) && (allFiles.Count <= 0))
             {
+                //  Nothing processed (no matching files), not an error
+                Console.WriteLine("No files processed, no image comparison file created");
+            }
+            else if (c != null)
+            {
+                //  Add a .html extension unless it's already .htm or .html
                 var e = Path.GetExtension(p.Compare)?.FastToLower();
-                if ((e != ".htm") || (e != ".html"))
+                if ((e != ".htm") && (e != ".html"))
                     c += ".html";
                 if (String.IsNullOrEmpty(Path.GetDirectoryName(c)))
                     c = Path.Combine(dest, c);

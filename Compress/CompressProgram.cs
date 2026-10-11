@@ -22,6 +22,14 @@ namespace SysWeaver
         const String Version = "1";
         const String TypeVersion = "3";
 
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0 = success or help requested, 1 = an exception while processing, 2 = invalid command line (from SysWeaver.CommandLine FilesToFolderTool).
+
+        /// <summary>
+        /// Exit code: a file couldn't be compressed using any of the compression methods (with OnlyBest).
+        /// </summary>
+        const int ExitCompressFailed = 3;
+
 
 
         static readonly String ToolsFolder = Path.Combine(CommandLine.ExecutableFolder, "tools");
@@ -63,7 +71,7 @@ namespace SysWeaver
 
         static int ExtMinimizeShader(String source, String dest)
         {
-          return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw --aggressive-inlining --format text --preserve-externals " + source.ToQuoted());
+            return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw --aggressive-inlining --format text --preserve-externals " + source.ToQuoted());
         }
 
 #pragma warning disable CS0649
@@ -481,8 +489,16 @@ namespace SysWeaver
                 }
             }
             var uncompressable = !mime.Item2;
-            if (ForcedCompression.TryGetValue(key, out var forceComp))
-                uncompressable = !forceComp;
+            if (opt.Force)
+            {
+                uncompressable = false;
+            }
+            else
+            {
+                if (ForcedCompression.TryGetValue(key, out var forceComp))
+                    uncompressable = !forceComp;
+            }
+
             if (copyOriginal || uncompressable)
             {
                 if (!String.Equals(destFolder, Path.GetDirectoryName(sourceFile), StringComparison.OrdinalIgnoreCase))
@@ -522,7 +538,7 @@ namespace SysWeaver
                 if (best == null)
                 {
                     msg.AddMessage("Couldn't compress the file using any compression method", MessageLevels.Error);
-                    return -4;
+                    return ExitCompressFailed;
                 }
                 var destExt = best.Ext ?? Path.GetExtension(best.Filename);
                 var destName = filename + destExt;

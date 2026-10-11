@@ -45,7 +45,7 @@ namespace SwCurl
 
         /// <summary>
         /// An optional filename where the result will be saved.
-        /// If there is an error it will be saved as ?status code, ex: "?404".
+        /// If the response has an error status, the status line is saved, ex: "&lt;404&gt; - Not found", followed by a new line and the response body (if any).
         /// </summary>
         public String Save = null;
 
@@ -78,7 +78,8 @@ namespace SwCurl
         public int Timeout = 5 * 60000;
 
         /// <summary>
-        /// If true, no console message will be displayed
+        /// If true, no console message will be displayed.
+        /// The HTTP status of a failed request is then only available in the Save file (the exit code is 3 for a 4xx, 4 for a 5xx, 5 for other statuses).
         /// </summary>
         public bool Silent = false;
 

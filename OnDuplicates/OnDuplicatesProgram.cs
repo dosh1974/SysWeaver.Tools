@@ -15,7 +15,23 @@ namespace SysWeaver
 
     internal class OnDuplicatesProgram
     {
-        static async Task Main(string[] args)
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
+
+        /// <summary>
+        /// Exit code: success (also returned when help was requested), finding duplicates is not an error.
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error, an exception while searching.
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line (no arguments, an unknown option or missing arguments).
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+
+        static async Task<int> Main(string[] args)
         {
             var start = DateTime.UtcNow;
             CommandLineArgument[] ca =
@@ -29,11 +45,22 @@ namespace SysWeaver
                 foreach (var x in CommandLine.SyntaxObject<Params>(ca))
                     Console.WriteLine(x);
                 Console.ResetColor();
-                return;
+                return ExitInvalidArguments;
             }
+            var failCode = ExitInvalidArguments;
             try
             {
                 var cmd = CommandLine.ParseObject<Params>(out var opt, args, ca);
+                if (cmd == null)
+                {
+                    //  Help requested
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    foreach (var x in CommandLine.SyntaxObject<Params>(ca))
+                        Console.WriteLine(x);
+                    Console.ResetColor();
+                    return ExitSuccess;
+                }
+                failCode = ExitGenericError;
                 var srcFolder = cmd.Arguments[0].Item2 as String;
                 var action = cmd.Arguments.Length > 1 ? (cmd.Arguments[1].Item2 as String)?.Trim() : null;
                 Action<String, String> onDup;
@@ -89,6 +116,7 @@ namespace SysWeaver
                     for (int i = 1; i < l; ++i)
                         onDup(p[i], org);
                 }
+                return ExitSuccess;
            }
             catch (Exception ex)
             {
@@ -101,7 +129,7 @@ namespace SysWeaver
                 foreach (var x in CommandLine.SyntaxObject<Params>(ca))
                     Console.WriteLine(x);
                 Console.ResetColor();
-                return;
+                return failCode;
             }
             finally
             {

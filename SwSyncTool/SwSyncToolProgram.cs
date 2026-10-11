@@ -13,6 +13,35 @@ namespace SwSyncTool
     static partial class SwSyncToolProgram
     {
 
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
+
+        /// <summary>
+        /// Exit code: success (also returned when help was requested).
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error, the operation threw an exception.
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line (unknown option or operation, too few or too many arguments).
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+        /// <summary>
+        /// Exit code: the operation completed but failed for one or more items (an archive failed to expand / verify / recover, or a push / pull reported errors).
+        /// </summary>
+        const int ExitItemsFailed = 3;
+
+        static readonly String[] ExitCodeHelp =
+        [
+            "Exit codes:",
+            "  0  Success, or help requested",
+            "  1  Generic error (the operation failed)",
+            "  2  Invalid command line",
+            "  3  The operation failed for one or more items (archives, push / pull errors)",
+        ];
+
         static readonly Op[] OpList = [
             new Op(
                 Report,
@@ -449,6 +478,7 @@ namespace SwSyncTool
                     ++i;
                     Console.WriteLine(i.ToString().PadLeft(4) + ": " + ex.Message);
                 }
+                return ExitItemsFailed;
             }
             return 0;
         }
@@ -523,6 +553,7 @@ namespace SwSyncTool
                     ++i;
                     Console.WriteLine(i.ToString().PadLeft(4) + ": " + ex.Message);
                 }
+                return ExitItemsFailed;
             }
             return 0;
         }
@@ -600,7 +631,7 @@ namespace SwSyncTool
                 }
             }
             if (exl != null)
-                return -1;
+                return ExitItemsFailed;
             return 0;
         }
 
@@ -803,7 +834,7 @@ namespace SwSyncTool
             }
             WriteStatsSummary(sum);
             if (exl != null)
-                return -1;
+                return ExitItemsFailed;
             return 0;
         }
 
@@ -850,7 +881,7 @@ namespace SwSyncTool
             }
             WriteStatsSummary(sum);
             if (exl != null)
-                return -1;
+                return ExitItemsFailed;
             return 0;
         }
 
@@ -883,12 +914,12 @@ namespace SwSyncTool
             }
             WriteStatsSummary(sum);
             if (exl != null)
-                return -1;
+                return ExitItemsFailed;
             return 0;
         }
 
 
-        static int Usage(String err = null, int retCode = 0, Op op = null)
+        static int Usage(String err = null, int retCode = ExitSuccess, Op op = null)
         {
             if (err != null)
             {
@@ -923,6 +954,9 @@ namespace SwSyncTool
                 Console.Write(x.Description.Replace("\n", sp));
                 Console.WriteLine();
             }
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var t in ExitCodeHelp)
+                Console.WriteLine(t);
             Console.ResetColor();
             return retCode;
         }
@@ -949,27 +983,23 @@ namespace SwSyncTool
             }
             catch (Exception ex)
             {
-                return Usage(ex.Message, -1);
+                return Usage(ex.Message, ExitInvalidArguments);
             }
             var args = cmd.Arguments;
             var al = args.Length;
             if (al <= 0)
-            {
-                foreach (var t in CommandLine.SyntaxObject<SyncToolParmas>(Args, CommandLine.OptionMembers.All))
-                    Console.WriteLine(t);
-                return Usage();
-            }
+                return Usage(null, ExitInvalidArguments);
             --al;
             argsC = args.Convert(x => x.Item2?.ToString());
             var opName = args[0].Item2 as String;
             if (!Ops.TryGetValue(opName.FastToLower(), out var op))
-                return Usage("Invalid operation \"" + opName + "\"!", -1);
+                return Usage("Invalid operation \"" + opName + "\"!", ExitInvalidArguments);
             try
             {
                 if (al < op.MinArgs)
-                    return Usage("Too few arguments!", -2, op);
+                    return Usage("Too few arguments!", ExitInvalidArguments, op);
                 if (al > op.MaxArgs)
-                    return Usage("Too many arguments!", -3, op);
+                    return Usage("Too many arguments!", ExitInvalidArguments, op);
 
                 var props = CdcProps.Default;
                 if (!String.IsNullOrEmpty(p.Folders))
@@ -983,11 +1013,11 @@ namespace SwSyncTool
                 Console.ResetColor();
                 Console.WriteLine();
                 Console.WriteLine(took.TotalSeconds.ToValueString(2, "All done! Took: ", " seconds"));
-                return 0;
+                return ExitSuccess;
             }
             catch (Exception ex)
             {
-                return Usage(ex.Message, -2, op);
+                return Usage(ex.Message, ExitGenericError, op);
             }
         }
 

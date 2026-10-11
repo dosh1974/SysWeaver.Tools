@@ -49,6 +49,11 @@ namespace SysWeaver
         /// </summary>
         public bool RemoveShaderVars = false;
 
+        /// <summary>
+        /// If true, compress the files (even if it by default wouldn't)
+        /// </summary>
+        public bool Force = false;
+
         internal ICompType[] CompTypes;
 
         internal List<Tuple<bool, IReadOnlyDictionary<String, CompressProgram.TypeCompressor>>> TypeCompressors;

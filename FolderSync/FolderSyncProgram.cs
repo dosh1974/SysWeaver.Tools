@@ -12,7 +12,27 @@ namespace FolderSync
 
         static String V(long value) => value.ToString("### ### ### ### ### ### ### ##0").TrimStart();
 
-        static async Task Main(string[] args)
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
+
+        /// <summary>
+        /// Exit code: success (also returned when help was requested).
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error, an exception while synching.
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line (no arguments, an unknown option or missing arguments).
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+        /// <summary>
+        /// Exit code: the sync completed but reported errors.
+        /// </summary>
+        const int ExitSyncErrors = 3;
+
+        static async Task<int> Main(string[] args)
         {
             var start = DateTime.UtcNow;
             CommandLineArgument[] ca =
@@ -27,11 +47,22 @@ namespace FolderSync
                 foreach (var x in CommandLine.SyntaxObject<Params>(ca))
                     Console.WriteLine(x);
                 Console.ResetColor();
-                return;
+                return ExitInvalidArguments;
             }
+            var failCode = ExitInvalidArguments;
             try
             {
                 var cmd = CommandLine.ParseObject<Params>(out var opt, args, ca);
+                if (cmd == null)
+                {
+                    //  Help requested
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    foreach (var x in CommandLine.SyntaxObject<Params>(ca))
+                        Console.WriteLine(x);
+                    Console.ResetColor();
+                    return ExitSuccess;
+                }
+                failCode = ExitGenericError;
                 var srcFolder = cmd.Arguments[0].Item2 as String;
                 var name = cmd.Arguments[2].Item2 as String;
                 var p = new FolderSyncerParams
@@ -120,7 +151,9 @@ namespace FolderSync
                         ++i;
                         Console.WriteLine(i.ToString().PadLeft(4) + ": " + ex.Message);
                     }
+                    return ExitSyncErrors;
                 }
+                return ExitSuccess;
             }
             catch (Exception ex)
             {
@@ -133,7 +166,7 @@ namespace FolderSync
                 foreach (var x in CommandLine.SyntaxObject<Params>(ca))
                     Console.WriteLine(x);
                 Console.ResetColor();
-                return;
+                return failCode;
             }
             finally
             {

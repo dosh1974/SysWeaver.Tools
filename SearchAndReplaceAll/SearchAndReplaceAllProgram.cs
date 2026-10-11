@@ -9,8 +9,29 @@ namespace SearchAndReplaceAll
     internal static class SearchAndReplaceAllProgram
     {
 
+        //  Process exit codes, 0 = success, non-zero (1-255) = failure.
+        //  0-2 are the same as SysWeaver.CommandLine FilesToFolderTool.ExitSuccess / ExitGenericError / ExitInvalidArguments.
 
-        static void Usage(String err = null, int ret = 0)
+        /// <summary>
+        /// Exit code: success (also returned when help was requested).
+        /// </summary>
+        const int ExitSuccess = 0;
+        /// <summary>
+        /// Exit code: generic error, an exception (ex: failed to rename a folder or a file).
+        /// </summary>
+        const int ExitGenericError = 1;
+        /// <summary>
+        /// Exit code: invalid command line (too few arguments, the folder doesn't exist, invalid or duplicate key value pairs).
+        /// </summary>
+        const int ExitInvalidArguments = 2;
+        /// <summary>
+        /// Exit code: the replace failed for one or more files (the others are processed).
+        /// </summary>
+        const int ExitFilesFailed = 3;
+
+        static bool IsHelp(String arg) => arg is "-?" or "/?" or "-h" or "-help" or "--help" or "/help";
+
+        static void Usage(String err = null, int ret = ExitSuccess)
         {
             if (err != null)
             {
@@ -20,7 +41,8 @@ namespace SearchAndReplaceAll
                 Console.ResetColor();
             }
             Console.WriteLine("Use: SearchAndReplaceAll.exe <Folder> <Key1=Value1> [Key2=Value2] .. [KeyN=ValueN]");
-            Environment.Exit(0);
+            Console.WriteLine("Exit codes: 0 = success or help, 1 = error, 2 = invalid command line, 3 = failed to replace in some files");
+            Environment.Exit(ret);
         }
 
 
@@ -57,15 +79,34 @@ namespace SearchAndReplaceAll
         };
 
 
-        static void Main(string[] args)
+        static int Main(string[] args)
+        {
+            try
+            {
+                return Run(args);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(ex.Message);
+                Console.ResetColor();
+                return ExitGenericError;
+            }
+        }
+
+        static int Run(string[] args)
         {
             var al = args.Length;
             if (al < 2)
-                Usage();
+            {
+                if ((al == 1) && IsHelp(args[0]))
+                    Usage();
+                Usage(null, ExitInvalidArguments);
+            }
             var folder = new DirectoryInfo(args[0]);
             var d = folder.FullName;
             if (!folder.Exists)
-                Usage("Folder \"" + d + "\" doesn't exist!", -1);
+                Usage("Folder \"" + d + "\" doesn't exist!", ExitInvalidArguments);
 
             Dictionary<String, string> kvs = new ();
             for (int i = 1; i < al; ++ i)
@@ -73,11 +114,11 @@ namespace SearchAndReplaceAll
                 var kv = args[i];
                 var ie = kv.IndexOf('=');  
                 if (ie < 0)
-                    Usage("Expected a Key=Value pair, found \"" + kv + "\"", -2);
+                    Usage("Expected a Key=Value pair, found \"" + kv + "\"", ExitInvalidArguments);
                 var key = kv.Substring(0, ie).TrimEnd();
                 var value = kv.Substring(ie + 1).TrimStart();
                 if (!kvs.TryAdd(key, value))
-                    Usage("Key \"" + key + "\" in \"" + kv + "\" is used more than once!", -3);
+                    Usage("Key \"" + key + "\" in \"" + kv + "\" is used more than once!", ExitInvalidArguments);
             }
             foreach (var e in kvs.ToList())
             {
@@ -137,6 +178,7 @@ namespace SearchAndReplaceAll
                 }
             };
             var exts = TextExtensions;
+            int failed = 0;
             Console.WriteLine("Replace in files");
             foreach (var fo in Directory.GetFiles(d, "*", SearchOption.AllDirectories))
             {
@@ -165,12 +207,19 @@ namespace SearchAndReplaceAll
                 }
                 catch (Exception ex)
                 {
+                    ++failed;
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("  \"" + fo.Substring(dl) + "\" failed! Excpetion: " + ex.Message);
                     Console.ResetColor();
                 }
             };
+            if (failed > 0)
+            {
+                Console.WriteLine("Done, failed to replace in " + failed + (failed > 1 ? " files!" : " file!"));
+                return ExitFilesFailed;
+            }
             Console.WriteLine("All done");
+            return ExitSuccess;
         }
 
 
