@@ -34,13 +34,21 @@ namespace SysWeaver
 
         static readonly String ToolsFolder = Path.Combine(CommandLine.ExecutableFolder, "tools");
 
+        /// <summary>
+        /// https://github.com/google/zopfli
+        /// </summary>
         static readonly String ToolZopFliPng = Path.Combine(ToolsFolder, "ZopfliPng.exe");
+        
         /// <summary>
         /// https://github.com/tdewolff/minify/
         /// </summary>
         static readonly String ToolMinify = Path.Combine(ToolsFolder, "minify.exe");
 
         static readonly String ToolOptimizeShaders = Path.Combine(ToolsFolder, "glsl_optimizer.exe");
+
+        /// <summary>
+        /// https://github.com/laurentlb/shader-minifier
+        /// </summary>
         static readonly String ToolMinimizeShaders = Path.Combine(ToolsFolder, "shader_minifier.exe");
 
         static readonly String ToolPreProcessorShaders = Path.Combine(ToolsFolder, "preprocessor.exe");
