@@ -21,7 +21,7 @@ $root = (Get-Location).Path
 $targetRoot = [IO.Path]::GetFullPath((Join-Path $root '..\SysWeaver\_tools'))
 
 # Project name -> folder name in the target (defaults to the project name)
-$folderMap = @{ 'Compress' = 'compress'; 'SvgOpt' = 'svg_opt' }
+$folderMap = @{ 'Compress' = 'compress'; 'Decompress' = 'decompress'; 'SvgOpt' = 'svg_opt' }
 
 function Test-SameContent([string]$a, [string]$b)
 {

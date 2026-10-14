@@ -18,9 +18,16 @@ namespace SysWeaver
 
         const int CacheDays = 60;
         const int TypeCacheDays = 60;
-
+        
+        /// <summary>
+        /// Version for the pure compresson part
+        /// </summary>
         const String Version = "1";
-        const String TypeVersion = "3";
+        
+        /// <summary>
+        /// Version for type specific transformation / compression
+        /// </summary>
+        const String TypeVersion = "4";
 
         //  Process exit codes, 0 = success, non-zero (1-255) = failure.
         //  0 = success or help requested, 1 = an exception while processing, 2 = invalid command line (from SysWeaver.CommandLine FilesToFolderTool).
@@ -79,7 +86,7 @@ namespace SysWeaver
 
         static int ExtMinimizeShader(String source, String dest)
         {
-            return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw --aggressive-inlining --format text --preserve-externals " + source.ToQuoted());
+            return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw --aggressive-inlining --format text --no-sequence --preserve-externals " + source.ToQuoted());
         }
 
 #pragma warning disable CS0649
@@ -216,13 +223,13 @@ namespace SysWeaver
                 }
                 File.WriteAllLines(temp1, lines);
                 r = ExtMinimizeShader(temp1, temp2);
-                if (r != 0)
+                /*if (r != 0)
                 {
                     if (ExtMinimizeShader(temp1, temp2) != 0)
                         temp2 = temp1;
                     //ExtMinimizeShader(temp1, temp2);
                     //return -2;
-                }
+                }*/
                 lines = File.ReadAllLines(temp2);
                 if (!p.RemoveShaderVars)
                 {

@@ -144,6 +144,7 @@
   </Folder>
   <Project Path="AcmeCertUtil/AcmeCertUtil.csproj" />
   <Project Path="Compress/Compress.csproj" />
+  <Project Path="Decompress/Decompress.csproj" />
   <Project Path="FolderSync/FolderSync.csproj" />
   <Project Path="OnDuplicates/OnDuplicates.csproj" />
   <Project Path="SearchAndReplaceAll/SearchAndReplaceAll.csproj" />
