@@ -59,6 +59,12 @@ Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method
 - Unknown names in `-Methods` are silently ignored; `org` (documented as "copy the original") and an empty entry (ex: a trailing comma) currently make the option validation throw, which ends with exit code 2
 - A file named `typescript.js` is copied as is (not minified)
 
+## Folder layout
+
+| Folder | Content |
+|---|---|
+| [`tools/`](tools/README.md) | Bundled Windows helper executables (minify, ZopfliPng, shader preprocessor / minifier, unused glsl_optimizer), copied next to the tool |
+
 ## Relationships
 
 - **Project:** [`Compress.csproj`](Compress.csproj)
