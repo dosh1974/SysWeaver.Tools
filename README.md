@@ -31,10 +31,12 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | Tool | In `_tools` | Summary |
 |---|---|---|
 | [AcmeCertUtil](AcmeCertUtil/README.md) | | Obtains (or renews) a Let's Encrypt certificate for a domain through ACME and saves it as a password protected `.pfx` file. |
+| [ComfyApiToCs](ComfyApiToCs/README.md) | `ComfyApiToCs` | Converts ComfyUI API format workflows (json) into C# source files with the input and output types (and nested types) to use with `ComfyUiService.RunWorkflow`. |
 | [Compress](Compress/README.md) | `compress` (build) | Pre-compresses files into side-by-side compressed copies (Brotli, gzip, zstd, deflate), optionally minifying web files, recompressing PNGs and optimising shaders first. |
 | [Decompress](Decompress/README.md) | `decompress` | Decompresses Brotli, gzip, zstd and deflate compressed files (the reverse of Compress). |
 | [FolderSync](FolderSync/README.md) | | Pushes one or more local folders to a managed folder on a SysWeaver folder sync service (push-only). |
 | [OnDuplicates](OnDuplicates/README.md) | `OnDuplicates` | Finds files with identical content in folder trees and lists them, or runs a command for each duplicate. |
+| [RunComfyUi](RunComfyUi/README.md) | `RunComfyUi` | Runs a ComfyUI workflow (API format json) with its inputs as command line options and saves the results; the input and output types are generated and compiled at runtime. |
 | [SearchAndReplaceAll](SearchAndReplaceAll/README.md) | | Renames folders and files and replaces text in source files for a set of `Key=Value` replacements, ex: to turn a copied project into a new one. |
 | [SvgOpt](SvgOpt/README.md) | `svg_opt` (build) | Optimises SVG files with SysWeaver.Minifier.Svg and can write an HTML page comparing the originals with the results. |
 | [SwCurl](SwCurl/README.md) | `SwCurl` | A curl-like HTTP client for SysWeaver APIs (SysWeaver login, compression, Tor) with HTTP results as exit codes. |
@@ -69,6 +71,9 @@ Tool specific codes:
 | Tool | Code | Meaning |
 |---|---|---|
 | Compress | 3 | A file couldn't be compressed using any of the compression methods (`-OnlyBest`) |
+| ComfyApiToCs | 3 | One or more files couldn't be converted (the others are) |
+| RunComfyUi | 3 | Running the workflow failed (connection, server or workflow error, cancelled) |
+| RunComfyUi | 4 | The workflow returned no results |
 | Decompress | 3 | A file couldn't be decompressed (invalid or truncated data) |
 | SwCurl | 0 | The response has a 2xx status |
 | SwCurl | 3 | The response has a 4xx status (client error) |

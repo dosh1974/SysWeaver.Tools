@@ -143,10 +143,12 @@
     <Project Path="../SysWeaver/_external/simplestack.orm/src/SimpleStack.Orm/SimpleStack.Orm.csproj" />
   </Folder>
   <Project Path="AcmeCertUtil/AcmeCertUtil.csproj" />
+  <Project Path="ComfyApiToCs/ComfyApiToCs.csproj" />
   <Project Path="Compress/Compress.csproj" />
   <Project Path="Decompress/Decompress.csproj" />
   <Project Path="FolderSync/FolderSync.csproj" />
   <Project Path="OnDuplicates/OnDuplicates.csproj" />
+  <Project Path="RunComfyUi/RunComfyUi.csproj" />
   <Project Path="SearchAndReplaceAll/SearchAndReplaceAll.csproj" />
   <Project Path="SvgOpt/SvgOpt.csproj" />
   <Project Path="SwCurl/SwCurl.csproj" />
