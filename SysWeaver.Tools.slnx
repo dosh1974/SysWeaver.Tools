@@ -5,6 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/_SysWeaver/">
+    <Project Path="../SysWeaver/SysWeaver.AI.Anthropic/SysWeaver.AI.Anthropic.csproj" />
     <Project Path="../SysWeaver/SysWeaver.AI.ComfyUi/SysWeaver.AI.ComfyUi.csproj" />
     <Project Path="../SysWeaver/SysWeaver.AI.Google/SysWeaver.AI.Google.csproj" />
     <Project Path="../SysWeaver/SysWeaver.AI.HostService/SysWeaver.AI.HostService.csproj" />
