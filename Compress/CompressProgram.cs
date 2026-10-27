@@ -9,11 +9,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SysWeaver
 {
 
-    class CompressProgram
+    partial class CompressProgram
     {
 
         const int CacheDays = 60;
@@ -28,6 +29,12 @@ namespace SysWeaver
         /// Version for type specific transformation / compression
         /// </summary>
         const String TypeVersion = "4";
+
+        /// <summary>
+        /// Version of the shader optimization (added to the TypeVersion of shaders only, so other types keep their cached results).
+        /// 8: shaders are stripped (shader_minifier only with MinifyShaders), Effect Weaver shaders keep working: the variable candidates, the iMouse channel comments, vertexMain, conditionals on compiler macros (__VERSION__), the snippet macros (EW_...) and the functions they use / named like snippets (Ew...), one top level declaration per line; no new overloads; the smallest of minimized (with / without aggressive inlining), stripped and the source.
+        /// </summary>
+        const String ShaderTypeVersion = "8";
 
         //  Process exit codes, 0 = success, non-zero (1-255) = failure.
         //  0 = success or help requested, 1 = an exception while processing, 2 = invalid command line (from SysWeaver.CommandLine FilesToFolderTool).
@@ -84,195 +91,12 @@ namespace SysWeaver
         }
 
 
-        static int ExtMinimizeShader(String source, String dest)
+        static int ExtMinimizeShader(String source, String dest, IEnumerable<String> keepFunctions = null, bool aggressive = true)
         {
-            return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw --aggressive-inlining --format text --no-sequence --preserve-externals " + source.ToQuoted());
-        }
-
-#pragma warning disable CS0649
-
-        sealed class VarDef
-        {
-            public decimal min = decimal.MinValue;
-            public decimal max = decimal.MaxValue;
-            public decimal step;
-            public string type;
-            public string desc;
-            public string name;
-        }
-
-#pragma warning restore CS0649
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="lines"></param>
-        /// <param name="onVar">Line content, type, name, value, comment</param>
-        static void OnAllGlobalConsts(String[] lines, Func<String, String, String, String, String, String> onVar)
-        {
-            var lc = lines.Length;
-            int depth = 0;
-            for (int i = 0; i < lc; ++i)
-            {
-                var n = lines[i];
-                depth += (n.Count(x => x == '{') - n.Count(x => x == '}'));
-                if (depth != 0)
-                    continue;
-                n = n.Trim();
-                if (!n.StartsWith("const "))
-                    continue;
-                var t = n.IndexOf('=');
-                if (t < 0)
-                    continue;
-                var p = t;
-                while (p > 0)
-                {
-                    --p;
-                    if (!Char.IsWhiteSpace(n[p]))
-                    {
-                        ++p;
-                        break;
-                    }
-                }
-                if (p <= 0)
-                    continue;
-                var typeAndName = n.Substring(6, p - 6).CodeSanitize();
-                var s = typeAndName.IndexOf(' ');
-                var type = typeAndName.Substring(0, s);
-                var name = typeAndName.Substring(s + 1);
-                var end = n.IndexOf(';');
-                if (end < 0)
-                    continue;
-                var value = n.Substring(t + 1, end - t - 1).CodeSanitize();
-                var commentI = n.IndexOf("//");
-                String comment = commentI < 0 ? null : n.Substring(commentI + 2).TrimStart();
-                lines[i] = onVar(n, type, name, value, comment);
-            }
-        }
-
-        static int OptimizeShaders(String source, String dest, CompressParams p)
-        {
-            String temp1 = dest + "_temp";
-            String temp2 = dest + "_temp2";
-            try
-            {
-                var ser = NewtonsoftJsonSerializer.Instance;
-                Dictionary<String, Tuple<String, String>> cvars = new Dictionary<string, Tuple<String, String>>(StringComparer.Ordinal);
-                var lines = File.ReadAllLines(source);
-                if (!p.RemoveShaderVars)
-                {
-                    OnAllGlobalConsts(lines, (line, type, name, value, comment) =>
-                    {
-                        if (comment == null)
-                            return line;
-                        if (!comment.StartsWith("var:"))
-                            return line;
-                        try
-                        {
-                            comment = comment.Substring(4).Trim();
-                            var desc = comment.Length > 0 ? ser.FromString<VarDef>(comment) : new VarDef();
-                            StringBuilder nl = new StringBuilder(line.Length);
-                            nl.Append("const ").Append(type).Append(' ').Append(name).Append('=').Append(value).Append(";//var:{");
-                            var l = nl.Length;
-                            void app<T>(String key, T value)
-                            {
-                                if (nl.Length > l)
-                                    nl.Append(',');
-                                nl.Append(key);
-                                var v = ser.ToString(value);
-                                if (typeof(T) != typeof(String))
-                                    if (v.EndsWith(".0"))
-                                        v = v.Substring(0, v.Length - 2);
-                                nl.Append(v);
-                            }
-                            if (desc.min != Decimal.MinValue)
-                                app("min:", desc.min);
-                            if (desc.max != Decimal.MaxValue)
-                                app("max:", desc.max);
-                            if (desc.step > 0)
-                                app("step:", desc.step);
-                            if (!String.IsNullOrEmpty(desc.type))
-                                app("type:", desc.type);
-                            if (!String.IsNullOrEmpty(desc.name))
-                                app("name:", desc.name);
-                            if (!String.IsNullOrEmpty(desc.desc))
-                                app("desc:", desc.desc);
-                            nl.Append('}');
-                            var con = nl.ToString();
-                            var def = String.Concat("#define ", name, ' ', value);
-                            cvars.Add(name, Tuple.Create(con, def));
-                        }
-                        catch
-                        {
-                        }
-                        return line;
-                    });
-                }
-                File.WriteAllLines(temp1, lines);
-                var r = ExternalProcess.Run(ToolPreProcessorShaders, temp1.ToQuoted() + " " + ("-o" + temp2).ToQuoted() + " -DGL_ES");
-                if (r != 0)
-                    return r;
-                lines = File.ReadAllLines(temp2);
-                var lc = lines.Length;
-                for (int i = 0; i < lc; ++i)
-                    lines[i] = lines[i].CodeSanitize();
-                if (!p.RemoveShaderVars)
-                {
-                    OnAllGlobalConsts(lines, (line, type, name, value, comment) => cvars.TryGetValue(name, out var x) ? x.Item2 : line);
-                }
-                File.WriteAllLines(temp1, lines);
-                r = ExtMinimizeShader(temp1, temp2);
-                /*if (r != 0)
-                {
-                    if (ExtMinimizeShader(temp1, temp2) != 0)
-                        temp2 = temp1;
-                    //ExtMinimizeShader(temp1, temp2);
-                    //return -2;
-                }*/
-                lines = File.ReadAllLines(temp2);
-                if (!p.RemoveShaderVars)
-                {
-                    lc = lines.Length;
-                    for (int i = 0; i < lc; ++i)
-                    {
-                        var x = lines[i];
-                        if (!x.StartsWith("#define "))
-                            continue;
-                        var s = x.IndexOf(' ', 8);
-                        if (s < 0)
-                            continue;
-                        var name = x.Substring(8, s - 8);
-                        lines[i] = cvars[name].Item1;
-                    }
-                }
-                File.WriteAllLines(dest, lines);
-/*                r = ExtCompressShader(temp2, dest);
-                if (r < 0)
-                    return -3;
-                r = ExtMinimizeShader(temp1, dest);
-                if (r < 0)
-                    return -4;*/
-                return 0;
-            }
-            finally
-            {
-                try
-                {
-                    File.Delete(temp2);
-                }
-                catch
-                {
-                }
-                try
-                {
-                    File.Delete(temp1);
-                }
-                catch
-                {
-                }
-            }
-
+            //  vertexMain: the entry point of the optional vertex stage (Effect Weaver), never removed or renamed (like keepFunctions).
+            //  --no-overloading: 1.6.0 can create duplicate overloads (ex: two "float m(float,float)"), an invalid shader.
+            var keep = String.Join(",", new[] { "main", "mainImage", "vertexMain" }.Concat(keepFunctions ?? Array.Empty<String>()).Distinct());
+            return ExternalProcess.Run(ToolMinimizeShaders, "-o " + dest.ToQuoted() + "  --move-declarations --field-names xyzw " + (aggressive ? "--aggressive-inlining " : "") + "--format text --no-sequence --no-overloading --preserve-externals --no-renaming-list " + keep + " " + source.ToQuoted());
         }
 
         static readonly IReadOnlySet<Char> WhiteSpaces = ReadOnlyData.Set("\r\n\t ".ToCharArray());
@@ -435,7 +259,7 @@ namespace SysWeaver
                     data.Size = -1;
                 }
                 return data;
-            }, TypeCacheDays, TypeVersion + opt.CacheKey);
+            }, TypeCacheDays, TypeVersion + (ShadersCompressors.ContainsKey(extension) ? "s" + ShaderTypeVersion : "") + opt.CacheKey);
         }
 
         static bool Copy(String source, String dest)

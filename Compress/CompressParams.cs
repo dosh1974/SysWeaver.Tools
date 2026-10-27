@@ -50,6 +50,12 @@ namespace SysWeaver
         public bool RemoveShaderVars = false;
 
         /// <summary>
+        /// If true, shaders are also minified with shader_minifier (renaming, inlining) when that is smaller than stripping them (comments and white space removed).
+        /// Smaller, but its rewrites can break a shader (it compiles and renders black / hangs the GPU), so verify the results.
+        /// </summary>
+        public bool MinifyShaders = false;
+
+        /// <summary>
         /// If true, compress the files (even if it by default wouldn't)
         /// </summary>
         public bool Force = false;
@@ -64,6 +70,7 @@ namespace SysWeaver
             OptimizeWebFiles ? 'i' : '_',
             OptimizeShaders ? 'i' : '_',
             RemoveShaderVars ? 'i' : '_',
+            MinifyShaders ? 'i' : '_',
             "");
     }
 

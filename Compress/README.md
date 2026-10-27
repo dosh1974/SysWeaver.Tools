@@ -24,7 +24,13 @@ The prebuilt copy in [`SysWeaver/_tools/compress`](https://github.com/dosh1974/S
 - Type specific pre-processing before compression (each can be turned off):
   - web files (`.js`, `.mjs`, `.css`, `.htm`, `.html`, `.xhtml`, `.json`, `.svg`, `.xml`, `.rss`, `.webmanifest`) are minified with `minify`; lines between `//DEBUG_BEGIN` and `//DEBUG_END` are removed from `.js` files first
   - `.png` files are recompressed with ZopfliPng (the result replaces the original in the output folder)
-  - `.glsl` / `.frag` shaders are pre-processed and minified with shader_minifier, keeping `//var:` annotated constants
+  - `.glsl` / `.frag` shaders are stripped (comments and white space removed, short number literals, nothing renamed or evaluated) so that they work exactly like the original, also in [Effect Weaver](https://github.com/dosh1974/EffectWeaver) (its shader parser reads settings from the source, unless `-RemoveShaderVars`). `-MinifyShaders true` also tries shader_minifier (renaming, inlining, preprocessed) and uses it when smaller: about 10 % smaller after Brotli, but shader_minifier 1.6.0 rewrites can break a shader (one effect compiled and then rendered black / lost the WebGL context), so verify such results. What is kept in both modes:
+    - the tunable variable candidates are kept with their comments: `#define NAME literal` (top level or in an `#ifndef NAME` guard) and `const T NAME = literal;` with a comment (aligned comment continuation lines joined, `// var: {...}` annotations compacted), in the original order
+    - the iMouse control comments (`// iMouse.x = Name | Description | Default`) are kept as compact lines at the top
+    - `main`, `mainImage` and `vertexMain` (the optional vertex stage) are entry points; the snippet macros the effect defines (`#define EW_SDF(p) map(p)`) are kept with the functions they use, and functions named like snippets (`Ew…`) keep their names; one top level declaration per line (snippets are inserted by line when the effect is built)
+    - conditionals on compiler macros (`#if __VERSION__ >= 300`, they differ between the GLSL ES 3.00 / 1.00 builds) are kept as is if they only contain directives
+    - with `-MinifyShaders`: if a kept define is used by a conditional (directly or through another macro), or a compiler macro conditional contains code, the shader is only stripped; the shader_minifier output (with and without aggressive inlining) is used only if it's smaller than stripping, and the source if nothing is smaller
+    - the parser's candidate rules are mirrored in `CompressProgram_Shaders.cs` (keep them in sync with EffectWeaver.Common `ShaderParser`); bumping `ShaderTypeVersion` re-processes the cached shaders
 - Files whose type doesn't benefit from compression (by MIME type) are only copied, unless `-Force` is used (`.jpg`, `.jpeg` and `.ico` are always compressed)
 - Results are cached per source file, and outputs are only written when they changed, so incremental builds are fast
 - Files are processed in parallel (sequentially in DEBUG builds)
@@ -33,6 +39,7 @@ The prebuilt copy in [`SysWeaver/_tools/compress`](https://github.com/dosh1974/S
 
 - [`CompressParams`](CompressParams.cs) — the command line options
 - [`CompressProgram`](CompressProgram.cs) — the type specific processing, compression and caching
+- [`CompressProgram_Shaders`](CompressProgram_Shaders.cs) — the shader optimization (Effect Weaver's parser rules, minimize / strip)
 
 ## Using it
 
@@ -48,6 +55,7 @@ Compress [options] <SourceFiles> [DestFolder]
   -CopyOriginal            Also copy the original file to the output folder
   -Force                   Compress files even if their type normally isn't compressed
   -OptimizeWebFiles false  Don't minify web files (also -RecompressImages false, -OptimizeShaders false)
+  -MinifyShaders true      Also minify shaders with shader_minifier when smaller (verify the results, see above)
   -?                       Help (all options)
 ```
 
