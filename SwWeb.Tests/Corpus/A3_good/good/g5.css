@@ -1,0 +1,29 @@
+.g5-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--sw-dur-2) var(--sw-ease), opacity var(--sw-dur-2) var(--sw-ease);
+    opacity: 0;
+}
+
+.g5-panel.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.g5-link {
+    color: var(--sw-accent);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color var(--sw-dur-1) var(--sw-ease);
+}
+
+@media (hover: hover) {
+    .g5-link:hover {
+        text-decoration: underline;
+    }
+}
+
+.g5-link:focus-visible {
+    outline: 2px solid var(--sw-focus);
+    outline-offset: 2px;
+}

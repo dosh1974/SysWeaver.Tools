@@ -60,6 +60,12 @@ namespace SysWeaver
         /// </summary>
         public bool Force = false;
 
+        /// <summary>
+        /// If true, a failed type specific step (minify, shader minifier, png) fails the run (exit code 4, an MSBuild error) instead of
+        /// compressing the original file with a warning
+        /// </summary>
+        public bool FailOnTypeError = false;
+
         internal ICompType[] CompTypes;
 
         internal List<Tuple<bool, IReadOnlyDictionary<String, CompressProgram.TypeCompressor>>> TypeCompressors;

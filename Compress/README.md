@@ -55,15 +55,19 @@ Compress [options] <SourceFiles> [DestFolder]
   -CopyOriginal            Also copy the original file to the output folder
   -Force                   Compress files even if their type normally isn't compressed
   -OptimizeWebFiles false  Don't minify web files (also -RecompressImages false, -OptimizeShaders false)
+  -FailOnTypeError         A failed minify / shader minifier / png step fails the run (exit code 4) instead of shipping the original
   -MinifyShaders true      Also minify shaders with shader_minifier when smaller (verify the results, see above)
   -?                       Help (all options)
 ```
 
-Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method (`-OnlyBest`), see [EXIT CODES](../README.md#exit-codes).
+Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method (`-OnlyBest`), 4 if a type specific step failed with `-FailOnTypeError`, see [EXIT CODES](../README.md#exit-codes).
+
+**Checking what ships**: a failed type specific step is also printed as `<file> : warning CMP001 : ...` (with `-FailOnTypeError`: `error CMP001`), the canonical form that an MSBuild `Exec` step reports as a build warning (error). The minifiers can also break a file without failing: run `SwWeb verify-build <repository>` ([SwWeb](../SwWeb/README.md)) after a build; it checks the compressed outputs (empty outputs, minified scripts that read a name before its declaration, shaders with duplicate functions).
 
 ## Limitations and considerations
 
-- The helper executables in [`tools/`](tools) (`minify.exe`, `ZopfliPng.exe`, `preprocessor.exe`, `shader_minifier.exe`; `glsl_optimizer.exe` is shipped but currently unused) are Windows binaries copied next to the tool; if one fails, the file is reported with a warning and compressed without the type specific step
+- The helper executables in [`tools/`](tools) (`minify.exe`, `ZopfliPng.exe`, `preprocessor.exe`, `shader_minifier.exe`; `glsl_optimizer.exe` is shipped but currently unused) are Windows binaries copied next to the tool; if one fails (exit code, or an empty shader_minifier output), the file is reported with a warning (`warning CMP001`) and compressed without the type specific step (`-FailOnTypeError`: the run fails)
+- Temporary `.js` files (after removing the `//DEBUG_BEGIN` blocks) go to a folder of the process below `SysWeaver_JsTemp` (the `TempFolder` of the machine), so parallel Compress runs don't share one
 - Unknown names in `-Methods` are silently ignored; `org` (documented as "copy the original") and an empty entry (ex: a trailing comma) currently make the option validation throw, which ends with exit code 2
 - A file named `typescript.js` is copied as is (not minified)
 

@@ -1,0 +1,7 @@
+/* Holdout h1 styles */
+.h-host { display: grid; gap: var(--sw-gap); }
+body.h-busy { cursor: progress; } /* H28 INP-10 */
+.h-card { padding: var(--sw-gap); transition: background-color 180ms ease-in-out; } /* H29 MOT-2 */
+.h-list li:is(:hover, :focus-visible) { background: var(--sw-hover); } /* H30 INP-11 */
+@media (hover: hover) { .h-grid tr:hover { background: var(--sw-hover); } } /* OK6 */
+.h-fade { opacity: 1; transition: opacity var(--sw-dur-1); } /* OK7 */

@@ -1,0 +1,189 @@
+{
+  "Bundles": [
+    {
+      "Out": "sw/session.js",
+      "Header": "Sw session: the small, self-contained SysWeaver messaging core for pages that render their own UI (the old \"SessionManager.Create(); SysWeaverInit();\" of common.js without theming): the session (GetMessages master / child, server time, default reactions to the server events, the fallback server block overlay), InterOp, the automatic html / body classes, the requested theme (applies nothing) and the legacy names SessionManager, InterOp, SysWeaverInit, GetServerTime, PostTop ... Opt-in theming: sw/theme.js after it. sw/core.js contains all of it (never needed together; harmless, each source runs once).",
+      "LoadOnce": true,
+      "MaxKB": 218,
+      "MaxGzipKB": 54,
+      "Files": [
+        "core/kernel.js",
+        "core/i18n.js",
+        "core/url.js",
+        "core/storage.js",
+        "core/include.js",
+        "core/interop.js",
+        "core/session.js",
+        "core/layout.js",
+        "core/session_start.js",
+        "core/legacy_session.js"
+      ]
+    },
+    {
+      "Out": "sw/theme.js",
+      "Header": "Sw theme: the opt-in SysWeaver theme engine for sw/session.js pages (after sw/session.js; loaded before it, it starts with the messaging core): data-theme, the theme globals getTheme / applyTheme / setTheme / resetTheme / toggleTheme / appendTheme, ?setTheme / ?useTheme, the brand stylesheet app/app.css, density. sw/core.js and common/common.js contain it.",
+      "LoadOnce": true,
+      "Files": [
+        "core/theme.js"
+      ]
+    },
+    {
+      "Out": "sw/net.js",
+      "Header": "Sw net: the requests of the SysWeaver core (Sw.Net, Sw.Util, Sw.Cancel) without session, theme or page code, for sw/session.js pages that call the server with Sw.Net, ex: auth/Auth.js (sw/session.js + sw/net.js + auth/Auth.js: sign in and messaging without the full core). sw/core.js contains it.",
+      "LoadOnce": true,
+      "Files": [
+        "core/kernel.js",
+        "core/base.js",
+        "core/i18n.js",
+        "core/url.js",
+        "core/storage.js",
+        "core/include.js",
+        "core/net.js"
+      ]
+    },
+    {
+      "Out": "sw/core.js",
+      "Header": "Sw core: the UI-less SysWeaver client library (requests, session / server messages, InterOp, theme, layout, page protocol, formatting, i18n). It contains sw/session.js, sw/theme.js and sw/net.js (the same source files; each source runs once per page).",
+      "LoadOnce": true,
+      "Files": [
+        "core/kernel.js",
+        "core/base.js",
+        "core/i18n.js",
+        "core/url.js",
+        "core/storage.js",
+        "core/include.js",
+        "core/format.js",
+        "core/net.js",
+        "core/interop.js",
+        "core/session.js",
+        "core/layout.js",
+        "core/session_start.js",
+        "core/theme.js",
+        "core/page.js",
+        "core/activity.js",
+        "core/draft.js",
+        "core/access.js",
+        "core/init.js"
+      ]
+    },
+    {
+      "Out": "sw/ui.js",
+      "Header": "Sw UI: the SysWeaver UI component library (requires sw/core.js). ui/code.js (code editor) is loaded on demand and not bundled. Each source runs once per page, also next to common/common.js (which contains it: on such a page this include adds nothing).",
+      "LoadOnce": true,
+      "Files": [
+        "ui/base.js",
+        "ui/controls.js",
+        "ui/overlay.js",
+        "ui/layout.js",
+        "ui/editors.js",
+        "ui/cells.js",
+        "ui/page.js"
+      ]
+    },
+    {
+      "Out": "sw/ui.css",
+      "Header": "Sw UI styles (link after common/theme.css).",
+      "Files": [
+        "ui/tokens.css",
+        "ui/components.css",
+        "ui/overlays.css",
+        "ui/cells.css",
+        "ui/code.css",
+        "ui/icons.css",
+        "ui/page.css"
+      ]
+    },
+    {
+      "Out": "common/common.js",
+      "Header": "LEGACY COMPATIBILITY BUNDLE for old format pages, other projects and srcData templates: sw/core.js + core/legacy_session.js + sw/ui.js + ui/compat_common.js (every global of the old common.js, mapped onto Sw; it also links sw/ui.css; theming ON as before; each source runs once per page, also next to sw/session.js or sw/core.js). New pages load sw/core.js (+ sw/ui.js) instead.",
+      "LoadOnce": true,
+      "Files": [
+        "core/kernel.js",
+        "core/base.js",
+        "core/i18n.js",
+        "core/url.js",
+        "core/storage.js",
+        "core/include.js",
+        "core/format.js",
+        "core/net.js",
+        "core/interop.js",
+        "core/session.js",
+        "core/layout.js",
+        "core/session_start.js",
+        "core/theme.js",
+        "core/page.js",
+        "core/activity.js",
+        "core/draft.js",
+        "core/access.js",
+        "core/init.js",
+        "core/legacy_session.js",
+        "ui/base.js",
+        "ui/controls.js",
+        "ui/overlay.js",
+        "ui/layout.js",
+        "ui/editors.js",
+        "ui/cells.js",
+        "ui/page.js",
+        "ui/compat_common.js"
+      ]
+    },
+    {
+      "Out": "sw/shell.js",
+      "Header": "Sw shell: the SysWeaver application shell of the root page index.html (requires sw/core.js and sw/ui.js). Each source runs once per page, also next to app/application.js or sw/compat.js.",
+      "LoadOnce": true,
+      "Files": [
+        "shell/menu.js",
+        "shell/content.js",
+        "shell/shell.js"
+      ]
+    },
+    {
+      "Out": "sw/shell.css",
+      "Header": "Sw shell styles (link after common/theme.css and sw/ui.css).",
+      "Files": [
+        "shell/shell.css"
+      ]
+    },
+    {
+      "Out": "app/application.js",
+      "Header": "LEGACY COMPATIBILITY BUNDLE for old format pages, other projects and srcData templates: sw/shell.js + shell/compat_application.js (every global of the old application.js: PopUp, Confirm, PopUpMenu, WebMenu, MainMenu, App, appMain ..., mapped onto Sw). Load it after common/common.js. New pages use sw/ui.js (+ sw/shell.js) instead. Each source runs once per page.",
+      "LoadOnce": true,
+      "Files": [
+        "shell/menu.js",
+        "shell/content.js",
+        "shell/shell.js",
+        "shell/compat_application.js"
+      ]
+    },
+    {
+      "Out": "app/application.css",
+      "Header": "LEGACY COMPATIBILITY STYLES for old format pages: sw/shell.css + shell/compat_application.css (the old pop-up elements). New pages link sw/ui.css (+ sw/shell.css) instead.",
+      "Files": [
+        "shell/shell.css",
+        "shell/compat_application.css"
+      ]
+    },
+    {
+      "Out": "sw/compat.js",
+      "Header": "LEGACY COMPATIBILITY BUNDLE for NEW format pages that still use legacy names (written by SwWeb migrate): load it after sw/core.js + sw/ui.js (+ sw/shell.js). It adds every global of the old common.js and app/application.js (core/legacy_session.js + ui/compat_common.js + shell/compat_application.js, with the shell code they need; shell files load once) without loading core / ui again. Remove the include (and sw/compat.css) once the page uses the Sw.* API only (SwWeb check --strict).",
+      "LoadOnce": true,
+      "Files": [
+        "shell/menu.js",
+        "shell/content.js",
+        "shell/shell.js",
+        "core/legacy_session.js",
+        "ui/compat_common.js",
+        "shell/compat_application.js"
+      ]
+    },
+    {
+      "Out": "sw/compat.css",
+      "Header": "LEGACY COMPATIBILITY STYLES for NEW format pages that load sw/compat.js: link it after sw/ui.css (+ sw/shell.css) and before the page style sheets (= ui/compat_common.css + the old app/application.css). sw/compat.js links it when the page does not.",
+      "Files": [
+        "ui/compat_common.css",
+        "shell/shell.css",
+        "shell/compat_application.css"
+      ]
+    }
+  ]
+}

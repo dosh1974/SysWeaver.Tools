@@ -44,6 +44,11 @@ namespace SysWeaver
         /// </summary>
         const int ExitCompressFailed = 3;
 
+        /// <summary>
+        /// Exit code: the type specific step (minify, shader minifier, png) of a file failed (with FailOnTypeError).
+        /// </summary>
+        const int ExitTypeCompressFailed = 4;
+
 
 
         static readonly String ToolsFolder = Path.Combine(CommandLine.ExecutableFolder, "tools");
@@ -104,6 +109,7 @@ namespace SysWeaver
         static int Minimize(String source, String dest, CompressParams p)
         {
             var ext = Path.GetExtension(source).FastToLower();
+            String tempFile = null;
             if (ext.FastEquals(".js"))
             {
                 var l = File.ReadAllLines(source);
@@ -128,14 +134,32 @@ namespace SysWeaver
                 }
                 if (o != c)
                 {
-                    var data = TempFolder.Get("JsTemp", 1);
+                    //  The folder is shared by every Compress process (parallel project builds) and can be removed by another process's
+                    //  clean up between the runs ("Could not find a part of the path C:\ProgramData\SysWeaver_JsTemp\..." in parallel
+                    //  builds, AS7-13): a folder of this process, created again right before the write
+                    var data = Path.Combine(TempFolder.Get("JsTemp", 1), "p" + Environment.ProcessId);
                     String temp;
                     using (var rng = SecureRng.Get())
                         temp = Path.Combine(data, rng.GetGuid24() + ".js");
                     TempFolder.DeleteOnExit(temp);
                     Array.Resize(ref l, o);
-                    File.WriteAllLines(temp, l);
+                    for (int attempt = 0; ; ++attempt)
+                    {
+                        try
+                        {
+                            Directory.CreateDirectory(data);
+                            File.WriteAllLines(temp, l);
+                            break;
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            if (attempt >= 5)
+                                throw;
+                            Thread.Sleep(50);
+                        }
+                    }
                     source = temp;
+                    tempFile = temp;
                 }
             }
             if (Path.GetFileName(source).FastEquals("typescript.js"))
@@ -144,7 +168,20 @@ namespace SysWeaver
                 return 0;
             }
 //            return ExternalProcess.Run(ToolMinify, "--js-keep-var-names --js-version 2019 --html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
-            return ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
+            var res = ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
+            if (tempFile != null)
+            {
+                //  The process folder goes when its last file goes (another file of this process still in use: kept, deleted later)
+                try
+                {
+                    File.Delete(tempFile);
+                    Directory.Delete(Path.GetDirectoryName(tempFile));
+                }
+                catch
+                {
+                }
+            }
+            return res;
         }
 
         static readonly IReadOnlyDictionary<String, TypeCompressor> ImageCompressors = new Dictionary<string, TypeCompressor>(StringComparer.Ordinal)
@@ -308,7 +345,18 @@ namespace SysWeaver
                     var g = await GetTypeCompressor(sourceFile, key, comp, opt).ConfigureAwait(false);
                     if ((g == null) || (g.Size < 0))
                     {
+                        //  Also in the canonical "origin : warning|error code : text" form, so an MSBuild Exec step reports it as a build
+                        //  warning (or error with -FailOnTypeError) instead of a console line nobody sees (AS7-13: a shader the minifier
+                        //  broke shipped its unprocessed source, and before OWN4-Demo-2 an empty file)
+                        var full = Path.GetFullPath(sourceFile);
+                        if (opt.FailOnTypeError)
+                        {
+                            msg.AddMessage(relSource.ToQuoted() + " Failed to type compress!", MessageLevels.Error);
+                            Console.Error.WriteLine(full + " : error CMP001 : the type specific step (minify / shader minifier / png) failed (-FailOnTypeError)");
+                            return ExitTypeCompressFailed;
+                        }
                         msg.AddMessage(relSource.ToQuoted() + " Failed to type compress!", MessageLevels.Warning);
+                        Console.Error.WriteLine(full + " : warning CMP001 : the type specific step (minify / shader minifier / png) failed: the original file is compressed and shipped instead");
                     }else
                     {
                         if (typeComp.Item1)

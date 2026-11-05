@@ -1,0 +1,58 @@
+/* good/h6.css - carrier overview */
+
+.car-main {
+    padding: var(--sw-gap-3, 16px);
+    max-width: 72rem;
+    margin-inline: auto;
+}
+
+.car-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--sw-gap-3, 16px);
+}
+
+.car-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sw-gap-1, 4px);
+    padding: var(--sw-gap-3, 16px);
+    border: 1px solid var(--sw-border);
+    border-radius: var(--sw-radius);
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--sw-dur-1) var(--sw-ease), border-color var(--sw-dur-1) var(--sw-ease);
+}
+
+@media (hover: hover) {
+    .car-card:hover {
+        background: var(--sw-hover);
+    }
+}
+
+.car-card:focus-visible {
+    outline: 2px solid var(--sw-focus);
+    outline-offset: 2px;
+}
+
+.car-logo {
+    aspect-ratio: 3 / 1;
+    width: 96px;
+    height: auto;
+}
+
+.car-name {
+    font-weight: 600;
+}
+
+.car-note {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.car-foot:empty {
+    min-height: 1.5em;
+}

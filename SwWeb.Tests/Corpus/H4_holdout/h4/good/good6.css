@@ -1,0 +1,22 @@
+/* good6.css - styles of the invoice overview: theme tokens only */
+.ov-find { display: grid; gap: var(--sw-space-2); max-width: var(--sw-form-max); margin-block-end: var(--sw-space-6); }
+.ov-status { min-height: calc(var(--sw-lh) * 1em); color: var(--sw-text-2); }
+.ov-amount { font-variant-numeric: tabular-nums; text-align: end; }
+.ov-chip {
+    min-height: var(--sw-control-h);
+    min-width: var(--sw-control-h);
+    padding-inline: var(--sw-space-3);
+    border: 1px solid var(--sw-border-strong);
+    border-radius: var(--sw-radius-pill);
+    background: var(--sw-surface);
+    color: var(--sw-text);
+    cursor: pointer;
+    transition: background-color var(--sw-dur-1) var(--sw-ease), border-color var(--sw-dur-1) var(--sw-ease);
+}
+@media (hover: hover) {
+    .ov-chip:hover { background: var(--sw-hover); border-color: var(--sw-text-accent); }
+}
+.ov-chip[aria-pressed="true"] { background: var(--sw-selected); border-color: var(--sw-text-accent); }
+.ov-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--sw-dur-2) var(--sw-ease); }
+.ov-more.is-open { grid-template-rows: 1fr; }
+.ov-more > div { overflow: hidden; }

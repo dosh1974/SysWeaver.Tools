@@ -1,0 +1,69 @@
+html {
+    scroll-behavior: smooth;
+}
+
+.bk-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bk-table td, .bk-table th {
+    padding: var(--sw-space-2) var(--sw-space-3);
+    border-bottom: 1px solid var(--sw-line);
+    text-align: start;
+}
+
+.bk-row {
+    transition: height var(--sw-dur-2) var(--sw-ease);
+}
+
+.bk-row.bk-open {
+    height: 96px;
+}
+
+.bk-size {
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+}
+
+.bk-new::after {
+    content: "New";
+    margin-inline-start: var(--sw-space-1);
+    color: var(--sw-accent);
+    font-size: var(--sw-fs-sm);
+}
+
+.bk-del {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--sw-danger);
+}
+
+.bk-actions {
+    visibility: hidden;
+}
+
+.bk-row:hover .bk-actions {
+    visibility: visible;
+}
+
+.bk-card:is(:hover, :focus-within) {
+    border-color: var(--sw-accent);
+}
+
+.bk-panel {
+    transition: opacity var(--sw-dur-2) var(--sw-ease);
+}
+
+.bk-panel.closing {
+    opacity: 0;
+}
+
+.bk-link {
+    color: var(--sw-link);
+    text-decoration: underline;
+}

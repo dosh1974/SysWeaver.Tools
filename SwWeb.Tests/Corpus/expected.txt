@@ -1,0 +1,556 @@
+# The frozen corpus of planted UX mistakes (critic series 4, rounds 1-2, and the round 2 held-out set): the expected findings.
+#
+#   <set> <id> <file>:<line>[-<line>] <rule>[|<rule>...] [runtime] [# what]
+#     a planted mistake: a finding of one of the rules on one of the lines (rules ux-*, a11y-*, design-confirm count)
+#     "runtime": only the framework at run time can see it (not counted in the static catch rate, never asserted)
+#   <set> - <file>:<line> <rule>  [# why]
+#     a line that must NOT have a finding of that rule (a right pattern, or a finding for the wrong reason before)
+#   <set> ok <file>:<line>
+#     a line written the guide's way: no UX finding on it
+#   <set> clean <file>
+#     a file that must have no UX finding at all
+#
+# Sets: A1_* = Architect round 1 (53_R1_Architect: sneak4 and the naive pages), A2_* = Architect round 2 (53_R2_Architect: sneak5,
+# the r2/bc page), F1_lab / F2_lab = FrontendDev rounds 1 / 2 (misuse.js, misuse2.js, the lab page), H1_holdout = the held-out set
+# written for round 2 without seeing the checker (h1/manifest.txt is its own list).
+
+# ---- A1_sneak4 (30)
+A1_sneak4 U1  sneak4/s.js:8   ux-inp-12   # save.disabled on a variable not named *btn*
+A1_sneak4 U2  sneak4/s.js:9   ux-inp-12   # setAttribute("disabled")
+A1_sneak4 U3  sneak4/s.js:11  ux-mot-2    # style.transition = "opacity 200ms"
+A1_sneak4 U4  sneak4/s.js:12  ux-mot-2    # animate({ duration: 300 })
+A1_sneak4 U5  sneak4/s.js:13  ux-inp-1    # pointerup only
+A1_sneak4 U6  sneak4/s.js:14  ux-inp-1    # onmouseup
+A1_sneak4 U7  sneak4/s.js:15  ux-inp-4    # contextmenu blocked on document
+A1_sneak4 U8  sneak4/s.js:16  ux-foc-4    # setAttribute("tabindex", "2")
+A1_sneak4 U9  sneak4/s.js:17  ux-pop-9    # const a = window.alert
+A1_sneak4 U10 sneak4/s.js:18  ux-pop-9    # Alert(..., "OK")
+A1_sneak4 U11 sneak4/s.js:19  ux-pop-9|design-confirm   # Confirm(..., "Yes")
+A1_sneak4 U12 sneak4/s.js:20  ux-pop-9|design-confirm   # a "No" button
+A1_sneak4 U13 sneak4/s.js:21  ux-tip-2    # tool tip repeats the label
+A1_sneak4 U14 sneak4/s.js:22  ux-inp-12   # Disabled: true
+A1_sneak4 U15 sneak4/s.js:23  ux-inp-12   # SetDisabled(true)
+A1_sneak4 U16 sneak4/s.js:24  ux-fbk-2    # OnClick block body, no return
+A1_sneak4 U17 sneak4/s.js:25  ux-inp-2    # click on a div without BadClick
+A1_sneak4 U18 sneak4/s.js:26  ux-inp-23   # Alt+ArrowLeft
+A1_sneak4 U19 sneak4/s.js:27  ux-frm-3    # validation error as a toast
+A1_sneak4 U20 sneak4/s.js:28  ux-inp-30   # selectstart
+A1_sneak4 U21 sneak4/s.js:29  ux-saf-10   # own beforeunload
+A1_sneak4 U22 sneak4/s.js:30  ux-saf-11   # own localStorage draft
+A1_sneak4 U23 sneak4/s.js:31  ux-lst-3    # createElement("table")
+A1_sneak4 C1  sneak4/s.css:1  ux-inp-11   # :hover inside @media (min-width)
+A1_sneak4 C3  sneak4/s.css:3  ux-inp-10   # body.x { cursor: progress }
+A1_sneak4 C4  sneak4/s.css:4  ux-mot-4    # transition: all
+A1_sneak4 C5  sneak4/s.css:5  ux-mot-4    # transition: max-height
+A1_sneak4 C6  sneak4/s.css:6  ux-mot-2    # transition-delay: 1s
+A1_sneak4 H1  sneak4/s.html:5 ux-foc-4    # tabindex="3"
+A1_sneak4 H2  sneak4/s.html:5 ux-frm-1    # input with a placeholder only
+A1_sneak4 -   sneak4/s.css:2  ux-inp-10   # cursor: progress on a control is right
+
+# ---- A1_naive (raw / sw: the naive pages; right: the guide's page of round 1)
+A1_naive R1  naive/raw.js:12  ux-frm-1    # input without a label
+A1_naive R2  naive/raw.js:12  ux-saf-10   # fields + Save without dirty tracking
+A1_naive R3  naive/raw.js:14  ux-frm-1    # textarea without a label
+A1_naive R4  naive/raw.js:14  ux-saf-11   # textarea without a draft
+A1_naive R5  naive/raw.js:26  ux-inp-12   # native disabled while busy
+A1_naive R6  naive/raw.js:30  ux-pop-9    # alert()
+A1_naive R7  naive/raw.js:35  ux-pop-9    # confirm()
+A1_naive R8  naive/raw.js:42  ux-lst-3    # hand-made table
+A1_naive R9  naive/raw.js:54  ux-inp-2    # row click without BadClick
+A1_naive R10 naive/raw.css:4  ux-inp-11   # :hover outside @media (hover)
+A1_naive R11 naive/raw.css:7  ux-inp-11
+A1_naive N1  naive/sw.js:15   ux-fbk-2    # OnClick without a returned promise
+A1_naive N1b naive/sw.js:15   ux-fbk-5    # "Saved" toast for an in-place result
+A1_naive N2  naive/sw.js:20   ux-inp-12   # busy by hand with E.disabled
+A1_naive N3  naive/sw.js:26   ux-pop-9|design-confirm   # plain Confirm with "OK" for a delete
+A1_naive N4  naive/sw.js:31   ux-inp-12   # Disabled: true
+A1_naive N5  naive/sw.js:36   ux-frm-1    # raw input in a dialog
+A1_naive N6  naive/sw.js:51   ux-fbk-4 runtime   # long work without progress (only the run time knows it is long)
+A1_naive N7  naive/sw.js:57   ux-inp-2    # card click without BadClick
+A1_naive N8  naive/sw.js:10   ux-saf-11   # multi-line TextBox without a draft
+A1_naive G1  naive/right.js:19 ux-saf-10  # own SetDirty next to the auto-dirty TextBox: two leave sentences (53_R2_Architect A2-8)
+A1_naive G2  naive/right.js:20 ux-saf-10
+A1_naive clean naive/raw.html
+A1_naive clean naive/sw.html
+A1_naive clean naive/right.html
+
+# ---- A2_sneak5 (30, the round 2 set the round 1 rules missed: 8 of 30)
+A2_sneak5 V1  sneak5/v.js:9   ux-inp-12   # Object.assign(btn, { disabled: true })
+A2_sneak5 V3  sneak5/v.js:10  ux-inp-12   # Disabled: !ready
+A2_sneak5 V5  sneak5/v.js:12  ux-pop-9    # const { confirm: ask } = window
+A2_sneak5 V6  sneak5/v.js:14  ux-pop-9    # OkText: _T("OK")
+A2_sneak5 V7  sneak5/v.js:15  ux-saf-1    # api ClearAll
+A2_sneak5 V8  sneak5/v.js:16  ux-saf-1    # destructive handler given by name
+A2_sneak5 V9  sneak5/v.js:18-20 ux-saf-3  # custom danger dialog, Default: true on Delete
+A2_sneak5 V10 sneak5/v.js:22  ux-inp-2|a11y-custom-control   # Sw.el("div", { onclick })
+A2_sneak5 V12 sneak5/v.js:24  ux-inp-2    # article click
+A2_sneak5 V13 sneak5/v.js:25  ux-fbk-2    # request in a helper
+A2_sneak5 V14 sneak5/v.js:26  ux-fbk-2    # request in a timer
+A2_sneak5 V15 sneak5/v.js:27  ux-fbk-2    # async OnClick without await
+A2_sneak5 V16 sneak5/v.js:28  ux-fbk-5    # "Saved" toast for an in-place result
+A2_sneak5 V17 sneak5/v.js:29  ux-saf-10   # contenteditable + SaveNotes
+A2_sneak5 V19 sneak5/v.js:31  ux-saf-11   # sessionStorage["draft_notes"]
+A2_sneak5 V20 sneak5/v.js:33  ux-frm-1|ux-saf-11   # textarea from an innerHTML string
+A2_sneak5 V22 sneak5/v.js:34  ux-lst-3    # createElement("TABLE")
+A2_sneak5 V23 sneak5/v.js:36  ux-fbk-7    # setTimeout loop rebuilding <li> rows
+A2_sneak5 V26 sneak5/v.js:38  ux-mot-2    # style.setProperty("transition", "opacity 250ms")
+A2_sneak5 V28 sneak5/v.js:39  ux-pop-1    # Sw.el("dialog") + show()
+A2_sneak5 V29 sneak5/v.js:41  ux-inp-10   # documentElement.style.cursor = "progress"
+A2_sneak5 V30 sneak5/v.js:42  ux-inp-23   # getModifierState("Alt") + ArrowLeft
+A2_sneak5 C1  sneak5/v.css:1  ux-inp-11   # :is(:hover, :focus-within)
+A2_sneak5 C2  sneak5/v.css:2  ux-mot-4    # transition: padding
+A2_sneak5 C3  sneak5/v.css:3  ux-mot-4    # @keyframes on flex-basis
+A2_sneak5 C4  sneak5/v.css:4  ux-inp-10   # .sw-page.x { cursor: progress }
+A2_sneak5 C5  sneak5/v.css:5  ux-fbk-2    # busy label hidden
+A2_sneak5 H1  sneak5/v.html:5  ux-inp-25  # user-scalable=false
+A2_sneak5 H2  sneak5/v.html:15 ux-acc-3   # role="heading" aria-level="1" next to the page header
+A2_sneak5 H3  sneak5/v.html:16 ux-lay-1   # canvas without a size
+A2_sneak5 -   sneak5/v.js:20  ux-saf-1    # the danger dialog's own Delete is the confirmation (A2-10a)
+
+# ---- A2_bc (the run time page of round 2: the static parts)
+A2_bc T2  r2/bc.js:16  ux-fbk-2    # request in a helper
+A2_bc T3  r2/bc.js:19  ux-fbk-2    # request in a timer (A2-9)
+A2_bc T10 r2/bc.js:60  ux-saf-3    # custom danger dialog with Default
+A2_bc T11 r2/bc.js:63  ux-inp-12   # Disabled: !ready through a local wrapper of Sw.Button
+A2_bc T12 r2/bc.js:78  ux-saf-10   # contenteditable without dirty tracking (A2-12)
+A2_bc T8  r2/bc.js:46-52 ux-pop-6 runtime   # async filled dialog is dirty (A2-2: framework)
+A2_bc -   r2/bc.js:13  ux-fbk-2    # a live view / long poll is not the button's work (A2-6)
+A2_bc -   r2/bc.js:51  ux-fbk-2    # the dialog footer returns its request (A2-10b)
+A2_bc -   r2/bc.js:72  ux-fbk-2    # Activity.Track is returned
+A2_bc -   r2/bc.js:75  ux-fbk-2    # the request is handed to Sw.Dialog.Working({ Promise })
+
+# ---- F1_lab (FrontendDev round 1: misuse.js 11 patterns; the lab page)
+F1_lab M1  lab/misuse.js:8   ux-saf-11 runtime   # a draft in a dialog never disposed (the dialog disposes it now)
+F1_lab M2  lab/misuse.js:10  ux-prf-4 runtime    # Activity.On in a framed page (removed on pagehide now)
+F1_lab M3  lab/misuse.js:12  ux-inp-31   # CopyButton({})
+F1_lab M4  lab/misuse.js:14  ux-inp-12   # Disabled.Set(s, true, "no"): no reason
+F1_lab M5  lab/misuse.js:16  ux-inp-12   # setAttribute("disabled") on a Sw button
+F1_lab M6  lab/misuse.js:18  ux-pop-6    # SetBusy(promise that never ends) without a way out
+F1_lab M7  lab/misuse.js:20  ux-txt-1 runtime    # Sw.Ready("Tabel") (a run time warning)
+F1_lab M8  lab/misuse.js:22  ux-txt-1 runtime    # CellFormat override (a run time warning)
+F1_lab M9  lab/misuse.js:24  ux-fbk-4 runtime    # Activity.Start on a page without the list
+F1_lab M10 lab/misuse.js:26  ux-pop-9    # confirm()
+F1_lab M11 lab/misuse.js:28  ux-saf-10   # SetDirty never cleared
+F1_lab M12 lab/misuse.js:7   ux-pop-9    # an "OK" button
+F1_lab M13 lab/misuse.js:4   ux-frm-1    # textarea without a label
+F1_lab L1  lab/ux.js:20      ux-saf-10   # own SetDirty in the OnInput of an auto-dirty TextBox (53_R2_FrontendDev F9)
+
+# ---- F2_lab (FrontendDev round 2: misuse2.js, 13 patterns)
+F2_lab N1b lab/misuse2.js:25  ux-fbk-5 runtime    # async OnChange that fails is silent (framework)
+F2_lab N2  lab/misuse2.js:33  ux-saf-10 runtime   # OnInput filter marks the page dirty (framework)
+F2_lab N3  lab/misuse2.js:43  ux-saf-10   # own SetDirty + the control's own dirty
+F2_lab N4a lab/misuse2.js:54  ux-sec-1    # draft of a private key
+F2_lab N4b lab/misuse2.js:55  ux-sec-1    # draft of an API token
+F2_lab N5  lab/misuse2.js:65  ux-saf-11   # two drafts, one Context
+F2_lab N6  lab/misuse2.js:77  ux-saf-11   # TextBox Draft + Sw.Draft.Attach
+F2_lab N8  lab/misuse2.js:103 ux-fbk-5    # async OnClick resolves false, says nothing (through a local wrapper)
+F2_lab N10 lab/misuse2.js:141 ux-sec-1    # a token in a Fail text
+F2_lab N11a lab/misuse2.js:149 ux-inp-23  # a combo registered twice
+F2_lab N11b lab/misuse2.js:151 ux-inp-23  # Mod+W (browser)
+F2_lab N13 lab/misuse2.js:159 ux-pop-6    # busy dialog that never ends
+
+# ---- H1_holdout (written without seeing the checker; first run 24 of 32, see h1/manifest.txt)
+H1_holdout H1  h1/h.js:14  ux-saf-10
+H1_holdout H2  h1/h.js:16  ux-inp-12
+H1_holdout H3  h1/h.js:18  ux-inp-12
+H1_holdout H4  h1/h.js:25  ux-inp-12
+H1_holdout H5  h1/h.js:28  ux-pop-9
+H1_holdout H6  h1/h.js:29  ux-pop-9|design-confirm
+H1_holdout H7  h1/h.js:30  ux-pop-1
+H1_holdout H8  h1/h.js:33  ux-saf-1
+H1_holdout H9  h1/h.js:35  ux-saf-1
+H1_holdout H10 h1/h.js:39  ux-fbk-2
+H1_holdout H11 h1/h.js:40  ux-fbk-2
+H1_holdout H12 h1/h.js:41  ux-fbk-2
+H1_holdout H13 h1/h.js:47  ux-fbk-5
+H1_holdout H14 h1/h.js:53  ux-saf-10
+H1_holdout H15 h1/h.js:54  ux-saf-11
+H1_holdout H16 h1/h.js:55  ux-mot-4
+H1_holdout H17 h1/h.js:56  ux-foc-4
+H1_holdout H18 h1/h.js:61  ux-saf-11|ux-sec-1
+H1_holdout H19 h1/h.js:62  ux-sec-1
+H1_holdout H20 h1/h.js:70  ux-frm-1
+H1_holdout H21 h1/h.js:73  ux-lst-3
+H1_holdout H22 h1/h.js:80  ux-fbk-7
+H1_holdout H23 h1/h.js:83  ux-inp-23
+H1_holdout H24 h1/h.js:84  ux-inp-23
+H1_holdout H25 h1/h.js:89  ux-inp-2
+H1_holdout H26 h1/h.js:91  ux-mot-2
+H1_holdout H27 h1/h.js:93  ux-acc-3
+H1_holdout H28 h1/h.css:3  ux-inp-10
+H1_holdout H29 h1/h.css:4  ux-mot-2
+H1_holdout H30 h1/h.css:5  ux-inp-11
+H1_holdout H31 h1/h.html:5  ux-inp-25
+H1_holdout H32 h1/h.html:13 ux-lay-1
+H1_holdout ok h1/h.js:13    # Sw.Page.Navigate
+H1_holdout ok h1/h.js:17    # OnClick returns the request
+H1_holdout ok h1/h.js:19    # Disabled with a reason
+H1_holdout ok h1/h.js:36    # Confirm with Danger before the delete, promise returned
+H1_holdout ok h1/h.js:66    # Sw.Draft.Attach on a notes field, cleared after the send
+H1_holdout ok h1/h.css:6   # :hover inside @media (hover: hover)
+H1_holdout ok h1/h.css:7   # transition: opacity var(--sw-dur-1)
+H1_holdout ok h1/h.html:14 # img with width and height
+
+# ---- A3_sneak6 (Architect round 3, held-out: 53_R3_Architect "Planted mistakes"; first run 18 of 37, then the families were added)
+A3_sneak6 K1  sneak6/inventory.html:5   ux-inp-25    # maximum-scale=1.0
+A3_sneak6 K2  sneak6/inventory.html:16  ux-acc-3     # a real h1 next to PageLayout({ Title })
+A3_sneak6 K3  sneak6/inventory.html:19  ux-lay-1     # iframe without a size
+A3_sneak6 K4  sneak6/inventory.html:20  a11y-custom-control|ux-inp-1   # span onclick
+A3_sneak6 K5  sneak6/inventory.css:4    ux-mot-4|ux-mot-2   # transition: max-height 300ms
+A3_sneak6 K6  sneak6/inventory.css:12   ux-txt-15    # content: "New"
+A3_sneak6 K7  sneak6/inventory.css:19-21 ux-txt-17   # fixed width + nowrap + overflow hidden, no ellipsis
+A3_sneak6 K8  sneak6/inventory.css:29   ux-mot-6     # endless pulse
+A3_sneak6 K9  sneak6/inventory.css:38   ux-inp-10    # cursor: wait
+A3_sneak6 K10 sneak6/inventory.css:42   ux-inp-30    # user-select: none on the status line
+A3_sneak6 K11 sneak6/invlib.js:14-15    ux-txt-20    # toFixed(1) + " KB"
+A3_sneak6 K12 sneak6/invlib.js:20       ux-sec-1     # api key in localStorage
+A3_sneak6 K13 sneak6/invlib.js:25       ux-sec-1     # token in a url query
+A3_sneak6 K14 sneak6/invlib.js:30;sneak6/inventory.js:155 ux-sec-2   # user data concatenated into html, set by innerHTML
+A3_sneak6 K16 sneak6/inventory.js:19    ux-foc-4     # tabIndex = 1
+A3_sneak6 K17 sneak6/inventory.js:24-29 ux-saf-1     # danger WipeCache without a question
+A3_sneak6 K18 sneak6/inventory.js:35    ux-saf-1|ux-fbk-2   # raw fetch DeleteItem, no question, not returned
+A3_sneak6 K19 sneak6/inventory.js:43    ux-pop-9     # prompt()
+A3_sneak6 K20 sneak6/inventory.js:52-57 ux-pop-9|design-confirm   # Yes / No
+A3_sneak6 K21 sneak6/inventory.js:69-70 ux-fbk-5     # catch { console.error } in OnClick
+A3_sneak6 K22 sneak6/inventory.js:79-80 ux-fbk-2     # busy by pointerEvents, .finally not returned
+A3_sneak6 K23 sneak6/inventory.js:88    ux-pop-9     # window["confirm"]
+A3_sneak6 K24 sneak6/inventory.js:91    ux-txt-6     # _TF("Removed") + " " + n + " " + _TF("items")
+A3_sneak6 K25 sneak6/inventory.js:102   ux-fbk-5     # "Preference updated" toast after a switch
+A3_sneak6 K26 sneak6/inventory.js:109-111 ux-frm-3   # SetError in OnInput
+A3_sneak6 K27 sneak6/inventory.js:125   tr-untranslated   # Sw.Fail("Error: key rejected")
+A3_sneak6 K28 sneak6/inventory.js:135-138 ux-fbk-7   # setInterval rebuilding the list
+A3_sneak6 K29 sneak6/inventory.js:143   ux-inp-23    # single key "r" on document
+A3_sneak6 K30 sneak6/inventory.js:145   ux-inp-23    # Alt+ArrowRight
+A3_sneak6 K31 sneak6/inventory.js:148   ux-inp-4     # document contextmenu blocked
+A3_sneak6 K32 sneak6/inventory.js:157   ux-txt-20    # toLocaleString("en-US")
+A3_sneak6 K33 sneak6/inventory.js:159   ux-inp-1     # select on mousedown
+A3_sneak6 K34 sneak6/inventory.js:160   ux-inp-6     # dblclick-only edit
+A3_sneak6 K35 sneak6/inventory.js:161   ux-inp-8|ux-fbk-5   # request on mouseenter
+A3_sneak6 K36 sneak6/inventory.js:162-164 ux-inp-20  # drag-only reorder
+A3_sneak6 K37 sneak6/inventory.js:168   ux-mot-2|ux-mot-4   # animate width, duration 400
+A3_sneak6 K38 sneak6/inventory.js:183   ux-saf-10|ux-saf-12 # location.replace on a page with fields
+A3_sneak6 ok sneak6/inventory.css:49    # transition on a token inside @media (hover: hover)
+
+# ---- A3_good (Architect round 3: 5 correct pages; 0 false positives on the first run)
+A3_good clean good/g1.js
+A3_good clean good/g1.html
+A3_good clean good/g2.js
+A3_good clean good/g2.html
+A3_good clean good/g3.js
+A3_good clean good/g3.css
+A3_good clean good/g3.html
+A3_good clean good/g4.js
+A3_good clean good/g4.html
+A3_good clean good/g5.js
+A3_good clean good/g5.css
+A3_good clean good/g5.html
+
+# ---- F3_lab (FrontendDev round 3: misuse3.js 13 patterns, rep.js, sec.js, r3.js; first run 1 of 13 by SwWeb)
+F3_lab N1  lab/misuse3.js:14  ux-saf-11   # Sw.Draft.Attach on a contenteditable editor
+F3_lab N2  lab/misuse3.js:18  ux-fbk-5    # Sw.Work.Report twice
+F3_lab N3  lab/misuse3.js:23  ux-foc-1 runtime   # Focus.Keep on a replaced container (dev warning)
+F3_lab N4  lab/misuse3.js:26  ux-fbk-4    # Activity.Run whose work ignores the signal
+F3_lab N5  lab/misuse3.js:28  ux-fbk-2    # OnClick returns a Sw.Activity.Start job
+F3_lab N6  lab/misuse3.js:30  ux-fbk-5    # footer OnClick closes, then fails
+F3_lab N7  lab/misuse3.js:32  ux-inp-23   # Ctrl+S and Mod+S
+F3_lab N8  lab/misuse3.js:34-35 ux-saf-11 # TextBox Draft in a Sw.Form
+F3_lab N9  lab/r3.js:34       ux-fbk-5 runtime   # rapid toggling of an auto-saving switch
+F3_lab N11 lab/misuse3.js:39  ux-fbk-2    # the real save marked Detached
+F3_lab N12 lab/misuse3.js:42  ux-fbk-2    # request in a setTimeout from OnClick
+F3_lab N13 lab/misuse3.js:44  ux-pop-6    # Cancellable: true on a footer write
+F3_lab F6  lab/rep.js:34      ux-fbk-4    # DelayAbort result ignored inside Run
+F3_lab F3  lab/sec.js:16      ux-sec-1 runtime   # drafts of fields whose labels come from a data array (framework secret check)
+F3_lab L1  lab/r3.js:49       ux-pop-6 runtime   # Cancellable set on a button object chosen at run time
+
+# ---- H2_holdout (series 4 round 3, written by a sub-agent without the checker or the corpus, H2_holdout/manifest.txt; first run 23 of 34, 1 false positive)
+H2_holdout P1  h2/fleet.js:13   ux-sec-1   # refresh token to a log through a helper alias
+H2_holdout P2  h2/fleet.js:43   ux-sec-1   # api key in localStorage
+H2_holdout P3  h2/fleetUtil.js:48 ux-sec-1 # api key in a cookie
+H2_holdout P4  h2/fleet.js:52   ux-sec-1   # token in a toast
+H2_holdout P5  h2/fleet.js:187  ux-sec-1   # session id in a url query
+H2_holdout P6  h2/fleet.js:88;h2/fleetUtil.js:34-37 ux-sec-2   # html built from server data in a helper
+H2_holdout P7  h2/fleet.js:162  ux-sec-2   # notes as innerHTML
+H2_holdout P8  h2/fleet.js:155  ux-sec-2   # insertAdjacentHTML with a template of data
+H2_holdout P9  h2/fleetUtil.js:10 ux-txt-20  # toFixed + " MB"
+H2_holdout P10 h2/fleetUtil.js:21 ux-txt-20  # getHours() + ":" + getMinutes()
+H2_holdout P11 h2/fleetUtil.js:25 ux-txt-20  # Math.round(x * 100)% in a template
+H2_holdout P12 h2/fleetUtil.js:29 ux-txt-6   # count + noun + "s"
+H2_holdout P13 h2/fleet.js:96   ux-txt-6   # _TF("Last seen") + " " + value
+H2_holdout P14 h2/fleet.js:100  ux-txt-20  # toLocaleDateString("en-GB")
+H2_holdout P15 h2/fleet.js:163  ux-txt-20  # Intl.NumberFormat
+H2_holdout P16 h2/fleet.js:110  ux-inp-1   # select on mousedown
+H2_holdout P17 h2/fleet.js:111  ux-inp-6   # dblclick only
+H2_holdout P18 h2/fleet.js:112  ux-inp-8 runtime   # a preview read on pointerenter: INP-8 allows a preview (disputed, not counted)
+H2_holdout P19 h2/fleet.js:141  ux-inp-8   # menu / request on mouseover
+H2_holdout P20 h2/fleet.js:140;h2/fleet.js:108 ux-inp-20  # drop is the only way to move to a group
+H2_holdout P21 h2/fleet.js:142  ux-inp-1   # pointerup without click
+H2_holdout P22 h2/fleet.js:92   ux-inp-2   # onclick on a span, no modifier check
+H2_holdout P23 h2/fleet.js:36   ux-fbk-5   # "Saved" toast after an auto-saving toggle
+H2_holdout P24 h2/fleet.js:81   ux-fbk-5   # setInterval request without handling
+H2_holdout P25 h2/fleet.js:119  ux-fbk-5   # fire-and-forget Send in a click listener
+H2_holdout P26 h2/fleet.js:151-152 ux-fbk-5  # catch only console.error
+H2_holdout P27 h2/fleet.js:178  ux-fbk-5 runtime   # a false result ignored (the api's contract is not in the page)
+H2_holdout P28 h2/fleet.js:203  ux-fbk-5   # .catch(() => {})
+H2_holdout P29 h2/fleet.js:216  ux-fbk-5 runtime   # empty catch around a UI call (no request: not decidable without noise)
+H2_holdout P30 h2/fleet.js:225  ux-fbk-5   # .catch(console.error)
+H2_holdout P31 h2/fleet.js:20   tr-untranslated   # literal Text / Title
+H2_holdout P32 h2/fleet.js:73   tr-untranslated   # literal Sw.Fail text
+H2_holdout P33 h2/fleet.js:169  tr-untranslated   # literal Error message shown by Sw.Fail(e)
+H2_holdout P34 h2/fleet.js:192  tr-untranslated   # literal Confirm texts
+H2_holdout ok h2/fleetUtil.js:15
+H2_holdout ok h2/fleetUtil.js:42
+H2_holdout ok h2/fleet.js:32
+H2_holdout ok h2/fleet.js:115   # pointerdown only starts a drag (a false positive on the first run, fixed)
+H2_holdout ok h2/fleet.js:116
+H2_holdout ok h2/fleet.js:124
+H2_holdout ok h2/fleet.js:173
+H2_holdout ok h2/fleet.js:183
+H2_holdout ok h2/fleet.js:195
+
+# ---- A4_sneak7 (41): Architect round 4 (53_R4_Architect: sneak7, KEY_sneak7.md), unseen first run 20 of 41
+A4_sneak7 H1  sneak7/shipments.html:7    external-resource   # web font from fonts.googleapis.com
+A4_sneak7 H2  sneak7/shipments.html:18   ux-lay-1     # img without a size
+A4_sneak7 H3  sneak7/shipments.html:19   a11y-name    # icon button without a name
+A4_sneak7 H4  sneak7/shipments.html:20   ux-frm-1     # placeholder only
+A4_sneak7 H5  sneak7/shipments.html:21   ux-txt-13    # aria-description words in the html
+A4_sneak7 H6  sneak7/shipments.html:22   ux-inp-21    # <a> without href
+A4_sneak7 C1  sneak7/shipments.css:14-16 ux-inp-24    # 16 px button
+A4_sneak7 C2  sneak7/shipments.css:27-28 a11y-focus   # outline: none
+A4_sneak7 C3  sneak7/shipments.css:31    ux-inp-11    # hover outside @media (hover)
+A4_sneak7 C4  sneak7/shipments.css:36    ux-lay-8     # min-width: 1280px
+A4_sneak7 C5  sneak7/shipments.css:44-45 ux-mot-7     # opacity 0, not hidden
+A4_sneak7 C6  sneak7/shipments.css:53    ux-mot-6     # endless blink
+A4_sneak7 C7  sneak7/shipments.css:59-60 ux-txt-17    # nowrap + hidden, no ellipsis
+A4_sneak7 L1  sneak7/shiplib.js:11       ux-sec-1     # api key in sessionStorage
+A4_sneak7 L2  sneak7/shiplib.js:21;sneak7/shipments.js:94 ux-sec-1   # a password logged by a trace helper
+A4_sneak7 L3  sneak7/shiplib.js:28       ux-txt-20    # "3h 20m"
+A4_sneak7 L4  sneak7/shiplib.js:33       ux-txt-20    # d/m/y by hand
+A4_sneak7 L5  sneak7/shiplib.js:38;sneak7/shipments.js:138 ux-sec-2  # template literal row html -> innerHTML
+A4_sneak7 L6  sneak7/shiplib.js:43-45;sneak7/shipments.js:72-73 ux-fbk-5  # .catch(() => null): failure = null
+A4_sneak7 P1  sneak7/shipments.js:21     ux-acc-11    # select change navigates
+A4_sneak7 P2  sneak7/shipments.js:28     tr-untranslated  # aria-label literal
+A4_sneak7 P3  sneak7/shipments.js:35     ux-saf-2|design-confirm  # "Are you sure?", no text, no Danger
+A4_sneak7 P4  sneak7/shipments.js:47     ux-fbk-5     # allSettled, failures dropped
+A4_sneak7 P5  sneak7/shipments.js:60-61  ux-fbk-5     # catch only clears the status
+A4_sneak7 P6  sneak7/shipments.js:128;sneak7/shipments.js:75 tr-untranslated  # thrown English text shown
+A4_sneak7 P7  sneak7/shipments.js:87     ux-sec-1     # password TextBox not masked
+A4_sneak7 P8  sneak7/shipments.js:98     ux-inp-12    # E.disabled without a reason
+A4_sneak7 P9  sneak7/shipments.js:102    ux-saf-11    # message without a draft
+A4_sneak7 P10 sneak7/shipments.js:112-113 ux-inp-23   # Alt+Left / Alt+Right
+A4_sneak7 P11 sneak7/shipments.js:117    ux-inp-8     # hover opens a menu
+A4_sneak7 P12 sneak7/shipments.js:122    ux-foc-2     # focus on the danger button
+A4_sneak7 P13 sneak7/shipments.js:139    ux-txt-20    # toISOString().slice(0, 10)
+A4_sneak7 P14 sneak7/shipments.js:140    ux-txt-6     # plural "s"
+A4_sneak7 P15 sneak7/shipments.js:146    ux-inp-1     # select on pointerdown
+A4_sneak7 P16 sneak7/shipments.js:147    ux-inp-1     # open on pointerup
+A4_sneak7 P17 sneak7/shipments.js:154-155 ux-lst-4    # a click on the cell copies
+A4_sneak7 P18 sneak7/shipments.js:156    tr-untranslated  # Sw.Info literal
+A4_sneak7 P19 sneak7/shipments.js:161    ux-mot-3     # smooth scroll
+A4_sneak7 P20 sneak7/shipments.js:137    ux-inp-20    # tabindex 0 rows without Enter
+A4_sneak7 P21 sneak7/shipments.js:82;sneak7/shipments.js:135 ux-lst-3  # hand-made table without headers
+A4_sneak7 P22 sneak7/shipments.js:133    ux-fbk-6     # list without an empty / error state
+A4_sneak7 ok sneak7/shipments.js:182      # an export with Sw.Activity.Run and the signal
+# (shipments.js:20: "DHL" / "UPS" option texts are product names; tr-untranslated reports them, the Architect counts them as debatable: not asserted)
+
+# ---- A4_good: the Architect's 6 correct pages of round 4 (1 false positive on the first run: ux-saf-1 on a remove with Undo, fixed)
+A4_good clean good/h1.js
+A4_good clean good/h2.js
+A4_good clean good/h3.js
+A4_good clean good/h4.js
+A4_good G5R5 good/h5.js:13 ux-fbk-6   # (round 5) the stops are loaded and rendered by hand without an empty state: a route without stops shows a blank list
+A4_good clean good/h6.css
+A4_good clean good/h1.html
+A4_good clean good/h2.html
+A4_good clean good/h3.html
+A4_good clean good/h4.html
+A4_good clean good/h5.html
+
+# ---- F4_lab: FrontendDev round 4 misuse4.js (13 patterns; P8 / P10 are prevented by the framework and are no mistakes)
+F4_lab P1  lab/misuse4.js:10   ux-acc-5     # Input.id changed: the label no longer names it
+F4_lab P2  lab/misuse4.js:14   ux-fbk-4     # Sw.Sleep's AbortError swallowed in Run
+F4_lab P3  lab/misuse4.js:17   ux-pop-6     # Read: true on a write
+F4_lab P4  lab/misuse4.js:20   ux-saf-11    # draft cleared before the send
+F4_lab P5  lab/misuse4.js:24   ux-fbk-4     # one Key for two works
+F4_lab P6  lab/misuse4.js:27   ux-inp-23 runtime  # a Scope element never shown
+F4_lab P7  lab/misuse4.js:29   ux-fbk-4     # OnChange returns a promise that never settles
+F4_lab P9  lab/misuse4.js:34   ux-pop-6 runtime   # code closes a busy dialog
+F4_lab P11 lab/misuse4.js:39   ux-fbk-2     # Sw.Net.Live for the save
+F4_lab P12 lab/misuse4.js:43   ux-frm-5     # EditWhileBusy without a re-read
+F4_lab P13 lab/misuse4.js:46   ux-fbk-4     # Progress in percent
+
+# ---- H3_holdout: the round 4 held-out set (36 mistakes, written by a fresh sub-agent from the guide and the READMEs only); first run 21 of 36 (58 %, 0 false positives), round 3 gate 18 of 36
+H3_holdout 01 h3/returns.html:5 ux-inp-25 # viewport meta locks zoom (maximum-scale=1)
+H3_holdout 02 h3/returns.html:37 ux-foc-4 # positive tabindex="2" on the search box
+H3_holdout 03 h3/returns.html:32 ux-acc-3 # card title is a second h1 on the page
+H3_holdout 04 h3/returns.css:35 ux-mot-2 # hard-coded transition duration and easing (180ms ease-out)
+H3_holdout 05 h3/returns.css:58 ux-txt-15 # user visible word "New" in CSS content
+H3_holdout 06 h3/returns.css:95 ux-mot-4 # progress bar animates width
+H3_holdout 07 h3/returns.css:99;h3/returns.js:80 ux-inp-10 # cursor: wait on the whole page while loading
+H3_holdout 08 h3/returns-api.js:52;h3/returns.js:224 ux-sec-1 # carrier API key stored in local storage through a helper
+H3_holdout 09 h3/returns-api.js:46;h3/returns.js:233 ux-sec-1 # carrier token put in the url query of the label request
+H3_holdout 10 h3/returns-api.js:17;h3/returns.js:155 ux-txt-20 # date formatted by hand (dd.mm.yyyy) in a helper
+H3_holdout 11 h3/returns-api.js:22;h3/returns.js:156 ux-txt-20 # refund amount formatted by hand (toFixed + currency) in a helper
+H3_holdout 12 h3/returns-api.js:40-41;h3/returns.js:242 ux-fbk-5 # MarkReceived swallows the failure as false; caller ignores it and shows "Received"
+H3_holdout 13 h3/returns.js:27 ux-inp-4 # browser context menu blocked on the whole list
+H3_holdout 14 h3/returns.js:285-289;h3/returns.js:28 ux-inp-23 # single-key shortcut "a" fires while typing in the search box
+H3_holdout 15 h3/returns.js:30 ux-fbk-5 # Reasons request .then without rejection handling, promise dropped
+H3_holdout 16 h3/returns.js:31 ux-fbk-5 # periodic counts request failure swallowed by .catch(() => { })
+H3_holdout 17 h3/returns.js:49 ux-fbk-2 # Export OnClick starts work but returns no promise
+H3_holdout 18 h3/returns.js:90 ux-txt-30 # error state text is the raw "status - statusText"
+H3_holdout 19 h3/returns.js:114 ux-txt-6 # plural made by appending "s" to a translated text
+H3_holdout 20 h3/returns.js:151 ux-acc-2 runtime # late / on time shown only by the colour of a dot
+H3_holdout 21 h3/returns.js:160 ux-tip-7 runtime # "Double-click to open the details" repeated on every row
+H3_holdout 22 h3/returns.js:162 tr-untranslated # untranslated aria-label "Inspection progress"
+H3_holdout 23 h3/returns.js:170 ux-inp-1 # Receive acts on pointerdown instead of click
+H3_holdout 24 h3/returns.js:177 ux-fbk-5 # restock change listener fires SetRestock and drops the promise
+H3_holdout 25 h3/returns.js:188 ux-inp-8 # hovering the menu button opens the menu (mouseenter)
+H3_holdout 26 h3/returns.js:190-194 ux-inp-6 # details open only by double click (no click, key or menu path)
+H3_holdout 27 h3/returns.js:234 tr-untranslated # untranslated toast text
+H3_holdout 28 h3/returns.js:262-263 ux-pop-9|design-confirm # confirmation buttons "No" / "Yes" instead of verbs
+H3_holdout 29 h3/returns.js:268 ux-fbk-5 # Promise.allSettled of approvals; rejections never reported
+H3_holdout 30 h3/returns.js:280 ux-lay-5 # live new returns inserted at the top of the list the user reads
+H3_holdout 31 h3/returns.js:282 ux-txt-6 # announcement sentence concatenated from translated fragments and data
+H3_holdout 32 h3/returns-detail.js:29-31;h3/returns-detail.js:42 ux-fbk-5 # claim request failure only logged to the console
+H3_holdout 33 h3/returns-detail.js:55 ux-sec-2 # customer message inserted as raw innerHTML
+H3_holdout 34 h3/returns-detail.js:63-65 ux-frm-3 # field error set while typing (OnInput)
+H3_holdout 35 h3/returns-detail.js:83;h3/returns-detail.js:96-97 ux-saf-1 # Remove deletes the return without a confirmation
+H3_holdout 36 h3/returns-detail.js:103 tr-untranslated # untranslated error thrown in a button handler (shown to the user)
+H3_holdout clean h3/good/archive-undo.js
+H3_holdout clean h3/good/remove-carrier.js
+H3_holdout clean h3/good/carrier-form.js
+H3_holdout clean h3/good/late-returns.js
+H3_holdout clean h3/good/reprint-label.js
+H3_holdout clean h3/good/overview.js
+
+# ---- A5_sneak8: Architect round 5 (53_R5_Architect: the "Backups" page, 49 planted mistakes; KEY_sneak8.md); first run 27 of 49 (55 %)
+A5_sneak8 H1  sneak8/backups.html:5   ux-inp-25            # zoom lock
+A5_sneak8 H2  sneak8/backups.html:20  ux-acc-3             # heading levels skip h1 -> h4
+A5_sneak8 H3  sneak8/backups.html:22  ux-frm-6             # e-mail field type="text"
+A5_sneak8 H4  sneak8/backups.html:25  a11y-custom-control|ux-inp-21   # <span onclick>
+A5_sneak8 H5  sneak8/backups.html:24  ux-foc-4             # tabindex="2"
+A5_sneak8 H6  sneak8/backups.html:7   external-resource    # CDN script
+A5_sneak8 C1  sneak8/backups.css:26   ux-inp-30            # user-select: none on a value class
+A5_sneak8 C2  sneak8/backups.css:30   ux-txt-15            # content: "New"
+A5_sneak8 C3  sneak8/backups.css:17   ux-mot-4             # transition: height
+A5_sneak8 C4  sneak8/backups.css:38   ux-inp-24            # 20 px target
+A5_sneak8 C5  sneak8/backups.css:63   ux-mot-7             # faded but present
+A5_sneak8 C6  sneak8/backups.css:54   ux-inp-11            # :is(:hover, ...) outside @media (hover)
+A5_sneak8 C7  sneak8/backups.css:2    ux-mot-3             # scroll-behavior: smooth
+A5_sneak8 C8  sneak8/backups.css:50   ux-inp-8             # row actions shown only on hover (the advice must not be @media (hover))
+A5_sneak8 L1  sneak8/bklib.js:7       ux-txt-20            # toFixed(2) + " kr"
+A5_sneak8 L2  sneak8/bklib.js:11      ux-txt-20            # / 1048576 ... " MB"
+A5_sneak8 L3  sneak8/bklib.js:16;sneak8/backups.js:65  ux-sec-1   # btoa(user + ":" + pass) to localStorage, the passphrase field's value passed to the helper
+A5_sneak8 L4  sneak8/bklib.js:22;sneak8/backups.js:81  ux-fbk-5   # a load whose catch logs and returns []
+A5_sneak8 L5  sneak8/bklib.js:29;sneak8/backups.js:90  ux-sec-2   # row html concatenated -> innerHTML
+A5_sneak8 L6  sneak8/bklib.js:34      ux-acc-2             # state by style.color only
+A5_sneak8 L7  sneak8/bklib.js:39;sneak8/backups.js:110 ux-sec-1   # &token= in a url
+A5_sneak8 P1  sneak8/backups.js:25    ux-pop-11            # Alert on load
+A5_sneak8 P2  sneak8/backups.js:97    ux-inp-6             # dblclick the only way to open (the click only selects)
+A5_sneak8 P3  sneak8/backups.js:75    ux-inp-23            # single key "d"
+A5_sneak8 P4  sneak8/backups.js:73    ux-inp-4             # blocked context menu
+A5_sneak8 P5  sneak8/backups.js:154   ux-saf-4             # delete all without type to confirm
+A5_sneak8 P6  sneak8/backups.js:131   ux-saf-6             # "can't be undone" on Archive
+A5_sneak8 P7  sneak8/backups.js:149   ux-txt-30            # Sw.Fail(_TF("Error"))
+A5_sneak8 P8  sneak8/backups.js:164   ux-inp-12            # setAttribute("disabled")
+A5_sneak8 P9  sneak8/backups.js:7     ux-acc-4             # status line without a live region
+A5_sneak8 P10 sneak8/backups.js:27    ux-acc-7             # 120 s sign out timer
+A5_sneak8 P11 sneak8/backups.js:55    ux-sec-1             # passphrase not masked
+A5_sneak8 P12 sneak8/backups.js:120   tr-not-literal       # _TF("Restore " + name)
+A5_sneak8 P13 sneak8/backups.js:125   ux-txt-6             # concatenated sentence
+A5_sneak8 P14 sneak8/backups.js:119   tr-untranslated      # template literal toast
+A5_sneak8 P15 sneak8/backups.js:37    tr-untranslated      # Promise.reject("Nothing selected")
+A5_sneak8 P16 sneak8/backups.js:174   ux-fbk-5             # .catch(() => {}) auto save
+A5_sneak8 P17 sneak8/backups.js:81    ux-fbk-6             # list loaded through a helper, no empty state
+A5_sneak8 P18 sneak8/backups.js:24    ux-foc-2             # this.DeleteAll.Focus() on load
+A5_sneak8 P19 sneak8/backups.js:32    ux-tip-1|design-icon # icon-only button without Title
+A5_sneak8 P20 sneak8/backups.js:139   design-confirm|ux-saf-2   # "Erase" without Danger
+A5_sneak8 P21 sneak8/backups.js:162   ux-pop-9             # window.confirm
+A5_sneak8 P22 sneak8/backups.js:98    ux-inp-1             # touchstart acts
+A5_sneak8 P23 sneak8/backups.js:99    ux-lst-4             # click on the id cell copies
+A5_sneak8 P24 sneak8/backups.js:48    ux-acc-11            # Select OnChange navigates
+A5_sneak8 P25 sneak8/backups.js:64    ux-sec-1             # console.info("passphrase", this.Pass.Get())
+A5_sneak8 P26 sneak8/backups.js:100-103 ux-inp-20          # drag-only reorder
+A5_sneak8 P27 sneak8/backups.js:92    ux-tip-7             # "Double-click to open" in every row
+A5_sneak8 P28 sneak8/backups.js:61    ux-frm-2             # required name not marked
+
+# ---- A5_good: the Architect's 6 correct pages of round 5 (1 debatable false positive on the first run: ux-pop-6 on ReadOnly PrepareDelete, fixed);
+#      the gate's true catches in them stay as planted items (an unhandled SetOrder promise, an icon name that is not in the set)
+A5_good G1 good/g6.js:39 ux-fbk-5      # keydown handler drops the SetOrder promise
+A5_good G2 good/g2.js:4  design-icon   # Icon "reload" is no icon (the set has "refresh")
+A5_good - good/g3.js:42 ux-pop-6       # ReadOnly on PrepareDelete (only issues a token): the author's statement
+A5_good clean good/g1.js
+A5_good clean good/g3.js
+A5_good clean good/g4.js
+A5_good clean good/g5.css
+A5_good clean good/g1.html
+A5_good clean good/g2.html
+A5_good clean good/g3.html
+A5_good clean good/g4.html
+A5_good clean good/g5.html
+A5_good clean good/g6.html
+
+# ---- F5_lab: FrontendDev round 5 misuse5.js (13 patterns; Q13 is prevented by the framework) and the page built from the docs
+F5_lab Q1  lab/misuse5.js:11  ux-pop-6     # AbortSafe on a write
+F5_lab Q2  lab/misuse5.js:13  ux-pop-6     # a plain AbortController aborts an upload write
+F5_lab Q3  lab/misuse5.js:15  ux-txt-30    # Sw.Net.Message(...).Text
+F5_lab Q4  lab/misuse5.js:18  ux-frm-8     # Locked(true) without finally
+F5_lab Q5  lab/misuse5.js:22  ux-saf-10 runtime  # "Same as billing" by code: not an edit
+F5_lab Q6  lab/misuse5.js:27  ux-lay-1 runtime   # own fixed bar, not registered
+F5_lab Q7  lab/misuse5.js:30  ux-lay-1 runtime   # footer label changed by code
+F5_lab Q8  lab/misuse5.js:32  ux-fbk-2     # awaiting Sw.Work.Current of its own button
+F5_lab Q9  lab/misuse5.js:34  ux-fbk-4     # job.Remove() right after Run
+F5_lab Q10 lab/misuse5.js:37  ux-fbk-7     # latest wins with Sw.Cancel.Controller and a Send not marked read
+F5_lab Q11 lab/misuse5.js:41  ux-pop-9 runtime   # option typos (the option checks warn at run time)
+F5_lab Q12 lab/misuse5.js:44  ux-txt-30    # Message arguments swapped
+F5_lab F10 lab/contacts.js:26 design-icon  # Icon "add" is no icon
+
+# ---- H4_holdout: the round 5 held-out set (41 mistakes, 27 in claimed families, written by a fresh sub-agent from the guide and the READMEs only;
+#      h4/manifest.txt is its own list); round 4 gate 24 of 41 (59 %); first run of the round 5 gate, before tuning to it, 32 of 41 (78 %; claimed 22 of 27),
+#      0 false positives (the design-icon findings in good2.js / invoices.js are real: "delete" / "add" are no icons)
+H4_holdout 01 h4/invoice-api.js:9    ux-sec-1   # token to local storage via a helper
+H4_holdout 02 h4/invoice-api.js:31   ux-sec-1   # token in a url query
+H4_holdout 03 h4/invoice-api.js:35   ux-sec-1   # passphrase logged through JSON.stringify
+H4_holdout 04 h4/invoice-api.js:39   ux-txt-20  # money by toFixed + currency
+H4_holdout 05 h4/invoice-api.js:43   ux-txt-20  # date from getDate / getMonth
+H4_holdout 06 h4/invoice-api.js:19-20 ux-fbk-5  # catch returns []
+H4_holdout 07 h4/invoice-detail.js:11 ux-txt-20 # KB by hand
+H4_holdout 08 h4/invoice-detail.js:39 ux-saf-1  # dialog Delete deletes at once (InvoiceApi.remove)
+H4_holdout 09 h4/invoice-detail.js:49 ux-pop-9  # window.confirm
+H4_holdout 10 h4/invoice-detail.js:63 ux-pop-9|design-confirm  # Yes / No buttons
+H4_holdout 11 h4/invoice-detail.js:59 ux-sec-1  # passphrase shown as status text
+H4_holdout 12 h4/invoices.js:113     ux-sec-2   # innerHTML with data
+H4_holdout 13 h4/invoices.js:122     ux-txt-6   # concatenated sentence
+H4_holdout 14 h4/invoices.js:46      tr-untranslated  # untranslated toast
+H4_holdout 15 h4/invoices.js:84      ux-inp-1   # pointerdown acts
+H4_holdout 16 h4/invoices.js:118     ux-inp-6   # dblclick only
+H4_holdout 17 h4/invoices.js:82      ux-fbk-5   # reload().catch(() => {}) in a listener
+H4_holdout 18 h4/invoices.js:148-151 ux-saf-2|design-confirm  # destructive Confirm without Danger
+H4_holdout 19 h4/invoices.js:21      ux-foc-2   # focus to the danger button on load
+H4_holdout 20 h4/invoices.js:102;h4/invoices.js:111 ux-fbk-6  # list rendered by hand (render) without an empty state
+H4_holdout 21 h4/invoices.js:88      ux-inp-23  # single key "n"
+H4_holdout 22 h4/invoices.js:40      ux-inp-12  # SetDisabled(true) without a reason
+H4_holdout 23 h4/invoices.js:38      ux-fbk-2   # OnClick calls a request helper, returns nothing
+H4_holdout 24 h4/invoices.css:12     ux-mot-2   # 200ms ease-out
+H4_holdout 25 h4/invoices.css:34     ux-mot-4   # transition of height
+H4_holdout 26 h4/invoices.css:31     ux-inp-30  # user-select: none on the amount
+H4_holdout 27 h4/invoices.html:25    ux-foc-4   # tabindex="2"
+H4_holdout 28 h4/invoices.html:20    ux-acc-3   # h3 after h1
+H4_holdout 29 h4/invoices.html:30    ux-acc-4   # status line without a live region
+H4_holdout 30 h4/invoice-detail.js:20-23 ux-frm-2  # required by Validate, not marked
+H4_holdout 31 h4/invoices.js:116     ux-acc-2 runtime  # overdue by a class whose css is colour only
+H4_holdout 32 h4/invoice-detail.js:44 ux-acc-7  # dialog closes itself after 120 s
+H4_holdout 33 h4/invoices.js:105     ux-txt-30  # "Error"
+H4_holdout 34 h4/invoices.js:20      ux-pop-11  # dialog on load
+H4_holdout 35 h4/invoices.html:34    ux-frm-6   # e-mail type="text"
+H4_holdout 36 h4/invoices.js:135     ux-saf-6   # "can't be undone" on archive
+H4_holdout 37 h4/invoices.html:22    ux-frm-1   # placeholder only
+H4_holdout 38 h4/invoices.css:33     ux-txt-15  # words in css content
+H4_holdout 39 h4/invoices.html:5     ux-inp-25  # zoom lock
+H4_holdout 40 h4/invoices.html:7     external-resource  # web font
+H4_holdout 41 h4/invoices.css:20     ux-txt-17  # nowrap + hidden, no ellipsis
+H4_holdout G1 h4/good/good2.js:17    design-icon  # Icon "delete" is no icon (the gate's catch in a "correct" file)
+H4_holdout clean h4/good/good1.js
+H4_holdout clean h4/good/good3.js
+H4_holdout clean h4/good/good4.js
+H4_holdout clean h4/good/good5.html
+H4_holdout clean h4/good/good6.css

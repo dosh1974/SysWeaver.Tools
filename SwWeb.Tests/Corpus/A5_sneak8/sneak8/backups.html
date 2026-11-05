@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Backups</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="bklib.js"></script>
+    <script defer src="backups.js"></script>
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="backups.css">
+</head>
+<body class="sw-root">
+    <main class="sw-page-form" id="bkMain">
+        <h1 class="bk-title">Backups</h1>
+        <section class="sw-card bk-card">
+            <h4 class="bk-sub">Notifications</h4>
+            <label for="bkMail">Notification e-mail</label>
+            <input type="text" id="bkMail" name="mail">
+            <label for="bkFilter">Filter</label>
+            <input type="search" id="bkFilter" tabindex="2">
+            <p>Read the <span class="bk-link" onclick="Bk.OpenHelp()">backup guide</span> before you restore.</p>
+        </section>
+        <section class="sw-card bk-card" id="bkListCard">
+            <table class="bk-table">
+                <thead><tr><th>Id</th><th>Name</th><th>Size</th><th>Cost</th><th>State</th><th></th></tr></thead>
+                <tbody id="bkRows"></tbody>
+            </table>
+        </section>
+        <div class="bk-panel" id="bkPanel"></div>
+    </main>
+</body>
+</html>

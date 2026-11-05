@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Service status</title>
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="g5.css">
+</head>
+<body class="sw-root">
+    <main class="sw-page-read">
+        <header class="sw-ph">
+            <div class="sw-ph-text">
+                <div class="sw-ph-titlerow"><h1 class="sw-ph-title">Service status</h1></div>
+                <p class="sw-ph-desc">What runs on this server and how to reach it</p>
+            </div>
+        </header>
+        <section class="sw-card">
+            <div class="sw-card-head"><h2 class="sw-card-title">Services</h2></div>
+            <div class="sw-card-body">
+                <ul class="st-list">
+                    <li class="st-item"><span class="st-state st-ok"><span class="st-dot" aria-hidden="true"></span>Running</span> <a class="st-link" href="../explore/table.html?q=Api/debug/ApiTable">Api list</a></li>
+                    <li class="st-item"><span class="st-state st-warn"><span class="st-dot" aria-hidden="true"></span>Degraded</span> <a class="st-link" href="../app/Home.html">Mail</a></li>
+                </ul>
+            </div>
+        </section>
+        <section class="sw-card">
+            <div class="sw-card-head"><h2 class="sw-card-title">Contact</h2></div>
+            <div class="sw-card-body sw-selectable">
+                <p>Write to the operations team when a service stays degraded for more than an hour.</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

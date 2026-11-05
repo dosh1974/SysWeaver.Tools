@@ -1,0 +1,43 @@
+P1 h2/fleet.js 13 UX-SEC-1 refresh token written to the console through the helper alias U.trace (console.info in fleetUtil.js 51)
+P2 h2/fleet.js 43 UX-SEC-1 api key stored in localStorage
+P3 h2/fleetUtil.js 48 UX-SEC-1 api key stored in a cookie (document.cookie in helper rememberKey)
+P4 h2/fleet.js 52 UX-SEC-1 enrollment token shown in a toast
+P5 h2/fleet.js 187 UX-SEC-1 session id put in a url query string (window.open ...?sid=)
+P6 h2/fleet.js 88 UX-SEC-2 device name/owner from the server inserted as raw html (innerHTML of html built in helper rowHtml, fleetUtil.js 34-37)
+P7 h2/fleet.js 162 UX-SEC-2 device notes from the server assigned to innerHTML
+P8 h2/fleet.js 155 UX-SEC-2 message author/text inserted with insertAdjacentHTML from a template string
+P9 h2/fleetUtil.js 10 UX-TXT-20 size formatted by hand (bytes / MB).toFixed(1) + " MB"
+P10 h2/fleetUtil.js 21 UX-TXT-20 time formatted by hand getHours() + ":" + getMinutes()
+P11 h2/fleetUtil.js 25 UX-TXT-20 percentage formatted by hand in a template string Math.round(level * 100)%
+P12 h2/fleetUtil.js 29 UX-TXT-6 count + translated noun concatenated, plural by adding "s"
+P13 h2/fleet.js 96 UX-TXT-6 _TF("Last seen") + " " + value concatenation instead of a placeholder sentence
+P14 h2/fleet.js 100 UX-TXT-20 date formatted with toLocaleDateString("en-GB")
+P15 h2/fleet.js 163 UX-TXT-20 temperature formatted with Intl.NumberFormat
+P16 h2/fleet.js 110 UX-INP-7 row selection on mousedown (press), no click equivalent
+P17 h2/fleet.js 111 UX-INP-6 double click is the only way to open the device details
+P18 h2/fleet.js 112 UX-INP-8 request (preview load) on pointerenter hover
+P19 h2/fleet.js 141 UX-INP-8 group menu/info opened on mouseover hover (onmouseover property)
+P20 h2/fleet.js 140 UX-INP-20 drag-and-drop is the only way to move a device to another group
+P21 h2/fleet.js 142 UX-INP-1 group filter on pointerup without a click handler
+P22 h2/fleet.js 92 UX-INP-2 onclick on a non-control span navigates without checking modifier keys
+P23 h2/fleet.js 36 UX-FBK-5 "Saved" toast after an auto-saving toggle (shown regardless, duplicates the control's own feedback)
+P24 h2/fleet.js 81 UX-FBK-5 setInterval callback starts Sw.Net.Get without any failure handling
+P25 h2/fleet.js 119 UX-FBK-5 fire-and-forget Sw.Net.Send in an addEventListener click handler
+P26 h2/fleet.js 152 UX-FBK-5 catch block only does console.error, the user sees an empty list
+P27 h2/fleet.js 178 UX-FBK-5 result of Rename (false = refused) ignored, name updated anyway
+P28 h2/fleet.js 203 UX-FBK-5 .catch(() => {}) swallows the SetGroup failure
+P29 h2/fleet.js 216 UX-FBK-5 empty catch block
+P30 h2/fleet.js 225 UX-FBK-5 .catch(console.error) on a request
+P31 h2/fleet.js 20 UX-TXT-1 literal Text and Title on a Sw.Button
+P32 h2/fleet.js 73 UX-TXT-1 literal text passed to Sw.Fail
+P33 h2/fleet.js 169 UX-TXT-1 Error thrown with a literal message that Sw.Fail(e) shows to the user
+P34 h2/fleet.js 192 UX-TXT-1 literal title, text and ok text in Sw.Dialog.Confirm
+ok h2/fleetUtil.js 15 size formatted with Sw.Format.Bytes
+ok h2/fleetUtil.js 42 server text put in with textContent
+ok h2/fleet.js 32 Sw.TextBox Draft on a non-secret notes field
+ok h2/fleet.js 115 pointerdown only starts a drag; the Move up button (line 116) is the click fallback
+ok h2/fleet.js 116 Move up button OnClick returns the request
+ok h2/fleet.js 124 click handler on a non-control starts with Sw.BadClick(ev)
+ok h2/fleet.js 173 catch shows Sw.Fail(e)
+ok h2/fleet.js 183 pingAll (OnClick) returns the Sw.Net.Send request
+ok h2/fleet.js 195 _T("Retired {0} devices", n, "ctx") with a placeholder

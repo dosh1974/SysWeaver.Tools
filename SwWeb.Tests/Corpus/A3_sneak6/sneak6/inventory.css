@@ -1,0 +1,51 @@
+.inv-panel {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 300ms ease;
+}
+
+.inv-panel.open {
+    max-height: 40rem;
+}
+
+.inv-item.is-new::after {
+    content: "New";
+    margin-inline-start: 0.5rem;
+    color: var(--sw-accent);
+}
+
+.inv-tag {
+    display: inline-block;
+    width: 72px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.inv-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sw-ok);
+    animation: inv-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes inv-pulse {
+    from { opacity: 1; }
+    to { opacity: 0.2; }
+}
+
+body.inv-busy {
+    cursor: wait;
+}
+
+.inv-statusline {
+    user-select: none;
+    color: var(--sw-text-2);
+}
+
+@media (hover: hover) {
+    .inv-item:hover {
+        background: var(--sw-hover);
+        transition: background var(--sw-dur-1) var(--sw-ease);
+    }
+}

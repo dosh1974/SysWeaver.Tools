@@ -1,0 +1,8 @@
+.nv-form { display: flex; flex-direction: column; gap: 8px; max-width: 480px; }
+.nv-form input, .nv-form textarea { padding: 6px; border: 1px solid var(--sw-border); border-radius: var(--sw-radius-md); }
+.nv-btn { padding: 6px 12px; border: 1px solid var(--sw-border); border-radius: var(--sw-radius-md); background: var(--sw-surface); color: var(--sw-text); cursor: pointer; }
+.nv-btn:hover { background: var(--sw-hover); }
+.nv-table { border-collapse: collapse; width: 100%; }
+.nv-table tr.nv-row { cursor: pointer; }
+.nv-table tr.nv-row:hover { background: var(--sw-hover); }
+.nv-table .nv-cell { padding: 4px 8px; border-bottom: 1px solid var(--sw-border); }

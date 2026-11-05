@@ -1,0 +1,55 @@
+.st-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--sw-space-2);
+}
+
+.st-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sw-space-3);
+    min-width: 0;
+}
+
+.st-state {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sw-space-1);
+}
+
+.st-dot {
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: var(--sw-radius-pill);
+    background: currentColor;
+}
+
+.st-ok {
+    color: var(--sw-ok);
+}
+
+.st-warn {
+    color: var(--sw-warning);
+}
+
+.st-link {
+    color: var(--sw-link);
+    min-block-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    transition: color var(--sw-dur-1) var(--sw-ease);
+}
+
+@media (hover: hover) {
+    .st-link:hover {
+        color: var(--sw-link-hover);
+    }
+}
+
+.st-link:focus-visible {
+    outline: 2px solid var(--sw-focus);
+    outline-offset: 2px;
+}

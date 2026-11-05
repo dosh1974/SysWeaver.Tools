@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Carrier overview</title>
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="h6.css">
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+</head>
+<body class="sw-root" data-translation_context="Carrier overview page of a shipping app">
+    <main class="car-main">
+        <h1 tabindex="-1">Carriers</h1>
+        <section class="car-grid" aria-label="Carriers we ship with">
+            <a class="car-card" href="carrier.html?c=dhl" title="Open the bookings and prices of DHL">
+                <img class="car-logo" src="../brand/dhl.svg" width="96" height="32" alt="" data-sw-fade>
+                <span class="car-name" translate="no">DHL</span>
+                <span class="car-note sw-selectable" title="Pick-up every weekday at 15:00">Pick-up every weekday at 15:00</span>
+            </a>
+            <a class="car-card" href="carrier.html?c=ups" title="Open the bookings and prices of UPS">
+                <img class="car-logo" src="../brand/ups.svg" width="96" height="32" alt="" data-sw-fade>
+                <span class="car-name" translate="no">UPS</span>
+                <span class="car-note sw-selectable" title="Pick-up on request">Pick-up on request</span>
+            </a>
+        </section>
+        <p class="car-foot sw-selectable" role="status"></p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+@media (min-width: 800px) { .sx-a:hover { color: var(--sw-text-2); } }
+.sx-b { cursor: progress; }
+body.sx-busy { cursor: progress; }
+.sx-c { transition: all var(--sw-dur-1); }
+.sx-d { transition: max-height var(--sw-dur-2); }
+.sx-e { animation-duration: calc(var(--sw-dur-1) * 3); transition-delay: 1s; }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Inventory</title>
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="invlib.js"></script>
+    <script defer src="inventory.js"></script>
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="inventory.css">
+</head>
+<body class="sw-root" data-translation_context="Inventory page of the warehouse app">
+    <h1 class="inv-title">Inventory</h1>
+    <div id="inv-root"></div>
+    <aside class="inv-side">
+        <iframe class="inv-preview" src="../app/Home.html" title="Preview of the selected item"></iframe>
+        <span class="inv-help" onclick="InvHelp()">Help</span>
+    </aside>
+</body>
+</html>

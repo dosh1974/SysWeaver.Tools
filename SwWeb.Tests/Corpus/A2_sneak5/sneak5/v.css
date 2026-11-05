@@ -1,0 +1,5 @@
+.v-a:is(:hover, :focus-within) { color: var(--sw-text-2); }
+.v-b { transition: padding var(--sw-dur-2); }
+@keyframes v-grow { from { flex-basis: 0; } to { flex-basis: 100%; } }
+.sw-page.v-loading { cursor: progress; }
+.sw-btn[aria-busy="true"] .sw-btn-text { visibility: hidden; }

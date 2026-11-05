@@ -1,0 +1,61 @@
+/* sneak7/shipments.css - shipments page */
+
+.ship-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sw-gap-2, 8px);
+}
+
+.ship-carrier-logo {
+    display: block;
+}
+
+.ship-ico {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.ship-row {
+    cursor: pointer;
+}
+
+.ship-row:focus {
+    outline: none;
+}
+
+.ship-card:hover {
+    background: var(--sw-hover);
+}
+
+.ship-table-wrap {
+    min-width: 1280px;
+}
+
+.ship-flash {
+    opacity: 1;
+    transition: opacity var(--sw-dur-2) var(--sw-ease);
+}
+
+.ship-flash.ship-gone {
+    opacity: 0;
+}
+
+@keyframes ship-blink {
+    50% { opacity: 0.2; }
+}
+
+.ship-late {
+    animation: ship-blink var(--sw-dur-3) var(--sw-ease) infinite;
+}
+
+.ship-addr {
+    display: block;
+    max-width: 14rem;
+    white-space: nowrap;
+    overflow: hidden;
+}

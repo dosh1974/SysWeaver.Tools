@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Invoices</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="invoices.css">
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="invoice-api.js"></script>
+    <script defer src="invoice-detail.js"></script>
+    <script defer src="invoices.js"></script>
+</head>
+<body class="sw-root">
+    <main class="sw-page-dash" data-translation_context="Invoices page of a small billing app">
+        <h1 tabindex="-1">Invoices</h1>
+        <h3 class="inv-sub">Open and paid invoices</h3>
+        <div class="inv-toolbar">
+            <input id="inv-search" type="search" placeholder="Search invoices">
+            <div class="inv-chips" role="group" aria-label="Filter by status">
+                <button class="inv-chip" data-status="open" aria-pressed="false" data-translation_context="Filter button: show only open invoices">Open</button>
+                <button class="inv-chip" data-status="overdue" aria-pressed="false" tabindex="2" data-translation_context="Filter button: show only overdue invoices">Overdue</button>
+                <button class="inv-chip" data-status="paid" aria-pressed="false" data-translation_context="Filter button: show only paid invoices">Paid</button>
+            </div>
+        </div>
+        <ul id="inv-rows" class="inv-rows" aria-label="Invoices"></ul>
+        <div id="inv-status" class="inv-status sw-selectable"></div>
+        <section class="inv-settings" aria-labelledby="inv-settings-title">
+            <h2 id="inv-settings-title">Billing settings</h2>
+            <label for="inv-mail" data-translation_context="Label of the field for the e-mail address that receives copies of the invoices">Billing e-mail</label>
+            <input id="inv-mail" type="text" name="mail">
+            <div id="inv-token-host"></div>
+        </section>
+    </main>
+</body>
+</html>

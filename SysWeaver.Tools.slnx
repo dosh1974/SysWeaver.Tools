@@ -154,6 +154,8 @@
   <Project Path="SvgOpt/SvgOpt.csproj" />
   <Project Path="SwCurl/SwCurl.csproj" />
   <Project Path="SwSyncTool/SwSyncTool.csproj" />
+  <Project Path="SwWeb.Tests/SwWeb.Tests.csproj" />
+  <Project Path="SwWeb/SwWeb.csproj" />
   <Project Path="Touch/Touch.csproj" />
   <Project Path="VsClean/VsClean.csproj" />
 </Solution>

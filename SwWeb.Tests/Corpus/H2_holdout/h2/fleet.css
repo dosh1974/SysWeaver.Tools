@@ -1,0 +1,48 @@
+/* h2/fleet.css - device fleet page */
+
+.fleet-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--sw-space-2, 0.5rem);
+}
+
+.fleet-row {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr auto auto;
+    align-items: center;
+    gap: var(--sw-space-2, 0.5rem);
+    padding: var(--sw-space-2, 0.5rem);
+    border: 1px solid var(--sw-border);
+    border-radius: var(--sw-radius-md);
+    background: var(--sw-surface);
+}
+
+.fleet-row.selected {
+    border-color: var(--sw-accent);
+}
+
+.fleet-handle {
+    cursor: grab;
+    color: var(--sw-text-muted);
+}
+
+.fleet-groups li {
+    padding: var(--sw-space-1, 0.25rem) var(--sw-space-2, 0.5rem);
+    border-radius: var(--sw-radius-sm);
+}
+
+.fleet-groups li.drop-target {
+    outline: 2px dashed var(--sw-accent);
+}
+
+.fleet-messages {
+    max-height: 16rem;
+    overflow: auto;
+}
+
+.fleet-preview {
+    min-height: 6rem;
+    color: var(--sw-text-muted);
+}

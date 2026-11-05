@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Invoice overview</title>
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="good6.css">
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="good4.js"></script>
+</head>
+<body class="sw-root">
+    <main id="ov-main" class="sw-page-dash" data-translation_context="Invoice overview page of a small billing app">
+        <h1 tabindex="-1">Invoice overview</h1>
+        <section class="ov-find" aria-labelledby="ov-find-title">
+            <h2 id="ov-find-title">Find an invoice</h2>
+            <label for="ov-search" data-translation_context="Label of the search field that filters the invoice list">Search</label>
+            <input id="ov-search" type="search" autocomplete="off" spellcheck="false" placeholder="ex: 2026-0042">
+            <p id="ov-status" class="ov-status sw-selectable" role="status"></p>
+        </section>
+    </main>
+</body>
+</html>

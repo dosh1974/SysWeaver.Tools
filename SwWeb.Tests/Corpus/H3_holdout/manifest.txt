@@ -1,0 +1,42 @@
+H3 01 h3/returns.html:5 UX-INP-25 new # viewport meta locks zoom (maximum-scale=1)
+H3 02 h3/returns.html:37 UX-FOC-4 new # positive tabindex="2" on the search box
+H3 03 h3/returns.html:32 UX-ACC-3 new # card title is a second h1 on the page
+H3 04 h3/returns.css:35 UX-MOT-2 new # hard-coded transition duration and easing (180ms ease-out)
+H3 05 h3/returns.css:58 UX-TXT-15 new # user visible word "New" in CSS content
+H3 06 h3/returns.css:95 UX-MOT-4 new # progress bar animates width
+H3 07 h3/returns.css:99;h3/returns.js:80 UX-INP-10 new # cursor: wait on the whole page while loading
+H3 08 h3/returns-api.js:52;h3/returns.js:224 UX-SEC-1 claimed # carrier API key stored in local storage through a helper
+H3 09 h3/returns-api.js:46;h3/returns.js:233 UX-SEC-1 claimed # carrier token put in the url query of the label request
+H3 10 h3/returns-api.js:17;h3/returns.js:155 UX-TXT-20 claimed # date formatted by hand (dd.mm.yyyy) in a helper
+H3 11 h3/returns-api.js:22;h3/returns.js:156 UX-TXT-20 claimed # refund amount formatted by hand (toFixed + currency) in a helper
+H3 12 h3/returns-api.js:40-41;h3/returns.js:242 UX-FBK-5 claimed # MarkReceived swallows the failure as false; caller ignores it and shows "Received"
+H3 13 h3/returns.js:27 UX-INP-4 new # browser context menu blocked on the whole list
+H3 14 h3/returns.js:285-289;h3/returns.js:28 UX-INP-23 new # single-key shortcut "a" fires while typing in the search box
+H3 15 h3/returns.js:30 UX-FBK-5 claimed # Reasons request .then without rejection handling, promise dropped
+H3 16 h3/returns.js:31 UX-FBK-5 claimed # periodic counts request failure swallowed by .catch(() => { })
+H3 17 h3/returns.js:49 UX-FBK-2 new # Export OnClick starts work but returns no promise
+H3 18 h3/returns.js:90 UX-TXT-30 new # error state text is the raw "status - statusText"
+H3 19 h3/returns.js:114 UX-TXT-6 claimed # plural made by appending "s" to a translated text
+H3 20 h3/returns.js:151 UX-ACC-2 new # late / on time shown only by the colour of a dot
+H3 21 h3/returns.js:160 UX-TIP-7 new # "Double-click to open the details" repeated on every row
+H3 22 h3/returns.js:162 UX-TXT-1 claimed # untranslated aria-label "Inspection progress"
+H3 23 h3/returns.js:170 UX-INP-1 claimed # Receive acts on pointerdown instead of click
+H3 24 h3/returns.js:177 UX-FBK-5 claimed # restock change listener fires SetRestock and drops the promise
+H3 25 h3/returns.js:188 UX-INP-8 claimed # hovering the menu button opens the menu (mouseenter)
+H3 26 h3/returns.js:190-194 UX-INP-6 claimed # details open only by double click (no click, key or menu path)
+H3 27 h3/returns.js:234 UX-TXT-1 claimed # untranslated toast text
+H3 28 h3/returns.js:262-263 UX-POP-9 new # confirmation buttons "No" / "Yes" instead of verbs
+H3 29 h3/returns.js:268 UX-FBK-5 claimed # Promise.allSettled of approvals; rejections never reported
+H3 30 h3/returns.js:280 UX-LAY-5 new # live new returns inserted at the top of the list the user reads
+H3 31 h3/returns.js:282 UX-TXT-6 claimed # announcement sentence concatenated from translated fragments and data
+H3 32 h3/returns-detail.js:29-31;h3/returns-detail.js:42 UX-FBK-5 claimed # claim request failure only logged to the console
+H3 33 h3/returns-detail.js:55 UX-SEC-2 claimed # customer message inserted as raw innerHTML
+H3 34 h3/returns-detail.js:63-65 UX-FRM-3 new # field error set while typing (OnInput)
+H3 35 h3/returns-detail.js:83;h3/returns-detail.js:96-97 UX-SAF-1 new # Remove deletes the return without a confirmation
+H3 36 h3/returns-detail.js:103 UX-TXT-1 claimed # untranslated error thrown in a button handler (shown to the user)
+H3 clean h3/good/archive-undo.js
+H3 clean h3/good/remove-carrier.js
+H3 clean h3/good/carrier-form.js
+H3 clean h3/good/late-returns.js
+H3 clean h3/good/reprint-label.js
+H3 clean h3/good/overview.js

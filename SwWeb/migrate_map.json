@@ -1,0 +1,693 @@
+// SwWeb migrate: default mapping of the legacy front end globals (old common/common.js, app/application.js) to the new Sw API.
+// Built from the old common.js / application.js globals and their Sw counterparts (core/README.md, ui/README.md and PORTING.md part A in SysWeaver.HttpServer/srcWeb). See the SwWeb README ("migrate", "Mapping file").
+//
+// Entry forms (in "Globals", and in "Members" of an object entry):
+//   "old": "Sw.New.Path"                                 Rename (same arguments and semantics), every use as a global.
+//   "old": { "New": "...", "MaxArgs": 2, "Note": "" }      Rename calls with at most MaxArgs arguments, report the others.
+//   "old": { "New": "...", "Positional": 1, "Options": ["A", "B"] }  old(x, y, z) -> New(x, { A: y, B: z }); more arguments are reported.
+//   "old": { "Kind": "Property", "New": "..." }            old() (no arguments) becomes the property New; other uses are reported.
+//   "old": { "Kind": "Report", "Suggest": "...", "Note": "" } Never rewritten, every use is reported with the suggestion.
+//   "old": { "Kind": "Ignore" }                            Not a legacy name (no rewrite, no report).
+//   "old": { "Members": { "member": <entry> }, "New": "..." } An object: "old.member" is mapped per member; unmapped members use New + ".member"
+//                                                          when New is set, else they are reported. A bare "old" uses New (or is reported).
+//   "Shell": true marks a shell feature (a page using it loads sw/shell.js + sw/shell.css).
+// "Css": selector hooks in .css files and <style> elements: ".OldClass" / "OldElement" -> new selector text. Rewritten only with "Safe": true.
+// "Library": "<file>" on a section: its names are legacy aliases that this library still provides; uses that can't be renamed are reported
+//   but don't need sw/compat.js. Only pure renames (same object / function) are "New" strings, wrappers with other arguments are "Report".
+// "Tokens": css custom properties (design tokens): "--old": { "New": "--new", "Safe": true } renames every var(--old) use (css, style
+//   attributes, JavaScript strings) because --old is an alias of --new (identical value); entries without "Safe" are reported by the Design v2
+//   rules (check --design, migrate --level design) with "New" as the suggestion. Definitions (--old: value) are never rewritten.
+//   An option named "-" in "Options" drops that argument (the new API ignores it; only simple arguments such as literals are dropped).
+// Sections can be added / extended by a --map file (same format; entries with the same name replace the default ones).
+{
+  "Sections": {
+    "core": {
+      "Description": "Old common.js names with a UI-less counterpart in sw/core.js (core/README.md).",
+      "Globals": {
+        "hackerThemeAnimate": "Sw.Theme.Animations.hacker",
+        "GetServerTime": "Sw.Session.ServerTime",
+        "GetServerTick": "Sw.Session.ServerTick",
+        "SessionManager": {
+          "Members": {
+            "AddMessageHandler": "Sw.Session.Subscribe",
+            "RemoveMessageHandler": "Sw.Session.Unsubscribe",
+            "AddServerEvent": "Sw.Session.AddEvent",
+            "RemoveServerEvent": "Sw.Session.RemoveEvent",
+            "IsMaster": "Sw.Session.IsMaster",
+            "ServerEvents": { "Kind": "Report", "Suggest": "Sw.Session.Events()", "Note": "returns the names (array), not the Map" },
+            "Init": { "Kind": "Report", "Suggest": "(remove the call)", "Note": "Sw.Init runs the session automatically" },
+            "Create": { "Kind": "Report", "Suggest": "(remove the call)", "Note": "Sw.Init runs the session automatically" },
+            "Url": { "Kind": "Report", "Suggest": "Sw.Url.Root + \"Api/application/GetMessages\"" },
+            "Current": { "Kind": "Report", "Suggest": "Sw.Url.Script" }
+          }
+        },
+        "SysWeaverIgnoreUserChanges": "Sw.Session.IgnoreUserChanges",
+        "SysWeaverInit": "Sw.Init",
+        "InterOp": {
+          "Members": {
+            "Id": "Sw.InterOp.Id",
+            "Post": "Sw.InterOp.Post",
+            "AddListener": "Sw.InterOp.AddListener",
+            "RemoveListener": "Sw.InterOp.RemoveListener",
+            "GetMessage": "Sw.InterOp.GetMessage"
+          }
+        },
+        "InterOpBroadcast": { "Kind": "Report", "Suggest": "Sw.InterOp", "Note": "internal transport, no counterpart" },
+        "InterOpWindows": { "Kind": "Report", "Suggest": "Sw.InterOp", "Note": "internal transport, no counterpart" },
+        "PostParent": "Sw.Frame.PostParent",
+        "PostTop": "Sw.Frame.PostTop",
+        "PostAll": "Sw.Frame.PostAll",
+        "PageLoaded": "Sw.Page.SignalLoaded",
+        "Open": { "New": "Sw.Page.Navigate", "MaxArgs": 2, "Note": "Sw.Page.Navigate defaults to the same tab (\"_self\"), the old Open to a new tab: Open(url) becomes Sw.Page.Navigate(url, \"_blank\")" },
+        "ReloadAll": "Sw.Page.Reload",
+        "EditUrl": { "New": "Sw.Page.Edit", "Note": "urls are now resolved against Sw.Url.Root" },
+        "ViewUrl": { "New": "Sw.Page.View", "Note": "urls are now resolved against Sw.Url.Root" },
+        "EditOrOpenUrl": { "New": "Sw.Page.EditOrOpen", "Note": "urls are now resolved against Sw.Url.Root" },
+        "getUrlParams": "Sw.Url.Params",
+        "getNumberParam": { "Kind": "Report", "Suggest": "Sw.Url.GetNumber(name, def)", "Note": "signature differs: reads the current url, no params argument; null instead of NaN" },
+        "getIntParam": { "Kind": "Report", "Suggest": "Sw.Url.GetInt(name, def)", "Note": "signature differs: reads the current url, no params argument; null instead of NaN" },
+        "IsAbsolutePath": "Sw.Url.IsAbsolute",
+        "IsSameOrigin": "Sw.Url.IsSameOrigin",
+        "GetAbsolutePath": "Sw.Url.Absolute",
+        "GetFunction": { "New": "Sw.Util.Resolve", "Note": "returns undefined instead of throwing for a missing intermediate" },
+        "isMobile": { "Kind": "Property", "New": "Sw.Platform.IsMobileDevice" },
+        "getPlatform": { "Kind": "Property", "New": "Sw.Platform.Name" },
+        "getMobileParams": "Sw.Platform.MobileParams",
+        "getDevicePosition": "Sw.Platform.GetPosition",
+        "delay": "Sw.Util.Delay",
+        "delayOneFrame": "Sw.Util.DelayFrame",
+        "delayWithAbort": "Sw.Util.DelayAbort",
+        "AbortHandler": "Sw.Util.AbortHandler",
+        "waitEvent": { "New": "Sw.Util.WaitEvent", "Args": "$0, $1, $3, $2", "Suggest": "Sw.Util.WaitEvent(target, name, timeout, fn)", "Note": "argument order differs (timeout before fn)" },
+        "waitEvent2": { "New": "Sw.Util.WaitEvent", "Args": "$0, [$1, $2], $4, $3", "Suggest": "Sw.Util.WaitEvent(target, [name1, name2], timeout, fn)", "Note": "names as an array, timeout before fn" },
+        "waitFor": { "Kind": "Report", "Suggest": "new Promise(r => fn(r))" },
+        "Animator": {
+          "Members": {
+            "Add": "Sw.Util.Animator.Add",
+            "Remove": "Sw.Util.Animator.Remove",
+            "Functions": "Sw.Util.Animator.Functions",
+            "HaveAnimation": "Sw.Util.Animator.Running"
+          }
+        },
+        "CryptRandomInt32": "Sw.Util.RandomInt32",
+        "CryptRandomGuid": "Sw.Util.RandomGuid",
+        "RemoveNulls": { "New": "Sw.Util.RemoveNulls", "Note": "returns false instead of undefined for arrays" },
+        "Base64EncodeString": "Sw.Util.Base64EncodeString",
+        "Base64DecodeString": "Sw.Util.Base64DecodeString",
+        "MakeUriSafeBase64": "Sw.Util.Base64UrlSafe",
+        "Uint8ArrayToBase64": "Sw.Util.Base64Encode",
+        "base64ToArray": "Sw.Util.Base64Decode",
+        "bufferToHex": "Sw.Util.ToHex",
+        "bufferToBase64": "Sw.Util.ToBase64Async",
+        "hashData": { "Kind": "Report", "Suggest": "Sw.Util.Sha256(data)", "Note": "returns a Uint8Array (old: ArrayBuffer or Uint8Array)" },
+        "hashString": "Sw.Util.HashString",
+        "hashDataSha1": { "Kind": "Report", "Suggest": "Sw.Util.Sha1(data)", "Note": "returns a Uint8Array (old: ArrayBuffer)" },
+        "hashStringSha1": "Sw.Util.Sha1B64",
+        "legacySha256": { "Kind": "Report", "Suggest": "Sw.Util.Sha256(data)", "Note": "internal, not exposed" },
+        "concatArrays": "Sw.Util.ConcatBytes",
+        "ConcatUint8Arrays": "Sw.Util.ConcatBytes",
+        "ReadAllData": "Sw.Util.ReadAll",
+        "DeflateCompress": "Sw.Util.Deflate",
+        "ToTypedJson": "Sw.Net.ToTypedJson",
+        "sendRequest": { "New": "Sw.Net.Send", "Positional": 2, "Options": [ "Reload", "ErrHandler", "Blob", "Setup", "Post" ], "Suggest": "Sw.Net.Send(url, data, { Reload, ErrHandler, Blob, Setup, Post })", "Note": "the optional arguments are an options object" },
+        "getRequest": { "New": "Sw.Net.Get", "Positional": 1, "Options": [ "Reload", "Blob", "Setup", "Read" ], "Suggest": "Sw.Net.Get(url, { Reload, Blob, Setup, Read })", "Note": "returnFn -> Read; the no-op maxRetryCount (6th argument) is reported" },
+        "postData": "Sw.Net.Beacon",
+        "downloadFile": { "Kind": "Report", "Suggest": "Sw.Net.Download(url, filename)", "Note": "argument order swapped" },
+        "downloadText": "Sw.Net.DownloadText",
+        "FlushCache": "Sw.Net.FlushCache",
+        "FlushCacheSync": { "Kind": "Report", "Suggest": "Sw.Net.FlushCache(url).then(whenDone)" },
+        "includeJs": "Sw.Net.IncludeJs",
+        "includeCss": "Sw.Net.IncludeCss",
+        "Cache": {
+          "Members": {
+            "Get": "Sw.Net.Cached",
+            "GetRequest": "Sw.Net.CachedGet",
+            "SendRequest": "Sw.Net.CachedSend"
+          }
+        },
+        "GetHistoryState": "Sw.History.Get",
+        "SetHistoryState": "Sw.History.Set",
+        "UpdateHistoryState": "Sw.History.Update",
+        "ClearHistoryState": "Sw.History.Clear",
+        "ClearOtherHistoryState": "Sw.History.ClearOther",
+        "InternalGetHistoryState": { "Kind": "Report", "Suggest": "Sw.History.Get(key, def)", "Note": "internal" },
+        "ArgAsHtml": "Sw.I18n.ArgAsHtml",
+        "CurrencyFormatOptions": "Sw.Format.CurrencyOptions",
+        "makeHtmlSafe": "Sw.Format.HtmlSafe",
+        "makeHtmlAttributeSafe": "Sw.Format.HtmlAttributeSafe",
+        "isValidEmail": "Sw.Format.IsValidEmail",
+        "isValidPhone": "Sw.Format.IsValidPhone",
+        "isLetter": "Sw.Format.IsLetter",
+        "RankScoreMatch": "Sw.Format.RankScoreMatch",
+        "getFileExtension": "Sw.Format.FileExtension",
+        "imageExtensions": "Sw.Format.Ext.Image",
+        "videoExtensions": "Sw.Format.Ext.Video",
+        "audioExtensions": "Sw.Format.Ext.Audio",
+        "programmingExtensions": "Sw.Format.Ext.Programming",
+        "compressExtensions": "Sw.Format.Ext.Compress",
+        "isImageExt": "Sw.Format.IsImageExt",
+        "isVideoExt": "Sw.Format.IsVideoExt",
+        "isAudioExt": "Sw.Format.IsAudioExt",
+        "isProgrammingExt": "Sw.Format.IsProgrammingExt",
+        "isCompressibleExt": "Sw.Format.IsCompressibleExt",
+        "isImageFile": "Sw.Format.IsImageFile",
+        "isVideoFile": "Sw.Format.IsVideoFile",
+        "AddLoading": { "New": "Sw.Page.Loading", "Positional": 0, "Options": [ "Element", "Text", "Opaque", "Icon" ], "Suggest": "Sw.Page.Loading({ Element: page, Text: text, Opaque: opaque, Icon: useIcon })", "Note": "the arguments are an options object" },
+        "MakeJsObject": { "Kind": "Report", "Suggest": "(none)", "Note": "dead code in the old common.js" },
+        "MakeCsObject": { "Kind": "Report", "Suggest": "(none)", "Note": "dead code in the old common.js" },
+        "UseTheme": "Sw.Theme.Forced",
+        "IsDarkMode": "Sw.Theme.IsDark",
+        "SysWeaverServerTimeOffset": "Sw.Session.TimeOffset",
+        "SysWeaverId": "Sw.InterOp.Id",
+        "IsTop": "Sw.Page.IsTop",
+        "Mobile": "Sw.Layout.Mobile",
+        "Portrait": "Sw.Layout.Portrait",
+        "Narrow": "Sw.Layout.Narrow",
+        "SelfPortrait": "Sw.Layout.SelfPortrait",
+        "SelfNarrow": "Sw.Layout.SelfNarrow",
+        "SwWidth": "Sw.Layout.Width",
+        "SwHeight": "Sw.Layout.Height",
+        "DidInteract": "Sw.Page.DidInteract",
+        "IgnoreUserChanged": "Sw.Session.IsIgnoringUserChanges",
+        "ValueFormat": {
+          "Members": {
+            "stringFormat": "Sw.Format.StringFormat",
+            "stringFormatArgs": "Sw.Format.StringFormatArgs",
+            "FormatMaps": "Sw.I18n.FormatMaps",
+            "toString": "Sw.Format.Number",
+            "toAmount": "Sw.Format.Amount",
+            "formatSuffix": "Sw.Format.Suffix",
+            "formatByteSize": "Sw.Format.Bytes",
+            "formatTimeSpanMs": "Sw.Format.DurationMs",
+            "formatTimeSpan": "Sw.Format.TimeSpan",
+            "getTimeStampTitle": "Sw.Format.TimeStamp",
+            "convertLocalDateToUTCDate": "Sw.Format.LocalToUtc",
+            "convertUTCDateToLocalDate": "Sw.Format.UtcToLocal",
+            "countSuffix": "Sw.Format.CountSuffix",
+            "removeCamelCase": "Sw.Format.RemoveCamelCase",
+            "keyValueSplit": "Sw.Format.KeyValueSplit",
+            "joinNonEmpty": "Sw.Format.JoinNonEmpty",
+            "AddNonNullLine": "Sw.Format.AddNonNullLine",
+            "jsonToHtml": "Sw.Format.JsonToHtml",
+            "isDecimal": { "Kind": "Report", "Suggest": "Sw.Format.DecimalTypes", "Note": "a frozen object instead of a Map" },
+            "Current": { "Kind": "Report", "Suggest": "Sw.Url.Script" },
+            "copyToClipboard": { "Kind": "Report", "Suggest": "Sw.Clipboard.Copy(value, { Toast: false })" },
+            "copyToClipboardInfo": { "Kind": "Report", "Suggest": "Sw.Clipboard.Copy(value, { Generic: generic })" },
+            "readFromClipboard": "Sw.Clipboard.Read",
+            "copyOnClick": { "New": "Sw.Clipboard.CopyOnClick", "Positional": 2, "Options": [ "Keyboard", "AddTitle" ], "Suggest": "Sw.Clipboard.CopyOnClick(el, value, { Keyboard, AddTitle })", "Note": "the optional arguments are an options object; the old class MouseClick is now sw-copyable (css on it: design-legacy-class)" },
+            "isAnythingSelected": { "Kind": "Report", "Suggest": "Sw.HasSelectionIn(el)" },
+            "haveElementSelection": { "New": "Sw.HasSelectionIn", "Note": "now checks the range intersection" },
+            "update": "Sw.Cells.Update",
+            "updateDefault": "Sw.Cells.Default",
+            "updateType": "Sw.Cells.Type",
+            "updateNumber": "Sw.Cells.Number",
+            "updateWebColor": "Sw.Cells.WebColor",
+            "updateUrl": "Sw.Cells.Url",
+            "updateImg": "Sw.Cells.Img",
+            "updateDateTimeLive": "Sw.Cells.DateTimeLive",
+            "updateDateTime": "Sw.Cells.DateTime",
+            "updateTimeSpan": "Sw.Cells.TimeSpan",
+            "updateJson": "Sw.Cells.Json",
+            "updateMarkDown": "Sw.Cells.MarkDown",
+            "updateLongText": "Sw.Cells.LongText",
+            "updateBoolean": "Sw.Cells.Boolean",
+            "updateByteSize": "Sw.Cells.ByteSize",
+            "updateByteSpeed": "Sw.Cells.ByteSpeed",
+            "updateTags": "Sw.Cells.Tags",
+            "updatePerRowFormat": "Sw.Cells.PerRowFormat",
+            "updateToggle": "Sw.Cells.Toggle",
+            "updateActions": "Sw.Cells.Actions",
+            "typeFormatter": "Sw.Cells.TypeFormatters",
+            "formatFormatter": "Sw.Cells.FormatFormatters",
+            "updateFormat": "Sw.Cells.Reset",
+            "updateText": "Sw.Cells.SetText",
+            "updateHtml": { "Kind": "Report", "Suggest": "Sw.Cells.SetNodes(el, signature, buildFn, title, flash)" },
+            "getUrlTarget": "Sw.Cells.UrlTarget",
+            "createLink": { "Kind": "Report", "Suggest": "Sw.Cells.CreateLink(url, text, target, title, isImage, { UseEdit, UseView })", "Note": "useAttr is not supported" },
+            "SetMarkDown": "Sw.Markdown.Set",
+            "MarkDownToHTML": "Sw.Markdown.ToHtml"
+          }
+        }
+      }
+    },
+    "ui": {
+      "Description": "Old common.js UI names with a counterpart in sw/ui.js (ui/README.md).",
+      "Globals": {
+        "isPureClick": "Sw.IsPureEvent",
+        "badClick": "Sw.BadClick",
+        "keyboardClick": { "New": "Sw.KeyClick", "MaxArgs": 1, "Suggest": "Sw.KeyClick(el, onClick)", "Note": "adds the class sw-keyclick (old: KeyClick, css on it: design-legacy-class) and uses listeners instead of el.onkeyup" },
+        "removeKeyboardClick": { "New": "Sw.RemoveKeyClick", "MaxArgs": 1, "Suggest": "Sw.RemoveKeyClick(el)", "Note": "only removes what Sw.KeyClick added (keyboardClick is renamed to Sw.KeyClick)" },
+        "rightClick": { "Kind": "Report", "Suggest": "Sw.LongPress(el, fn)" },
+        "removeRightClick": { "Kind": "Report", "Suggest": "the remover returned by Sw.LongPress" },
+        "isTabable": { "New": "Sw.Focus.IsTabbable", "Note": "also checks visibility / disabled" },
+        "focusNextTab": "Sw.Focus.Next",
+        "focusPrevTab": "Sw.Focus.Prev",
+        "tabToNextOnEnter": "Sw.Focus.NextOnEnter",
+        "BlockTab": "Sw.Focus.Trap",
+        "UnblockTab": "Sw.Focus.Release",
+        "IsAttached": { "Kind": "Report", "Suggest": "el.isConnected" },
+        "isInDocument": { "Kind": "Report", "Suggest": "el.isConnected" },
+        "TrackElement": { "Kind": "Report", "Suggest": "Sw.Track(anchorOrMouseEvent, box, { Margin, Side, Align })" },
+        "GetRgbColor": { "Kind": "Report", "Suggest": "Sw.Color.ParseCss(css)", "Note": "returns [r, g, b, a] instead of a css string" },
+        "fixElementWithSrc": { "New": "Sw.FadeSrc", "Positional": 1, "Options": [ "ShowError", "FadeIn", "FadeDelay", "Channel", "Parent" ], "Suggest": "Sw.FadeSrc(el, { ShowError, FadeIn, FadeDelay, Channel, Parent, UseEvent })" },
+        "cleanElementWithSrc": "Sw.UnfadeSrc",
+        "createElementWithSrc": { "Kind": "Report", "Suggest": "Sw.FadeSrc(document.createElement(tag), { ShowError, FadeIn })" },
+        "createImg": "Sw.CreateImg",
+        "createIFrame": "Sw.CreateIFrame",
+        "SetImageSource": { "New": "Sw.SetImageSource", "Positional": 2, "Options": [ "Fallback", "FlushCache", "OnLoaded", "ReloadOn" ], "Suggest": "Sw.SetImageSource(img, src, { Fallback, FlushCache, OnLoaded, ReloadOn })" },
+        "PendingImages": "Sw.PendingImages",
+        "ColorIcon": { "Kind": "Report", "Suggest": "Sw.IconClass(image, { Size, Color, Title, Class }) or new Sw.Button({ Icon, Title, Kind: \"ghost\", OnClick })" },
+        "ButtonStyle": { "Kind": "Report", "Suggest": "Sw.Button options (Kind, Class, Small)" },
+        "Button": { "Kind": "Report", "Suggest": "new Sw.Button({ Text, Title, Icon, Disabled, OnClick })" },
+        "ProgressBar": { "Kind": "Report", "Suggest": "new Sw.ProgressBar({ Value, Text, Indeterminate, Small })", "Note": "the old TI / TO text elements don't exist" },
+        "Fail": "Sw.Fail",
+        "Info": "Sw.Info",
+        "Message": "Sw.Message",
+        "FullScreen": "Sw.FullScreen",
+        "onLink": "Sw.Cells.OnLink",
+        "fixLinks": { "Kind": "Report", "Suggest": "Sw.Cells.CreateLink for each <a>" },
+        "PopUp": { "Kind": "Report", "Suggest": "Sw.Dialog.Open({ Content: (body, close, tools) => ..., Close, NoEscape, Modal, OnClose })" },
+        "PopUpElement": { "Kind": "Report", "Suggest": "Sw.Popup.Show(anchorOrPoint, content, { Side, Align, Modal, NoEscape, OnClose, Focus: true })" },
+        "PopUpElementMenu": { "Kind": "Report", "Suggest": "Sw.Popup.Show(el, content, { Align, Side })" },
+        "PopUpMenu": { "Kind": "Report", "Suggest": "Sw.Menu.Show(el, items, { Align, Side })", "Note": "convert the WebMenu items to Sw.Menu items (server menus: Sw.Shell.ToMenuItems in sw/shell.js)" },
+        "PopUpWorking": { "Kind": "Report", "Suggest": "Sw.Dialog.Working({ Title, Text, Icon })", "Note": "returns the close function synchronously" },
+        "PopUpSelection": { "Kind": "Report", "Suggest": "Sw.Dialog.Select({ Title, Tip, Placeholder, Items, StartText, GetAll })" },
+        "SearchablePoupSelection": "Sw.SearchSelection",
+        "Confirm": { "New": "Sw.Dialog.Confirm", "Positional": 3, "Options": [ "CancelText", "OkIcon", "CancelIcon", "OkTitle", "CancelTitle" ], "Suggest": "Sw.Dialog.Confirm(title, text, okText, { CancelText, OkIcon, CancelIcon, OkTitle, CancelTitle, Danger })", "Note": "okStyle / cancelStyle are reported; the old default icons IconOk / IconCancel are not set; a destructive call (title or OK text Delete, Remove, Kill ...) gets { Danger: true } (danger button, Cancel focused), the literal labels \"Yes, Delete!\" / \"No, Keep it!\" become \"Delete\" / \"Cancel\"; a title that is no question and \"Are you sure?\" in the text are reported; literal texts go through _T (PORTING.md)" },
+        "PopUpEdit": { "Kind": "Report", "Suggest": "Sw.Dialog.Show({ Title, Content: editElement, Buttons: [...] }) + the Edit library" },
+        "CreatePopUpBlocker": { "Kind": "Report", "Suggest": "Sw.Popup.Show / Sw.Dialog.Open" },
+        "CreatePopUpAtElement": { "Kind": "Report", "Suggest": "Sw.Popup.Show" },
+        "CreateTabBlock": { "Kind": "Report", "Suggest": "Sw.Focus.Sentinel(\"start\" | \"end\")" },
+        "WebMenu": { "Kind": "Report", "Suggest": "Sw.Menu items { Text, Title, Icon, Items, OnClick }", "Note": "a server menu (Api GetMenu, WebMenu.From) converts with Sw.Shell.ToMenuItems(menu.Items) from sw/shell.js: include ../sw/shell.js (check rule missing-include, migrate adds it)" },
+        "WebMenuItem": { "Kind": "Report", "Suggest": "a Sw.Menu item { Text, Title, Icon, Items, OnClick }" }
+      },
+      "Css": {
+        "SysWeaver-Button": { "New": ".sw-button" },
+        "SysWeaver-CenterBlock": { "New": ".sw-row" },
+        "SysWeaver-CenterBlockSpace": { "New": ".sw-row" },
+        "SysWeaver-Fail": { "New": ".sw-toast" },
+        "SysWeaver-Loading": { "New": ".sw-loader" },
+        "SysWeaver-LoadingText": { "New": ".sw-loader-text" },
+        "SysWeaver-ServerBlock": { "New": ".sw-serverblock", "OwnUi": true, "Note": "on a page without sw/ui.css that styles SysWeaver-ServerBlock itself, the core draws the original elements (SysWeaver-ServerBlock, -ServerImage, -ServerTitle, -ServerText, -ServerWaiting, -ServerTime)" },
+        "SysWeaver-ProgressBar": { "New": ".sw-progress" },
+        "SysWeaver-Blocker": { "New": ".sw-layer.sw-dim" },
+        "SysWeaver-PopUpBackground": { "New": ".sw-dialog" },
+        "SysWeaver-PopupMenu": { "New": ".sw-popup" },
+        "SysWeaver-PopupMenuBack": { "New": ".sw-popup" },
+        "SysWeaver-PopUpText": { "New": ".sw-dialog-title" },
+        "SysWeaver-SelectList": { "New": ".sw-select-results" },
+        "SysWeaver-PopSelEnd": { "New": ".sw-select-end" },
+        "SysWeaver-ConfTitle": { "New": ".sw-dialog-title" },
+        "SysWeaver-ConfText": { "New": ".sw-dialog-text" },
+        "SysWeaver-ConfButtons": { "New": ".sw-dialog-foot" },
+        "SysWeaver-PopUpWorking": { "New": ".sw-working-box" },
+        "SysWeaver-Code": { "New": "pre.sw-code-json" },
+        "SysWeaver-Link": { "New": "a.sw-link" },
+        "SysWeaver-LongText": { "New": ".sw-longtext" },
+        "SysWeaver-MdText": { "New": ".sw-md" },
+        ".KeyClick": { "New": ".sw-keyclick" },
+        ".MouseClick": { "New": ".sw-copyable" },
+        ".SysWeaverCode": { "New": ".sw-code-json" }
+      }
+    },
+    "compatonly": {
+      "Description": "Old common.js helpers that only sw/compat.js still provides: no Sw counterpart, reported with the platform replacement (PORTING.md A11).",
+      "Globals": {
+        "setMediaSrcAndWait": { "Kind": "Report", "Suggest": "a local helper: new Promise(r => { el.addEventListener(\"canplaythrough\", () => r(true), { once: true }); el.addEventListener(\"error\", () => r(false), { once: true }); el.src = url; })", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "CaptureVideoFrame": { "Kind": "Report", "Suggest": "a local helper: draw the video on a canvas (ctx.drawImage(video, 0, 0)) and read canvas.toBlob(cb, mime, quality / 100)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "EnterNoSleep": { "Kind": "Report", "Suggest": "const lock = await navigator.wakeLock.request(\"screen\")", "Note": "no Sw counterpart; the Wake Lock API needs https or localhost (PORTING.md A11)" },
+        "ExitNoSleep": { "Kind": "Report", "Suggest": "await lock.release() (the lock of navigator.wakeLock.request)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "IsSleepPrevented": { "Kind": "Report", "Suggest": "lock && !lock.released (the lock of navigator.wakeLock.request)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "GetAbsoluteRect": { "Kind": "Report", "Suggest": "const r = el.getBoundingClientRect(); left = r.left + window.scrollX, top = r.top + window.scrollY", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "IsAtMaxScrollV": { "Kind": "Report", "Suggest": "el.scrollTop >= el.scrollHeight - el.clientHeight - 1", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "StickToBottom": { "Kind": "Report", "Suggest": "a local scroll handler: remember IsAtMaxScrollV on scroll, after adding content scroll to the bottom when it was there (el.scrollTop = el.scrollHeight)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "SetTemporaryInnerText": { "Kind": "Report", "Suggest": "el.textContent = text; setTimeout(() => el.textContent = old, ms) (or a Sw.Info toast)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "getIntegerAttribute": { "Kind": "Report", "Suggest": "parseInt(el.getAttribute(name)) (use the default when it is NaN or negative)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "getNumberAttribute": { "Kind": "Report", "Suggest": "parseFloat(el.getAttribute(name)) (use the default when it is NaN or negative)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "insertAtCursor": { "Kind": "Report", "Suggest": "field.setRangeText(text, field.selectionStart, field.selectionEnd, \"end\")", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "isHidden": { "Kind": "Report", "Suggest": "getComputedStyle(el).display === \"none\" (or !el.checkVisibility())", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "traverseChildren": { "Kind": "Report", "Suggest": "document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT) with nextNode()", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "traverseForward": { "Kind": "Report", "Suggest": "a TreeWalker from the element (nextNode()) (to move the focus: Sw.Focus.Next / Sw.Focus.Prev)", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "traverseBackward": { "Kind": "Report", "Suggest": "a TreeWalker from the element (previousNode())", "Note": "no Sw counterpart (PORTING.md A11)" },
+        "doHandleSrc": { "Kind": "Report", "Suggest": "(remove: Sw.FadeSrc(el, { ... }) handles the smooth loading)", "Note": "old internal of the smooth img / iframe loading" },
+        "removeFadeChannel": { "Kind": "Report", "Suggest": "(remove: Sw.FadeSrc handles the fade channels)", "Note": "old internal of the smooth img / iframe loading" },
+        "InternalSrcElementOnEvent": { "Kind": "Report", "Suggest": "(remove: Sw.FadeSrc handles the events)", "Note": "old internal of the smooth img / iframe loading" },
+        "InternalSrcElementOnLoad": { "Kind": "Report", "Suggest": "(remove: Sw.FadeSrc handles the events)", "Note": "old internal of the smooth img / iframe loading" },
+        "InternalSrcElementOnError": { "Kind": "Report", "Suggest": "(remove: Sw.FadeSrc handles the events)", "Note": "old internal of the smooth img / iframe loading" }
+      }
+    },
+    "shell": {      "Description": "Old application.js shell names (sw/shell.js).",
+      "Globals": {
+        "appMain": { "Kind": "Ignore", "Shell": true },
+        "AppParams": { "New": "Sw.Shell.Params", "Shell": true },
+        "App": { "New": "Sw.Shell.App", "Shell": true },
+        "MainMenu": { "Kind": "Report", "Suggest": "Sw.Shell (menu.js)", "Shell": true },
+        "MainMenuStyle": { "Kind": "Report", "Suggest": "Sw.Shell (menu.js)", "Shell": true }
+      }
+    },
+    "table": {
+      "Description": "explore/table.js legacy aliases (explore README). The global Table is NOT Sw.Table: members are mapped one by one.",
+      "Library": "explore/table.js",
+      "Globals": {
+        "Table": {
+          "Members": {
+            "addTable": { "New": "Sw.Table.Create", "Positional": 0, "Options": [ "Url", "Element", "-", "Param", "OnFirstLoad", "Name", "State", "OnFirstData", "Filter" ], "Suggest": "Sw.Table.Create({ Url, Element, Param, OnFirstLoad, Name, State, OnFirstData, Filter })", "Note": "positional arguments became an options object, rowsPerPage (ignored since the rewrite: the frame sizes the page) was dropped" },
+            "haveSort": "Sw.Table.Sort.Has",
+            "isCurrentSort": { "Kind": "Report", "Suggest": "Sw.Table.Sort.Find(req, col).Index === 0" },
+            "isReverseSort": { "Kind": "Report", "Suggest": "!!(req.Order && req.Order.length && req.Order[0].charAt(0) === \"-\")", "Note": "no Sw counterpart" },
+            "removeSort": "Sw.Table.Sort.Remove",
+            "updateSort": "Sw.Table.Sort.Toggle",
+            "tableDefaultRequest": "Sw.Table.DefaultRequest",
+            "tableDefaultState": { "Kind": "Report", "Suggest": "new Sw.Table.State()" },
+            "canShowChart": "Sw.Table.CanShowChart",
+            "getTableExportMenu": "Sw.Table.GetExporters"
+          }
+        },
+        "TableDataProps": "Sw.Table.Props",
+        "TableDataFilterOps": "Sw.Table.Ops",
+        "TableDataFilter": "Sw.Table.Filter",
+        "TableDataState": "Sw.Table.State"
+      },
+      "Css": {
+        ".sw-table-tools": { "New": ".sw-table-ttools", "Note": "the table tools (Columns, Density, Download, Refresh) moved from the footer to the tool bar above the grid (div.sw-table-toolbar > div.sw-table-ttools > .sw-table-tbtn); rules on the old footer group no longer apply (PORTING.md B13)" }
+      }
+    },
+    "edit": {
+      "Description": "edit/*.js legacy aliases (edit README): Edit === Sw.Edit; handler / layout classes; type.js documentation helpers.",
+      "Library": "edit/Edit.js (type.js, text.js)",
+      "Globals": {
+        "Edit": "Sw.Edit",
+        "EditOptions": "Sw.Edit.Options",
+        "UndoStack": "Sw.Edit.UndoStack",
+        "UndoEntry": "Sw.Edit.UndoEntry",
+        "EditDesktop": "Sw.Edit.LayoutDesktop",
+        "EditMobile": "Sw.Edit.LayoutMobile",
+        "EditCollectionArray": {
+          "Members": { "Inst": "Sw.Edit.Collections.Array" }
+        },
+        "EditCollectionMap": {
+          "Members": { "Inst": "Sw.Edit.Collections.Map" }
+        },
+        "EditTypeBoolean": "Sw.Edit.Handlers.Boolean",
+        "EditTypeCollection": "Sw.Edit.Handlers.Collection",
+        "EditTypeDateTime": "Sw.Edit.Handlers.DateTime",
+        "EditTypeDefault": "Sw.Edit.Handlers.Default",
+        "EditTypeEnum": "Sw.Edit.Handlers.Enum",
+        "EditTypeInteger": "Sw.Edit.Handlers.Integer",
+        "EditTypeNumber": "Sw.Edit.Handlers.Number",
+        "EditTypeObject": "Sw.Edit.Handlers.Object",
+        "EditTypeString": "Sw.Edit.Handlers.String",
+        "EditTypeLanguage": "Sw.Edit.Handlers.Language",
+        "TypeMemberFlags": "Sw.TypeFlags",
+        "TypeInfoCache": "Sw.TypeInfo",
+        "AddTextElement": "Sw.TypeDoc.AddTextElement",
+        "BuildLink": "Sw.TypeDoc.BuildLink",
+        "BuildTypeNameRec": "Sw.TypeDoc.BuildTypeNameRec",
+        "AddTypeName": "Sw.TypeDoc.AddTypeName",
+        "typeAddSection": "Sw.TypeDoc.AddSection",
+        "typeAdd": "Sw.TypeDoc.Add"
+      }
+    },
+    "chart": {
+      "Description": "chart/chart.js legacy aliases (chart README). The global CanvasChart is NOT Sw.Chart: members are mapped one by one.",
+      "Library": "chart/chart.js",
+      "Globals": {
+        "CanvasChartOptions": "Sw.Chart.Options",
+        "CanvasChart": {
+          "Members": {
+            "addChart": "Sw.Chart.Add",
+            "getChartExportMenu": "Sw.Chart.GetExporters",
+            "FixedColors": "Sw.Chart.FixedColors",
+            "GradientFns": "Sw.Chart.GradientFns",
+            "MenuExportItems": { "Kind": "Report", "Suggest": "await Sw.Chart.GetExporters()" },
+            "addDataLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 1)" },
+            "onlyDataLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 2)" },
+            "firstLineDataLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 3)" },
+            "noLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 4)" },
+            "valueLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 5)" },
+            "bareValueLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 6)" },
+            "formattedValueLabels": { "Kind": "Report", "Suggest": "Sw.Chart.ApplyLabelMode(c, 0)" }
+          }
+        }
+      }
+    },
+    "chat": {
+      "Description": "chat/chat.js + chat/speech.js legacy aliases (chat README). The global Chat is NOT Sw.Chat: members are mapped one by one.",
+      "Library": "chat/chat.js",
+      "Globals": {
+        "Chat": {
+          "Members": {
+            "addChat": "Sw.Chat.Add",
+            "chatColor": "Sw.Chat.Color",
+            "FlagIsWorking": "Sw.Chat.Flags.IsWorking",
+            "FlagCanRemove": "Sw.Chat.Flags.CanRemove",
+            "IsMobile": "Sw.Platform.IsMobileDevice",
+            "Platform": "Sw.Platform.Name"
+          }
+        },
+        "ChatOptions": "Sw.Chat.Options",
+        "SpeechGen": {
+          "New": "Sw.Chat.SpeechGen",
+          "Members": {
+            "supportSpeechGen": "Sw.Chat.SpeechGen.Supported",
+            "similarity": "Sw.Chat.SpeechGen.Similarity",
+            "findVoice": "Sw.Chat.SpeechGen.FindVoice",
+            "filterText": "Sw.Chat.SpeechGen.FilterText",
+            "onSpeakEnd": "Sw.Chat.SpeechGen.OnSpeakEnd",
+            "cancelSpeak": "Sw.Chat.SpeechGen.Cancel",
+            "speakOnce": "Sw.Chat.SpeechGen.SpeakOnce",
+            "speakNew": "Sw.Chat.SpeechGen.SpeakNew",
+            "speakContinue": "Sw.Chat.SpeechGen.SpeakContinue"
+          }
+        },
+        "SpeechInput": {
+          "New": "Sw.Chat.SpeechInput",
+          "Members": {
+            "supportOpenMic": "Sw.Chat.SpeechInput.SupportOpenMic",
+            "supportSpeechRec": "Sw.Chat.SpeechInput.Supported",
+            "triggerOnSpeech": "Sw.Chat.SpeechInput.Listen",
+            "IsMobile": "Sw.Platform.IsMobileDevice"
+          }
+        }
+      }
+    },
+    "auth": {
+      "Description": "auth/Auth.js + auth/AuthUi.js legacy aliases (MicroService.Auth README). The global AuthPage is NOT Sw.AuthUi.AuthPage.",
+      "Library": "auth/Auth.js (AuthUi.js)",
+      "Globals": {
+        "logoutRequest": { "New": "Sw.Auth.Logout", "Positional": 0, "Options": [ "-" ], "Note": "the api prefix argument is dropped: Sw.Auth.Logout always uses the site root (Sw.Url.Root + \"logout\"), as the auth/Auth.js alias does" },
+        "loginRequest": { "New": "Sw.Auth.Login", "Positional": 2, "Options": [ "-" ], "Note": "the api prefix argument is dropped: Sw.Auth.Login always uses the site root (Sw.Url.Root + \"Api/auth/\"), as the auth/Auth.js alias does" },
+        "AuthTrim": "Sw.Auth.Trim",
+        "AuthPolicyText": "Sw.Auth.PolicyText",
+        "ValidatePassword": { "New": "Sw.Auth.ValidatePassword", "Suggest": "Sw.Auth.CheckPolicy(Sw.Auth.Trim(password), policy ?? await Sw.Auth.UserPolicy(Sw.Auth.Trim(user)))", "Note": "Sw.Auth.ValidatePassword is the old function (policy cache object, onNewPolicy callback); new code uses Sw.Auth.CheckPolicy" },
+        "CheckPassword": { "Kind": "Report", "Suggest": "Sw.Auth.CheckLeak(password) + Sw.Auth.LeakText(result)", "Note": "the old function wrote into an element" },
+        "AuthGetEmailError": "Sw.Auth.EmailError",
+        "AuthGetPhoneError": "Sw.Auth.PhoneError",
+        "GenPassword": "Sw.Auth.GenPassword",
+        "AuthStartPage": { "New": "Sw.Auth.StartPage", "MaxArgs": 0, "Note": "the delay argument is not supported" },
+        "cleanUpShortCode": "Sw.Auth.CleanShortCode",
+        "validateShortCode": "Sw.Auth.ValidateShortCode",
+        "CreateAuthWrapper": { "Kind": "Report", "Suggest": "Sw.AuthUi.Page(icon, async page => ...)" },
+        "AuthPage": { "Kind": "Report", "Suggest": "Sw.AuthUi.Page(icon, async page => ..., { IconIsFile })", "Note": "the callback gets the page instead of (box, imgObj)" },
+        "AuthText": { "Kind": "Report", "Suggest": "Sw.AuthUi.Text(t, text, { Title, Html })" },
+        "AuthLabel": "Sw.AuthUi.Heading",
+        "AuthError": { "Kind": "Report", "Suggest": "new Sw.AuthUi.Status(t, { Title }).Set(text)" },
+        "AuthSetText": { "Kind": "Report", "Suggest": "Sw.AuthUi.Status.Set" },
+        "AuthSetError": { "Kind": "Report", "Suggest": "Sw.AuthUi.Status.Set / Field.SetInvalid" },
+        "AuthUserHtml": "Sw.AuthUi.UserHtml",
+        "AuthButtonRow": "Sw.AuthUi.Buttons",
+        "AuthButton": { "Kind": "Report", "Suggest": "new Sw.Button({ Text, Title, Icon, Disabled, OnClick })" },
+        "AuthHr": { "Kind": "Report", "Suggest": "(layout of Sw.AuthUi.Page)" },
+        "AuthBr": { "Kind": "Report", "Suggest": "(layout of Sw.AuthUi.Page)" },
+        "AuthInput": { "Kind": "Report", "Suggest": "new Sw.AuthUi.Field(t, { ... })" },
+        "AuthPassword": { "Kind": "Report", "Suggest": "new Sw.AuthUi.Field(t, { ... })" },
+        "AuthNewPassword": { "Kind": "Report", "Suggest": "new Sw.AuthUi.Field(t, { ... })" },
+        "AuthInputPhone": { "Kind": "Report", "Suggest": "new Sw.AuthUi.PhoneField(t, { ... })" },
+        "AuthAddIcon": { "Kind": "Report", "Suggest": "(Sw.AuthUi.Page icon)" },
+        "AuthTab": { "Kind": "Report", "Suggest": "new Sw.AuthUi.Segments(t, { Label, OnChange })" },
+        "AuthPageValidation": { "Kind": "Report", "Suggest": "Sw.AuthUi.ShortCode(page, { Html, Link, Label, Placeholder, ButtonText })" },
+        "IsAutoFilled": "Sw.AuthUi.IsAutoFilled",
+        "loginMain": "Sw.AuthUi.LoginMain",
+        "logoutMain": "Sw.AuthUi.LogoutMain"
+      }
+    },
+    "usermanager": {
+      "Description": "auth/UserManager.js legacy aliases (MicroService.UserManager README); load after auth/Auth.js.",
+      "Library": "auth/UserManager.js",
+      "Globals": {
+        "setPasswordRequest": "Sw.UserManager.SetPassword",
+        "getCreatePasswordPolicy": "Sw.UserManager.CreatePolicy",
+        "addUserRequest": "Sw.UserManager.AddUser",
+        "sendDeleteUserRequest": "Sw.UserManager.SendDeleteUserRequest",
+        "deleteUserRequest": "Sw.UserManager.DeleteUser",
+        "signUpRequest": "Sw.UserManager.SignUp",
+        "forgotPasswordRequest": "Sw.UserManager.ForgotPassword",
+        "resetPasswordRequest": "Sw.UserManager.ResetPassword",
+        "sendAddPasswordRequest": "Sw.UserManager.SendAddPasswordRequest",
+        "sendDeletePasswordRequest": "Sw.UserManager.SendDeletePasswordRequest",
+        "deletePassword": "Sw.UserManager.DeletePassword",
+        "inviteUserRequest": "Sw.UserManager.Invite",
+        "changeEmailRequest": "Sw.UserManager.SendChangeEmailRequest",
+        "changeEmail": "Sw.UserManager.AddEmail",
+        "deleteEmail": "Sw.UserManager.DeleteEmail",
+        "addEmailRequest": "Sw.UserManager.SendAddEmailRequest",
+        "addEmail": "Sw.UserManager.AddEmail",
+        "changePhoneRequest": "Sw.UserManager.SendChangePhoneRequest",
+        "changePhone": "Sw.UserManager.AddPhone",
+        "deletePhone": "Sw.UserManager.DeletePhone",
+        "addPhoneRequest": "Sw.UserManager.SendAddPhoneRequest",
+        "addPhone": "Sw.UserManager.AddPhone",
+        "setNickName": "Sw.UserManager.SetNickName",
+        "setLanguage": "Sw.UserManager.SetLanguage",
+        "isManagedUser": "Sw.UserManager.IsManagedUser",
+        "userManagerProps": "Sw.UserManager.Props"
+      }
+    },
+    "passkey": {
+      "Description": "auth/Passkey.js legacy aliases (MicroService.PassKey README).",
+      "Library": "auth/Passkey.js",
+      "Globals": {
+        "PassKey": "Sw.PassKey",
+        "PassKeyChallenge": "Sw.PassKeyChallenge"
+      }
+    },
+    "upload": {
+      "Description": "common/fileUploader.js legacy aliases (FileUploader README).",
+      "Library": "common/fileUploader.js",
+      "Globals": {
+        "UploadStatus": "Sw.Upload.Status",
+        "fileUploaderStatusText": "Sw.Upload.StatusText",
+        "fileUploader": { "New": "Sw.Upload.Files", "Positional": 2, "Options": [ "ApiBase" ], "Suggest": "Sw.Upload.Files(repo, files, { ApiBase: apiBase })", "Note": "the optional api base is an options object" },
+        "fileUploaderElement": "Sw.Upload.ForElement",
+        "fileUploaderDrop": "Sw.Upload.Handlers.Drop",
+        "fileUploaderDrag": "Sw.Upload.Handlers.DragOver",
+        "fileUploaderDragEnter": "Sw.Upload.Handlers.DragEnter",
+        "fileUploaderDragLeave": "Sw.Upload.Handlers.DragLeave",
+        "selectFiles": { "New": "Sw.Upload.Pick", "Positional": 0, "Options": [ "Multiple" ], "Suggest": "Sw.Upload.Pick({ Multiple })", "Note": "the argument is an options object" },
+        "fileUploaderClick": "Sw.Upload.Handlers.Click",
+        "fileUploaderSetup": { "New": "Sw.Upload.Target", "Positional": 1, "Options": [ "Repo", "OnStart", "OnResults", "ApiBase", "Multiple" ], "Suggest": "Sw.Upload.Target(el, { Repo, OnStart, OnResults, ApiBase, Multiple })", "Note": "Sw.Upload.Target returns { Remove() } (fileUploaderSetup returned nothing)" },
+        "fileUploaderInit": { "Kind": "Report", "Suggest": "Sw.Upload.Target(e) for every <sysweaver-drop> element" }
+      }
+    },
+    "media": {
+      "Description": "mediaView/media.js and mediaPlayer/*.js legacy aliases (Media READMEs).",
+      "Library": "mediaView/media.js, mediaPlayer/*.js",
+      "Globals": {
+        "mediaCreatePlayer": "Sw.MediaView.CreatePlayer",
+        "mediaPlayWithPopup": "Sw.MediaView.PlayWithPopup",
+        "mediaEditProps": "Sw.MediaView.EditProps",
+        "mediaGetTypeFromUrl": "Sw.MediaView.GetTypeFromUrl",
+        "SsHack": "Sw.MediaView.SsHack",
+        "MediaPlayer": "Sw.Media.Player",
+        "MediaTypes": "Sw.Media.Types",
+        "MediaPlayerTools": "Sw.Media.Tools",
+        "TextGradientStop": "Sw.Media.TextGradientStop",
+        "TextLinearGradient": "Sw.Media.TextLinearGradient",
+        "CanvasTools": "Sw.Media.CanvasTools",
+        "EffectProgram": "Sw.Media.EffectProgram",
+        "EffectProgramData": "Sw.Media.EffectProgramData",
+        "MediaPlayerParamsAudio": "Sw.Media.MediaPlayerParamsAudio",
+        "MediaPlayerAudio": "Sw.Media.MediaPlayerAudio",
+        "MediaPlayerParamsEffect": "Sw.Media.MediaPlayerParamsEffect",
+        "MediaPlayerEffect": "Sw.Media.MediaPlayerEffect",
+        "MediaPlayerImageTexture": "Sw.Media.MediaPlayerImageTexture",
+        "MediaPlayerParamsImage": "Sw.Media.MediaPlayerParamsImage",
+        "MediaPlayerImage": "Sw.Media.MediaPlayerImage",
+        "MediaPlayerParamsText": "Sw.Media.MediaPlayerParamsText",
+        "MediaPlayerText": "Sw.Media.MediaPlayerText",
+        "MediaPlayerTextTexture": "Sw.Media.MediaPlayerTextTexture",
+        "MediaPlayerParamsVideo": "Sw.Media.MediaPlayerParamsVideo",
+        "MediaPlayerVideo": "Sw.Media.MediaPlayerVideo",
+        "MediaPlayerParamsYouTube": "Sw.Media.MediaPlayerParamsYouTube",
+        "MediaPlayerYoutube": "Sw.Media.MediaPlayerYoutube",
+        "ParseTools": "Sw.Media.ParseTools",
+        "MapView": "Sw.Media.MapView",
+        "EffectPage": "Sw.Media.EffectPage",
+        "TextEffect": "Sw.Media.TextEffect",
+        "CounterEffectParams": "Sw.Media.CounterEffectParams"
+      }
+    },
+    "tags": {
+      "Description": "app/tags.js legacy alias (app README).",
+      "Library": "app/tags.js",
+      "Globals": {
+        "CreateTagsGallery": { "Kind": "Report", "Suggest": "const g = new Sw.TagsGallery({ FindTags, GetTags, RemoveTag, AddTag, MaxTagCount, Options }); await g.Ready", "Note": "returns a class instance (.E) instead of { Element, Update, GetTags }" }
+      }
+    },
+    "anim": {
+      "Description": "common/anim.js legacy globals (common README): each is the same object as Sw.Anim.<name>.",
+      "Library": "common/anim.js",
+      "Globals": {
+        "Smoothness": "Sw.Anim.Smoothness",
+        "FalseValue": "Sw.Anim.FalseValue",
+        "TrueValue": "Sw.Anim.TrueValue",
+        "MathTools": "Sw.Anim.MathTools",
+        "CubicHermite": "Sw.Anim.CubicHermite",
+        "CubicHermiteInterpolator": "Sw.Anim.CubicHermiteInterpolator",
+        "SmoothValue": "Sw.Anim.SmoothValue",
+        "SmoothBool": "Sw.Anim.SmoothBool",
+        "SpringAnimation": "Sw.Anim.SpringAnimation",
+        "ProjectileMotion": "Sw.Anim.ProjectileMotion",
+        "BounceMotion": "Sw.Anim.BounceMotion",
+        "BounceAnimation": "Sw.Anim.BounceAnimation"
+      }
+    },
+    "servermanager": {
+      "Description": "ServerManager page classes removed by the Design v2 page rewrite (PORTING.md B20): custom css on them no longer applies.",
+      "Css": {
+        ".sm-stat": { "New": "Sw.Facts (dl.sw-facts) / Sw.Kpi (div.sw-kpi)", "Note": "removed: the fact pills became a facts strip and KPI tiles" },
+        ".sm-stats": { "New": "Sw.Facts (dl.sw-facts)", "Note": "removed" },
+        ".sm-charts": { "New": "Sw.Grid + Sw.Card (SmShared.LineCard)", "Note": "removed: the donuts became KPI tiles, the bar series line cards" },
+        ".sm-history": { "New": "Sw.Card (SmShared.LineCard)", "Note": "removed" },
+        ".sm-commands": { "New": "the page header actions (Sw.PageHeader Actions)", "Note": "removed: the command row moved into the page header" },
+        ".sm-danger": { "New": "new Sw.Button({ Kind: \"danger\" }) in the page header", "Note": "removed" },
+        ".si-name": { "New": ".sw-ph-title (Sw.PageHeader)", "Note": "removed" },
+        ".si-state": { "New": ".sw-ph-status (Sw.PageHeader Status)", "Note": "removed" },
+        ".si-grid": { "New": "Sw.Facts / Sw.Card", "Note": "removed" },
+        ".vi-name": { "New": ".sw-ph-title (Sw.PageHeader)", "Note": "removed" },
+        ".vi-values": { "New": "Sw.Facts (dl.sw-facts)", "Note": "removed" }
+      }
+    },
+    "design": {
+      "Description": "Design v2 tokens (ui/README.md Theming, ui/tokens.css): old token names kept as aliases (safe renames) and legacy theme variables: Apply entries have one context-free role token (migrate --level design renames their uses, TextNew in text colour properties), the others are reported (use the role tokens). Porting guide: SysWeaver.HttpServer/srcWeb/PORTING.md.",
+      "Tokens": {
+        "--sw-bg-1": { "New": "--sw-surface", "Safe": true },
+        "--sw-bg-2": { "New": "--sw-surface-sunken", "Safe": true },
+        "--sw-bg-3": { "New": "--sw-surface-strong", "Safe": true },
+        "--sw-bg-inset": { "New": "--sw-surface-sunken", "Safe": true },
+        "--sw-line": { "New": "--sw-border", "Safe": true },
+        "--sw-line-strong": { "New": "--sw-border-strong", "Safe": true },
+        "--sw-muted": { "New": "--sw-text-2", "Safe": true },
+        "--sw-faint": { "New": "--sw-text-3", "Safe": true },
+        "--sw-accent1-fg": { "New": "--sw-text-accent", "Safe": true },
+        "--sw-shadow": { "New": "--sw-elev-1", "Safe": true, "Note": "a complete shadow; permanent surfaces use none (a hairline), only floating layers an elevation" },
+        "--sw-backdrop": { "New": "--sw-scrim", "Safe": true },
+        "--sw-touch": { "New": "--sw-control-h", "Safe": true },
+        "--sw-size": { "New": "--sw-text-md", "Safe": true },
+        "--sw-speed": { "New": "--sw-dur-2", "Safe": true },
+        "--sw-frame-bg": { "New": "(nothing: Sw.Group is a card since Design v2, its title no longer sits in the border)", "Note": "obsolete" },
+        "--ThemeBackground": { "New": "--sw-bg", "Note": "page background: --sw-canvas, cards / tables / forms: --sw-surface" },
+        "--ThemeMain": { "New": "--sw-fg", "TextNew": "--sw-text", "Note": "text: --sw-text (secondary --sw-text-2, tertiary --sw-text-3), lines: --sw-border / --sw-border-strong" },
+        "--ThemeAcc1": { "New": "--sw-accent1", "Apply": true, "TextNew": "--sw-text-accent", "Note": "links / current item: --sw-text-accent; use the accent only for meaning (current place, the primary action, data)" },
+        "--ThemeAcc2": { "New": "--sw-accent2", "Apply": true },
+        "--ThemeRad": { "New": "--sw-radius-md", "Apply": true, "Note": "cards, menus, tables (8 px; Pro and Hacker have their own scale)" },
+        "--ThemeRadInp": { "New": "--sw-radius", "Apply": true, "Note": "buttons, inputs, nav items (6 px)" },
+        "--ThemeRadInp2": { "New": "--sw-radius-sm", "Apply": true, "Note": "small parts, chips in inputs (4 px)" },
+        "--ThemeFont": { "New": "--sw-sans", "Apply": true },
+        "--ThemeFontHead": { "New": "--sw-head", "Apply": true },
+        "--ThemeFontMono": { "New": "--sw-mono", "Apply": true },
+        "--ThemeFontSize": { "New": "--sw-text-md", "Note": "the type scale --sw-text-xs .. --sw-text-3xl (rem)" },
+        "--ThemeIconSize": { "New": "--sw-icon", "Note": "--ThemeIconSize was a unitless scale (1.0), --sw-icon is the icon size itself (a length): calc(24px * var(--ThemeIconSize)) becomes var(--sw-icon)" },
+        "--ThemeFocus": { "New": "--sw-focus", "Apply": true, "Note": "focus rings: outline 2px solid var(--sw-focus) or box-shadow: var(--sw-focus-ring)" },
+        "--ThemeError": { "New": "--sw-danger", "Apply": true },
+        "--ThemeOk": { "New": "--sw-ok", "Apply": true },
+        "--ThemeWarning": { "New": "--sw-warning", "Apply": true },
+        "--ThemeFadeDuration": { "New": "--sw-dur-2", "Apply": true, "Note": "motion tokens --sw-dur-1 / -2 / -3 with --sw-ease" },
+        "--SysWeaverEditDesktopRad": { "New": "--sw-radius-md", "Apply": true, "Note": "edit/Edit.css legacy variable, only defined where Edit.css is loaded" },
+        "--SysWeaverEditDesktopRadInp": { "New": "--sw-radius", "Apply": true, "Note": "edit/Edit.css legacy variable, only defined where Edit.css is loaded" },
+        "--SysWeaverEditDesktopRadInp2": { "New": "--sw-radius-sm", "Apply": true, "Note": "edit/Edit.css legacy variable, only defined where Edit.css is loaded" },
+        "--SysWeaverEditFadeDuration": { "New": "--sw-dur-2", "Apply": true, "Note": "edit/Edit.css legacy variable, only defined where Edit.css is loaded" }
+      }
+    }
+  }
+}

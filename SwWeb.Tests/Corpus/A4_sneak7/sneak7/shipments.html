@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shipments</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="shipments.css">
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="shiplib.js"></script>
+    <script defer src="shipments.js"></script>
+</head>
+<body class="sw-root" data-translation_context="Shipments page of a warehouse app: parcels sent to customers">
+    <div id="ship-top" class="ship-top">
+        <img class="ship-carrier-logo" src="../brand/carrier.png" alt="Carrier logo">
+        <button class="ship-ico" data-act="refresh" type="button"><span class="sw-icon-refresh"></span></button>
+        <input id="ship-ref" class="ship-ref" type="text" placeholder="Reference number">
+        <div class="ship-help" aria-description="Shows where each parcel is right now">
+            <a class="ship-carrier-link" data-carrier="dhl">Open the carrier site</a>
+        </div>
+    </div>
+    <div id="ship-host"></div>
+</body>
+</html>

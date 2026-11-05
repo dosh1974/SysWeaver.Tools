@@ -1,0 +1,47 @@
+01 h4/invoice-api.js:9 UX-SEC-1 claimed # payment provider token (from a password field) written to local storage via helper rememberAccess
+02 h4/invoice-api.js:31 UX-SEC-1 claimed # token put in an url query (template literal + encodeURIComponent), used for Navigate in invoices.js:47
+03 h4/invoice-api.js:35 UX-SEC-1 claimed # passphrase logged via console.debug(JSON.stringify({ id, passphrase }))
+04 h4/invoice-api.js:39 UX-TXT-20 claimed # currency hand formatted: amount.toFixed(2) + " " + currency (arrow helper money)
+05 h4/invoice-api.js:43 UX-TXT-20 claimed # date hand formatted from getDate/getMonth/getFullYear in a template literal
+06 h4/invoice-api.js:20 UX-FBK-5 claimed # customers(): catch returns [] silently (dialog validation then fails with no reason)
+07 h4/invoice-detail.js:11 UX-TXT-20 claimed # bytes hand formatted: (PdfSize / 1024).toFixed(0) + " KB"
+08 h4/invoice-detail.js:39 UX-SAF-1 claimed # dialog Delete button deletes the invoice at once, no confirmation
+09 h4/invoice-detail.js:49 UX-POP-9 claimed # window.confirm used for the destructive Void (native dialog, OK/Cancel)
+10 h4/invoice-detail.js:63 UX-POP-9 claimed # Yes / No dialog buttons instead of verbs
+11 h4/invoice-detail.js:59 UX-SEC-1 claimed # value of the passphrase field shown as visible status text (_T placeholder)
+12 h4/invoices.js:113 UX-SEC-2 claimed # li.innerHTML with server/user data (invoice number, customer) in a template literal
+13 h4/invoices.js:122 UX-TXT-6 claimed # status sentence concatenated from two _TF pieces and a count
+14 h4/invoices.js:46 UX-TXT-1 claimed # untranslated toast text Sw.Toast("Preparing the PDF export")
+15 h4/invoices.js:84 UX-INP-1 claimed # filter chips act on pointerdown (no click, no keyboard)
+16 h4/invoices.js:118 UX-INP-6 claimed # invoice rows open only on dblclick (no single click, key or menu path)
+17 h4/invoices.js:82 UX-FBK-5 claimed # search listener: reload().catch(() => {}) swallows failures
+18 h4/invoices.js:148-151 UX-SAF-2 claimed # Delete old drafts: Sw.Dialog.Confirm of a destructive action without { Danger: true }
+19 h4/invoices.js:21 UX-FOC-2 claimed # focus moved by code to the danger "Delete old drafts" button on page load (setTimeout)
+20 h4/invoices.js:111 UX-FBK-6 claimed # list rendered by hand (for loop into ul) with no empty state
+21 h4/invoices.js:88 UX-INP-23 claimed # single-key shortcut "n" on document keydown also fires while typing in the search field
+22 h4/invoices.js:40 UX-INP-12 claimed # syncBtn.SetDisabled(true) without a reason
+23 h4/invoices.js:38 UX-FBK-2 claimed # OnClick starts InvoiceApi.syncPayments() in a block body and returns no promise
+24 h4/invoices.css:12 UX-MOT-2 claimed # hard-coded transition duration/easing 200ms ease-out
+25 h4/invoices.css:34 UX-MOT-4 claimed # transition of height
+26 h4/invoices.css:31 UX-INP-30 claimed # user-select: none on the amount value
+27 h4/invoices.html:25 UX-FOC-4 claimed # positive tabindex="2" on a filter chip
+28 h4/invoices.html:20 UX-ACC-3 other # heading level skipped: h3 right after h1
+29 h4/invoices.html:30 UX-ACC-4 other # status line updated by code has no role="status" / live region
+30 h4/invoice-detail.js:20-23 UX-FRM-2 other # customer field is required by its Validate but not marked Required (no marker, no aria-required)
+31 h4/invoices.js:116 UX-ACC-2 other # overdue state shown only by text colour (class inv-overdue), no icon or word
+32 h4/invoice-detail.js:44 UX-ACC-7 other # dialog closes itself after 120 s with no warning and no way to extend
+33 h4/invoices.js:105 UX-TXT-30 other # generic error toast "Error": says nothing about what happened or what to do
+34 h4/invoices.js:20 UX-POP-11 other # dialog opens by itself on page load to announce a feature
+35 h4/invoices.html:34 UX-FRM-6 other # billing e-mail field is type="text" without autocomplete="email"
+36 h4/invoices.js:137 UX-SAF-6 other # archive confirmation says "This can't be undone." for a reversible archive
+37 h4/invoices.html:22 UX-FRM-1 other # search field has only a placeholder, no visible label
+38 h4/invoices.css:33 UX-TXT-15 other # user visible word in CSS content: " (draft)"
+39 h4/invoices.html:5 UX-INP-25 other # zoom lock maximum-scale=1 in the viewport meta
+40 h4/invoices.html:7 UX-PRF-3 other # external web font from fonts.googleapis.com (offline rule; also LAY-6)
+41 h4/invoices.css:20 UX-TXT-17 other # fixed 80px width with nowrap + overflow hidden on a text button, no ellipsis / tool tip
+clean h4/good/good1.js
+clean h4/good/good2.js
+clean h4/good/good3.js
+clean h4/good/good4.js
+clean h4/good/good5.html
+clean h4/good/good6.css

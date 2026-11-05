@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SwWeb</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The legacy global list is embedded (fallback) and copied next to the exe (editable override). -->
+    <EmbeddedResource Include="legacy_globals.txt" LogicalName="SwWeb.legacy_globals.txt" />
+    <EmbeddedResource Include="migrate_map.json" LogicalName="SwWeb.migrate_map.json" />
+    <EmbeddedResource Include="sw_tokens.txt" LogicalName="SwWeb.sw_tokens.txt" />
+    <EmbeddedResource Include="sw_icons.txt" LogicalName="SwWeb.sw_icons.txt" />
+    <!-- The framework bundle manifest (a copy of SysWeaver.HttpServer/srcWeb/sw/bundles.json, rule bundle-overlap; a test keeps them equal). -->
+    <EmbeddedResource Include="sw_bundles.json" LogicalName="SwWeb.sw_bundles.json" />
+    <None Include="legacy_globals.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SwWeb.Tests" />
+  </ItemGroup>
+
+</Project>

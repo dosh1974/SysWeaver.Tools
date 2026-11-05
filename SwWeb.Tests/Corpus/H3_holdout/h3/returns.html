@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Warehouse returns</title>
+    <link rel="icon" type="image/svg+xml" href="../icon.svg">
+    <link rel="stylesheet" href="../common/theme.css">
+    <link rel="stylesheet" href="../sw/ui.css">
+    <link rel="stylesheet" href="returns.css">
+    <script defer src="../sw/core.js"></script>
+    <script defer src="../sw/ui.js"></script>
+    <script defer src="returns-api.js"></script>
+    <script defer src="returns-detail.js"></script>
+    <script defer src="returns.js"></script>
+</head>
+<body class="sw-root">
+    <main class="sw-page-dash" id="page" data-translation_context="Warehouse returns page of a shop back office: customer returns waiting to be received, checked and refunded">
+        <header class="sw-ph">
+            <div class="sw-ph-text">
+                <div class="sw-ph-titlerow">
+                    <h1 class="sw-ph-title" tabindex="-1">Warehouse returns</h1>
+                    <span class="sw-ph-status ret-count" id="late"></span>
+                </div>
+                <p class="sw-ph-desc sw-selectable">Returns waiting to be received, checked and refunded.</p>
+            </div>
+            <div class="sw-ph-actions" id="actions" data-sw-nodirty></div>
+        </header>
+
+        <section class="sw-card" aria-labelledby="filterTitle">
+            <div class="sw-card-head">
+                <h1 class="sw-card-title" id="filterTitle" data-translation_context="Title of the card with the search and filter fields">Find returns</h1>
+            </div>
+            <div class="sw-card-body ret-filters">
+                <div class="sw-field">
+                    <label class="sw-field-label" for="search" data-translation_context="Label of the search box that filters the list of returns">Search</label>
+                    <input id="search" class="sw-input" type="search" tabindex="2" spellcheck="false" autocomplete="off">
+                </div>
+                <div id="reasonHost"></div>
+            </div>
+        </section>
+
+        <section class="sw-card" aria-labelledby="listTitle">
+            <div class="sw-card-head">
+                <h2 class="sw-card-title" id="listTitle" data-translation_context="Title of the card with the list of returns that are not closed yet">Open returns</h2>
+                <span class="sw-card-sub ret-count" id="count" aria-live="polite"></span>
+            </div>
+            <div class="sw-card-body sw-flush ret-body" id="listHost">
+                <ul class="ret-list" id="list" aria-labelledby="listTitle"></ul>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

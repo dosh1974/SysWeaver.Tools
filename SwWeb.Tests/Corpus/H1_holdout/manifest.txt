@@ -1,0 +1,40 @@
+H1 h.js 14 SAF-10 navigates away from code with window.location.assign instead of Sw.Page.Navigate
+H2 h.js 16 INP-12 Sw.Button Disabled option given a boolean expression (no reason)
+H3 h.js 18 INP-12 SetDisabled(!selected.length) with no reason text
+H4 h.js 25 INP-12 native disabled via toggleAttribute("disabled", ...)
+H5 h.js 28 POP-9 native confirm reached via self.confirm inside an OnClick
+H6 h.js 29 POP-9 Sw.Dialog.Show with "Yes" / "No" button labels
+H7 h.js 30 POP-1 own <dialog> made with Object.assign(createElement("dialog")) and opened via d["showModal"]()
+H8 h.js 33 SAF-1 PurgeLog api called inline through a Sw.Net.Send alias (send) without confirmation
+H9 h.js 35 SAF-1 named handler resetCounters (calls ResetCounters api, defined line 34) passed as OnClick without confirmation
+H10 h.js 39 FBK-2 OnClick starts requests in a forEach and does not return them
+H11 h.js 40 FBK-2 OnClick starts a request in a .then chain inside a block body without return
+H12 h.js 41 FBK-2 OnClick starts a request inside setTimeout, nothing returned
+H13 h.js 47 FBK-5 "Done" Sw.Info toast after the new name is already shown in place
+H14 h.js 53 SAF-10 contenteditable notes field (contentEditable property) saved without dirty tracking
+H15 h.js 54 SAF-11 own draft in sessionStorage via bracket assignment
+H16 h.js 55 MOT-4 transition of height via style.cssText
+H17 h.js 56 FOC-4 positive tabindex via setAttribute("tabindex", "1")
+H18 h.js 61 SAF-11 Draft option on a password-type API key TextBox
+H19 h.js 62 SEC-1 copied API key echoed in a toast (template string)
+H20 h.js 70 FRM-1 input made with Object.assign(createElement("input")) without a label
+H21 h.js 73 LST-3 hand-made table via Sw.el("table") filled with insertRow / insertCell
+H22 h.js 80 FBK-7 self-rescheduling setTimeout poll that rebuilds the list items (replaceChildren)
+H23 h.js 83 INP-23 keydown shortcut on e.altKey && e.code === "ArrowLeft"
+H24 h.js 84 INP-23 Sw.Keys.Add on browser-reserved "Ctrl+W"
+H25 h.js 89 INP-2 onclick property on a div card without Sw.BadClick / ModifierClick
+H26 h.js 91 MOT-2 Element.animate with hard-coded duration 250 and easing "ease-out"
+H27 h.js 93 ACC-3 second h1 inserted via insertAdjacentHTML template string
+H28 h.css 3 INP-10 cursor: progress on body
+H29 h.css 4 MOT-2 hard-coded transition duration 180ms and easing ease-in-out
+H30 h.css 5 INP-11 :hover inside :is() outside @media (hover: hover)
+H31 h.html 5 INP-25 viewport zoom lock user-scalable=0 (no spaces)
+H32 h.html 13 LAY-1 img without width / height
+OK1 h.js 13 - Sw.Page.Navigate used for navigation
+OK2 h.js 17 - Sw.Button OnClick arrow returns the Sw.Net.Send promise
+OK3 h.js 19 - Disabled given a reason text _TF("Select a row first")
+OK4 h.js 36 - Sw.Dialog.Confirm with { Danger: true } before the DeleteItem api, promise returned
+OK5 h.js 66 - Sw.Draft.Attach on a plain notes TextBox with draft.Clear() after send (line 67)
+OK6 h.css 6 - :hover inside @media (hover: hover)
+OK7 h.css 7 - transition: opacity var(--sw-dur-1)
+OK8 h.html 14 - img with width and height

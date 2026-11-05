@@ -1,0 +1,15 @@
+.g3-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--sw-gap, 1rem);
+    min-height: 12rem;
+}
+
+.g3-when {
+    font-variant-numeric: tabular-nums;
+    color: var(--sw-text-2);
+}
+
+.g3-empty {
+    min-height: 12rem;
+}

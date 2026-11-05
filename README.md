@@ -41,6 +41,7 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | [SvgOpt](SvgOpt/README.md) | `svg_opt` (build) | Optimises SVG files with SysWeaver.Minifier.Svg and can write an HTML page comparing the originals with the results. |
 | [SwCurl](SwCurl/README.md) | `SwCurl` | A curl-like HTTP client for SysWeaver APIs (SysWeaver login, compression, Tor) with HTTP results as exit codes. |
 | [SwSyncTool](SwSyncTool/README.md) | `SwSyncTool` | Pushes and pulls folders to and from a SysWeaver folder sync service, and maintains local `.swcompact` archives and their chunk store. |
+| [SwWeb](SwWeb/README.md) | | Builds the SysWeaver web front end bundles (`sw/bundles.json`) and lints `srcWeb` folders for the server contract rules (translation calls, template variables, file / folder names, JSDoc headers, legacy globals) and migrates old format pages to the new `Sw` format (`migrate`). |
 | [Touch](Touch/README.md) | | Sets the last write time of all files matching one or more file masks to now. |
 | [VsClean](VsClean/README.md) | `VsClean` | Deletes build output folders (`bin` / `obj` next to a `.csproj`, generated `web` / `data` next to `srcWeb` / `srcData`); used by the `Clean_All.bat` scripts. |
 
@@ -83,6 +84,8 @@ Tool specific codes:
 | SwCurl | 7 | The request timed out |
 | SwSyncTool | 3 | The operation failed for one or more items (an archive failed to expand / verify / touch / recover / stat, or push / pull reported errors; missing chunks found by verify are only reported) |
 | FolderSync | 3 | The sync completed but reported errors |
+| SwWeb | 3 | Problems found: `check` reported errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, or a bundle definition / source is invalid, `migrate` warnings that need manual follow-up |
+| SwWeb | 4 | `bundle`: one or more source files listed in the manifest don't exist |
 | SearchAndReplaceAll | 3 | Replacing failed in one or more files (the others are processed) |
 | VsClean | 3 | One or more folders couldn't be deleted (the others are deleted) |
 
