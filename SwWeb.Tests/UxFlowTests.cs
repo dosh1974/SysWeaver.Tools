@@ -24,6 +24,20 @@ namespace SwWeb.Tests
 
         static String[] Ids(List<Finding> f) => f.Select(x => x.Rule.Id).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
 
+        [Fact]
+        public void Fbk2ResolvesMethodsOnlyOnTheirObject()
+        {
+            //  Log.Clear() is sync, Panel.Clear() sends: a call on Log is no request (two methods of the name, not all send)
+            var two = "const Log = { Clear() { this.N = 0; } };\r\nconst Panel = { Clear() { Sw.Net.Send(\"../Api/x/Clear\", 1); } };\r\nnew Sw.Button({ Text: t, OnClick: () => Log.Clear() });";
+            Assert.DoesNotContain("ux-fbk-2", Ids(Js(two)));
+            //  Log of another file (not bound here): not this file's Add
+            var other = "const Panel = { Add(x) { Sw.Net.Send(\"../Api/x/Add\", x); } };\r\nnew Sw.Button({ Text: t, OnClick: () => { Log.Add(1); } });";
+            Assert.DoesNotContain("ux-fbk-2", Ids(Js(other)));
+            //  The method of a bound object is still followed
+            var bound = "const Panel = { Add(x) { Sw.Net.Send(\"../Api/x/Add\", x); } };\r\nnew Sw.Button({ Text: t, OnClick: () => { Panel.Add(1); } });";
+            Assert.Contains("ux-fbk-2", Ids(Js(bound)));
+        }
+
         [Theory]
         //  FBK-2: the request in a helper, a forEach, a timer, a .then chain, an alias of Sw.Net.Send, a destructured Net
         [InlineData("function save() { Sw.Net.Send(\"../Api/x/Save\", 1); }\r\nnew Sw.Button({ Text: t, OnClick: () => { save(); } });", "ux-fbk-2")]

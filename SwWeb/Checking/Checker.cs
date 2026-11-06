@@ -565,11 +565,14 @@ namespace SwWeb.Checking
             Walk(rootFull, "");
             if (options.Strict)
             {
+                //  A legacy name that a page script declares at its top level (ex: the page's own "App" object) is a page global of the folder,
+                //  not the legacy one: like migrate (never renamed), it is no legacy use in any script of the folder
+                var sources = pageScripts.Keys.ToDictionary(k => k, k => ReadSource(Path.Combine(rootFull, k.Replace('/', Path.DirectorySeparatorChar)), options));
+                var pageGlobals = new HashSet<String>(sources.Values.SelectMany(s => SwWeb.Bundling.Bundler.TopLevelDeclarations(s.Text).Select(d => d.Substring(d.IndexOf(' ') + 1))), StringComparer.Ordinal);
                 foreach (var kv in pageScripts)
                 {
-                    var src = ReadSource(Path.Combine(rootFull, kv.Key.Replace('/', Path.DirectorySeparatorChar)), options);
-                    var ctx = new FileContext(kv.Key, src, options, findings, webPrefix + kv.Key);
-                    CheckLegacyGlobals(ctx, JsLexer.Tokenize(ctx.Text), "the new-format page \"" + kv.Value + "\"", compatScripts[kv.Key]);
+                    var ctx = new FileContext(kv.Key, sources[kv.Key], options, findings, webPrefix + kv.Key);
+                    CheckLegacyGlobals(ctx, JsLexer.Tokenize(ctx.Text), "the new-format page \"" + kv.Value + "\"", compatScripts[kv.Key], pageGlobals);
                 }
             }
             res.Findings.Sort((a, b) =>
@@ -2114,14 +2117,15 @@ namespace SwWeb.Checking
         /// <param name="tokens">The tokens</param>
         /// <param name="usedBy">An optional description of the page that uses the script</param>
         /// <param name="compat">True if the code belongs to pages that load sw/compat.js (reported as legacy-compat warnings)</param>
-        public static void CheckLegacyGlobals(FileContext ctx, List<JsToken> tokens, String usedBy, bool compat = false)
+        /// <param name="pageGlobals">Names the page scripts of the folder declare at their top level (page globals, not the legacy ones)</param>
+        public static void CheckLegacyGlobals(FileContext ctx, List<JsToken> tokens, String usedBy, bool compat = false, HashSet<String> pageGlobals = null)
         {
             var legacy = ctx.Options.LegacyGlobals;
             if (legacy.Count == 0)
                 return;
             var text = ctx.Text;
             var sig = tokens.Where(t => t.IsSignificant).ToList();
-            var declared = new HashSet<String>(StringComparer.Ordinal);
+            var declared = pageGlobals == null ? new HashSet<String>(StringComparer.Ordinal) : new HashSet<String>(pageGlobals, StringComparer.Ordinal);
             for (int i = 0; i + 1 < sig.Count; ++i)
                 if ((sig[i].Kind == JsTokenKind.Identifier) && DeclKeywords.Contains(sig[i].GetText(text)) && (sig[i + 1].Kind == JsTokenKind.Identifier))
                     declared.Add(sig[i + 1].GetText(text));

@@ -32,9 +32,10 @@ namespace SysWeaver
 
         /// <summary>
         /// Version of the shader optimization (added to the TypeVersion of shaders only, so other types keep their cached results).
+        /// 9: "var:" annotations keep "unit" and "format" (the display of a value), the iMouse comments their optional range and unit parts.
         /// 8: shaders are stripped (shader_minifier only with MinifyShaders), Effect Weaver shaders keep working: the variable candidates, the iMouse channel comments, vertexMain, conditionals on compiler macros (__VERSION__), the snippet macros (EW_...) and the functions they use / named like snippets (Ew...), one top level declaration per line; no new overloads; the smallest of minimized (with / without aggressive inlining), stripped and the source.
         /// </summary>
-        const String ShaderTypeVersion = "8";
+        const String ShaderTypeVersion = "9";
 
         //  Process exit codes, 0 = success, non-zero (1-255) = failure.
         //  0 = success or help requested, 1 = an exception while processing, 2 = invalid command line (from SysWeaver.CommandLine FilesToFolderTool).

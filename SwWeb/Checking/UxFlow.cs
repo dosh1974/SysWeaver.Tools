@@ -109,12 +109,21 @@ namespace SwWeb.Checking
             readonly Dictionary<int, FnNode> ByHead = new Dictionary<int, FnNode>();
             readonly Dictionary<String, List<FnNode>> Named = new Dictionary<String, List<FnNode>>(StringComparer.Ordinal);
             readonly Dictionary<FnNode, Effects> Memo = new Dictionary<FnNode, Effects>();
+            /// <summary>The names the script binds (see the constructor).</summary>
+            readonly HashSet<String> Bound = new HashSet<String>(StringComparer.Ordinal);
+            static readonly HashSet<String> DeclWords = new HashSet<String>(StringComparer.Ordinal) { "const", "let", "var", "class", "function" };
             /// <summary>Names bound to the native confirm / alert / prompt (const ask = window.confirm, const { confirm: ask } = window).</summary>
             public readonly Dictionary<String, String> NativeAliases = new Dictionary<String, String>(StringComparer.Ordinal);
 
             public Flow(Toks toks)
             {
                 t = toks;
+                //  The names this script binds (declarations, assignments, arrow and function parameters): a method call on a name it doesn't
+                //  bind (Log.Add with Log of another file) is not resolved to a method of this file
+                for (int i = 0; i < t.N; ++i)
+                    if (t.Id(i) && ((t.Id(i - 1) && DeclWords.Contains(t.Tx(i - 1))) || (t.P(i + 1, "=") && !t.P(i - 1, ".")) || t.P(i + 1, "=>")
+                        || ((t.P(i - 1, "(") || t.P(i - 1, ",")) && (t.P(i + 1, ",") || t.P(i + 1, ")") || t.P(i + 1, "=")))))
+                        Bound.Add(t.Tx(i));
                 for (int i = 0; i < t.N; ++i)
                 {
                     bool start = t.Id(i, "function") && !t.Id(i - 1, "async")
@@ -472,8 +481,13 @@ namespace SwWeb.Checking
                     {
                         if (!t.P(j - 1, "."))
                             g = gs[0];
-                        else if ((t.Id(j - 2, "this") || (t.Id(j - 2) && !t.Id(j - 2, "Sw") && !t.P(j - 3, ".") && !t.P(j - 3, "?."))) && (name.Length > 2))
-                            g = gs.FirstOrDefault(x => x.IsMethod);
+                        else if ((t.Id(j - 2, "this") || (t.Id(j - 2) && !t.Id(j - 2, "Sw") && Bound.Contains(t.Tx(j - 2)) && !t.P(j - 3, ".") && !t.P(j - 3, "?."))) && (name.Length > 2))
+                        {
+                            //  The receiver isn't resolved: with several methods of that name in the file (Log.Clear, AiPanel.Clear) only when all of
+                            //  them start a request (else a sync method of another object would make every call of the name a request)
+                            var ms = gs.Where(x => x.IsMethod).ToList();
+                            g = ms.Count <= 1 || ms.All(m => Of(m, depth + 1, visiting).Reqs.Any(r => !r.Deferred)) ? ms.FirstOrDefault() : null;
+                        }
                     }
                     if (g != null)
                     {

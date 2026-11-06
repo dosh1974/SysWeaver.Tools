@@ -78,6 +78,8 @@
 --sw-elev-0
 --sw-elev-1
 --sw-elev-2
+--sw-fader-cap
+--sw-fader-cap-w
 --sw-faint
 --sw-fg
 --sw-focus
@@ -93,6 +95,7 @@
 --sw-hover
 --sw-icon
 --sw-info
+--sw-kb-inset
 --sw-label-w
 --sw-ld-list-w
 --sw-lh
@@ -150,6 +153,7 @@
 --sw-sheet-dy
 --sw-sheet-h
 --sw-shell-accent
+--sw-shell-bar-w
 --sw-shell-border
 --sw-shell-border-input
 --sw-shell-border-strong
@@ -226,10 +230,12 @@
 --sw-text-accent
 --sw-text-lg
 --sw-text-md
+--sw-text-scale
 --sw-text-sm
 --sw-text-xl
 --sw-text-xs
 --sw-theme-dark
+--sw-theme-density
 --sw-theme-light
 --sw-toast-danger
 --sw-toast-dx
@@ -239,6 +245,7 @@
 --sw-toast-warning
 --sw-top-h
 --sw-touch
+--sw-view-h
 --sw-warning
 --sw-warning-soft
 --sw-weave-scale

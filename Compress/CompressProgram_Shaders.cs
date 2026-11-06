@@ -46,6 +46,8 @@ namespace SysWeaver
             public string type;
             public string desc;
             public string name;
+            public string unit;
+            public string format;
         }
 
 #pragma warning restore CS0649
@@ -464,7 +466,7 @@ namespace SysWeaver
         #endregion
 
         /// <summary>
-        /// A "var: {...}" annotation with the keys the parser reads (name, desc, type, min, max, step) in compact form, null if it can't be parsed
+        /// A "var: {...}" annotation with the keys the parser reads (name, desc, type, min, max, step, unit, format) in compact form, null if it can't be parsed
         /// </summary>
         static String CompactAnnotation(String comment)
         {
@@ -498,6 +500,10 @@ namespace SysWeaver
                     app("name:", desc.name);
                 if (!String.IsNullOrEmpty(desc.desc))
                     app("desc:", desc.desc);
+                if (!String.IsNullOrEmpty(desc.unit))
+                    app("unit:", desc.unit);
+                if (!String.IsNullOrEmpty(desc.format))
+                    app("format:", desc.format);
                 nl.Append('}');
                 return nl.ToString();
             }

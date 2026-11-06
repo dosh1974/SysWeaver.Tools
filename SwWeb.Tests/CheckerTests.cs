@@ -273,6 +273,20 @@ namespace SwWeb.Tests
             Assert.Equal(1, r.FilesSkipped);
         }
 
+        [Fact]
+        public void CheckFolderPageGlobalsAreNoLegacyUse()
+        {
+            //  A legacy name (App) that a script of the page declares at its top level is the page's own global, also in its other scripts
+            using var f = new TestFolder();
+            f.Write("sw/core.js", Header + "var Sw = {};");
+            f.Write("common/common.js", Header + "function App() {}");
+            f.Write("page/ed.html", "<html><head><script src=\"../sw/core.js\"></script><script defer src=\"a.js\"></script><script defer src=\"b.js\"></script></head><body></body></html>");
+            f.Write("page/a.js", Header + "App.Start(); sendRequest(1);");
+            f.Write("page/b.js", Header + "const App = { Start() {} }; window.App = App;");
+            var r = Checker.CheckFolder(f.Root, new CheckOptions { Strict = true });
+            Assert.Equal(new[] { "page/a.js legacy-global sendRequest" }, r.Findings.Where(x => x.Rule.Id == "legacy-global").Select(x => x.Path + " " + x.Rule.Id + " " + x.Message.Split('"')[1]).ToArray());
+        }
+
         static String[] Legacy(String code)
         {
             var f = new List<Finding>();
