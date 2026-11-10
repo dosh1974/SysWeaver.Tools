@@ -121,6 +121,7 @@
   <Folder Name="/_SysWeaver/Internet/">
     <Project Path="../SysWeaver/Internet/SysWeaver.WebBrowser.Cef/SysWeaver.WebBrowser.Cef.csproj" />
     <Project Path="../SysWeaver/Internet/SysWeaver.WebBrowser.WebView2/SysWeaver.WebBrowser.WebView2.csproj" />
+    <Project Path="../SysWeaver/Internet/SysWeaver.Browser.Playwright/SysWeaver.WebBrowser.Playwright.csproj" />
   </Folder>
   <Folder Name="/_SysWeaver/Platform/">
     <Project Path="../SysWeaver/Platform/SysWeaver.Common.Linux/SysWeaver.Common.Linux.csproj" />
