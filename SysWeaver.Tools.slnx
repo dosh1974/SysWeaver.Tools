@@ -153,6 +153,7 @@
   <Project Path="OnDuplicates/OnDuplicates.csproj" />
   <Project Path="RunComfyUi/RunComfyUi.csproj" />
   <Project Path="SearchAndReplaceAll/SearchAndReplaceAll.csproj" />
+  <Project Path="SeedMatch/SeedMatch.csproj" />
   <Project Path="SvgOpt/SvgOpt.csproj" />
   <Project Path="SwCurl/SwCurl.csproj" />
   <Project Path="SwSyncTool/SwSyncTool.csproj" />

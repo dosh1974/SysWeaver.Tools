@@ -38,6 +38,7 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | [OnDuplicates](OnDuplicates/README.md) | `OnDuplicates` | Finds files with identical content in folder trees and lists them, or runs a command for each duplicate. |
 | [RunComfyUi](RunComfyUi/README.md) | `RunComfyUi` | Runs a ComfyUI workflow (API format json) with its inputs as command line options and saves the results; the input and output types are generated and compiled at runtime. |
 | [SearchAndReplaceAll](SearchAndReplaceAll/README.md) | | Renames folders and files and replaces text in source files for a set of `Key=Value` replacements, ex: to turn a copied project into a new one. |
+| [SeedMatch](SeedMatch/README.md) | | Finds an app seed (`AppSeed`) whose generated application theme is closest to some given colors (ex: the colors of a logo). |
 | [SvgOpt](SvgOpt/README.md) | `svg_opt` (build) | Optimises SVG files with SysWeaver.Minifier.Svg and can write an HTML page comparing the originals with the results. |
 | [SwCurl](SwCurl/README.md) | `SwCurl` | A curl-like HTTP client for SysWeaver APIs (SysWeaver login, compression, Tor) with HTTP results as exit codes. |
 | [SwSyncTool](SwSyncTool/README.md) | `SwSyncTool` | Pushes and pulls folders to and from a SysWeaver folder sync service, and maintains local `.swcompact` archives and their chunk store. |
@@ -90,4 +91,4 @@ Tool specific codes:
 | VsClean | 3 | One or more folders couldn't be deleted (the others are deleted) |
 
 SwCurl writes the HTTP status to the console (unless `-Silent`) and, for an error status, to the `-Save` file (the status line, ex: `<404> - Not found`, then the response body).  
-SvgOpt, OnDuplicates, AcmeCertUtil and Touch only use 0-2 (Touch: 0 or 1, no arguments is a no-op).  
+SvgOpt, OnDuplicates, AcmeCertUtil and Touch only use 0-2 (Touch and SeedMatch: 0 or 1, no arguments is a no-op).  
