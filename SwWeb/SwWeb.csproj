@@ -2,8 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <RootNamespace>SwWeb</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Features>runtime-async=on</Features>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,7 +4,7 @@
        Syntax: HttpBench [options] [report_name], see README.md -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <AssemblyName>HttpBench</AssemblyName>
     <RootNamespace>SysWeaver.HttpBench</RootNamespace>
     <!-- The help text of the options is read from the xml documentation -->
@@ -13,6 +13,10 @@
     <IsPackable>false</IsPackable>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Features>runtime-async=on</Features>
   </PropertyGroup>
 
   <!-- A lean client: no distributed tracing (activities, traceparent headers) in HttpClient -->
