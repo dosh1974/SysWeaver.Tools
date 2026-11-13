@@ -30,7 +30,7 @@ The prebuilt copy in [`SysWeaver/_tools/compress`](https://github.com/dosh1974/S
     - `main`, `mainImage` and `vertexMain` (the optional vertex stage) are entry points; the snippet macros the effect defines (`#define EW_SDF(p) map(p)`) are kept with the functions they use, and functions named like snippets (`Ew…`) keep their names; one top level declaration per line (snippets are inserted by line when the effect is built)
     - conditionals on compiler macros (`#if __VERSION__ >= 300`, they differ between the GLSL ES 3.00 / 1.00 builds) are kept as is if they only contain directives
     - with `-MinifyShaders`: if a kept define is used by a conditional (directly or through another macro), or a compiler macro conditional contains code, the shader is only stripped; the shader_minifier output (with and without aggressive inlining) is used only if it's smaller than stripping, and the source if nothing is smaller
-    - the parser's candidate rules are mirrored in `CompressProgram_Shaders.cs` (keep them in sync with EffectWeaver.Common `ShaderParser`); bumping `ShaderTypeVersion` re-processes the cached shaders
+    - the parser's candidate rules are mirrored in `CompressProgram_Shaders.cs` (keep them in sync with `ShaderParser` in SysWeaver.Media.Shader, was EffectWeaver.Common); bumping `ShaderTypeVersion` re-processes the cached shaders
 - Files whose type doesn't benefit from compression (by MIME type) are only copied, unless `-Force` is used (`.jpg`, `.jpeg` and `.ico` are always compressed)
 - Results are cached per source file, and outputs are only written when they changed, so incremental builds are fast
 - Files are processed in parallel (sequentially in DEBUG builds)

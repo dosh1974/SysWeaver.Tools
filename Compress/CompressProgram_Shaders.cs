@@ -52,7 +52,7 @@ namespace SysWeaver
 
 #pragma warning restore CS0649
 
-        #region Effect Weaver shader parser rules (keep in sync with EffectWeaver.Common/Shaders/ShaderParser.cs)
+        #region Effect Weaver shader parser rules (keep in sync with SysWeaver.Media.Shader/ShaderParser.cs, was EffectWeaver.Common/Shaders)
 
         static readonly Regex DefineRx = new Regex(@"^#\s*define\s+([A-Za-z_]\w*)\b(?!\()(.*)$", RegexOptions.Compiled);
         static readonly Regex ConstRx = new Regex(@"^const\s+(?:(highp|mediump|lowp)\s+)?(float|int|bool|vec2|vec3|vec4)\s+([A-Za-z_]\w*)\s*=\s*([^;]+);", RegexOptions.Compiled);
