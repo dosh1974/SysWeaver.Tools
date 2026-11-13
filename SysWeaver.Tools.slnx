@@ -30,6 +30,8 @@
     <Project Path="../SysWeaver/SysWeaver.FileDatabase/SysWeaver.FileDatabase.csproj" />
     <Project Path="../SysWeaver/SysWeaver.FileTranslation/SysWeaver.FileTranslation.csproj" />
     <Project Path="../SysWeaver/SysWeaver.FolderSync/SysWeaver.FolderSync.csproj" />
+    <Project Path="../SysWeaver/SysWeaver.HttpBench.Core/SysWeaver.HttpBench.Core.csproj" />
+    <Project Path="../SysWeaver/SysWeaver.HttpBench/SysWeaver.HttpBench.csproj" />
     <Project Path="../SysWeaver/SysWeaver.HttpServer.ExploreModule/SysWeaver.HttpServer.ExploreModule.csproj" />
     <Project Path="../SysWeaver/SysWeaver.HttpServer.IconModule/SysWeaver.HttpServer.IconModule.csproj" />
     <Project Path="../SysWeaver/SysWeaver.HttpServer.IsoDataModule/SysWeaver.HttpServer.IsoDataModule.csproj" />
@@ -150,9 +152,11 @@
   <Project Path="Compress/Compress.csproj" />
   <Project Path="Decompress/Decompress.csproj" />
   <Project Path="FolderSync/FolderSync.csproj" />
+  <Project Path="HttpBench/HttpBench.csproj" />
   <Project Path="OnDuplicates/OnDuplicates.csproj" />
   <Project Path="RunComfyUi/RunComfyUi.csproj" />
   <Project Path="SearchAndReplaceAll/SearchAndReplaceAll.csproj" />
+  <Project Path="SetDotNetVersion/SetDotNetVersion.csproj" />
   <Project Path="SvgOpt/SvgOpt.csproj" />
   <Project Path="SwCurl/SwCurl.csproj" />
   <Project Path="SwSyncTool/SwSyncTool.csproj" />

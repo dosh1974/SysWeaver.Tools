@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- HttpBench: performance test a SysWeaver web server from the command line, the results are written as a markdown report.
+       Syntax: HttpBench [options] [report_name], see README.md -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>HttpBench</AssemblyName>
+    <RootNamespace>SysWeaver.HttpBench</RootNamespace>
+    <!-- The help text of the options is read from the xml documentation -->
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <IsPackable>false</IsPackable>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <!-- A lean client: no distributed tracing (activities, traceparent headers) in HttpClient -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Net.Http.EnableActivityPropagation" Value="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.HttpBench.Core\SysWeaver.HttpBench.Core.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\SysWeaver.CommandLine\SysWeaver.CommandLine.csproj" />
+  </ItemGroup>
+
+</Project>

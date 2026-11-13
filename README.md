@@ -35,9 +35,11 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | [Compress](Compress/README.md) | `compress` (build) | Pre-compresses files into side-by-side compressed copies (Brotli, gzip, zstd, deflate), optionally minifying web files, recompressing PNGs and optimising shaders first. |
 | [Decompress](Decompress/README.md) | `decompress` | Decompresses Brotli, gzip, zstd and deflate compressed files (the reverse of Compress). |
 | [FolderSync](FolderSync/README.md) | | Pushes one or more local folders to a managed folder on a SysWeaver folder sync service (push-only). |
+| [HttpBench](HttpBench/README.md) | `HttpBench` | Performance tests a SysWeaver web server from the command line (options or a parameter file exported from the HTTP bench page) and writes the results as a markdown report. |
 | [OnDuplicates](OnDuplicates/README.md) | `OnDuplicates` | Finds files with identical content in folder trees and lists them, or runs a command for each duplicate. |
 | [RunComfyUi](RunComfyUi/README.md) | `RunComfyUi` | Runs a ComfyUI workflow (API format json) with its inputs as command line options and saves the results; the input and output types are generated and compiled at runtime. |
 | [SearchAndReplaceAll](SearchAndReplaceAll/README.md) | | Renames folders and files and replaces text in source files for a set of `Key=Value` replacements, ex: to turn a copied project into a new one. |
+| [SetDotNetVersion](SetDotNetVersion/README.md) | `SetDotNetVersion` | Changes the target framework (`net8.0` - `net11.0`) of all projects in a folder tree and optionally enables .NET 11 runtime async. |
 | [SvgOpt](SvgOpt/README.md) | `svg_opt` (build) | Optimises SVG files with SysWeaver.Minifier.Svg and can write an HTML page comparing the originals with the results. |
 | [SwCurl](SwCurl/README.md) | `SwCurl` | A curl-like HTTP client for SysWeaver APIs (SysWeaver login, compression, Tor) with HTTP results as exit codes. |
 | [SwSyncTool](SwSyncTool/README.md) | `SwSyncTool` | Pushes and pulls folders to and from a SysWeaver folder sync service, and maintains local `.swcompact` archives and their chunk store. |
@@ -76,6 +78,8 @@ Tool specific codes:
 | RunComfyUi | 3 | Running the workflow failed (connection, server or workflow error, cancelled) |
 | RunComfyUi | 4 | The workflow returned no results |
 | Decompress | 3 | A file couldn't be decompressed (invalid or truncated data) |
+| HttpBench | 3 | The test was stopped with Ctrl+C (the report of what was measured is still written); 1 = the test failed or the report could not be written |
+| HttpBench | 4 | The server didn't answer within `-WaitForServer` seconds |
 | SwCurl | 0 | The response has a 2xx status |
 | SwCurl | 3 | The response has a 4xx status (client error) |
 | SwCurl | 4 | The response has a 5xx status (server error) |
@@ -86,6 +90,7 @@ Tool specific codes:
 | FolderSync | 3 | The sync completed but reported errors |
 | SwWeb | 3 | Problems found: `check` reported errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, or a bundle definition / source is invalid, `migrate` warnings that need manual follow-up |
 | SwWeb | 4 | `bundle`: one or more source files listed in the manifest don't exist |
+| SetDotNetVersion | 3 | One or more files couldn't be processed (the others are) |
 | SearchAndReplaceAll | 3 | Replacing failed in one or more files (the others are processed) |
 | VsClean | 3 | One or more folders couldn't be deleted (the others are deleted) |
 
