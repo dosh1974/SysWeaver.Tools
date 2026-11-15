@@ -44,13 +44,13 @@ namespace SysWeaver.HttpBench
         public String Values;
 
         /// <summary>
-        /// The compression of the api values: None (default), br, gzip, deflate (zstd when available).
+        /// The compression of the api values: None (default), br, zstd, gzip, deflate (zstd needs .NET 11 or later, which HttpBench is built for).
         /// POST: the Content-Encoding of the body. GET: the "_" + letter + base64url query string payload.
         /// </summary>
         public String ValueCompression;
 
         /// <summary>
-        /// The accepted response compressions (the Accept-Encoding header): All (default, like a browser), None, or one of br, gzip, deflate (zstd).
+        /// The accepted response compressions (the Accept-Encoding header): All (default, like a browser), None, or one of br, zstd, gzip, deflate.
         /// </summary>
         public String AcceptEncoding;
 

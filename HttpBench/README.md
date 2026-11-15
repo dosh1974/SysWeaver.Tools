@@ -29,8 +29,8 @@ The parameters are taken from (later wins): the defaults, the parameter file (`-
 | `-Workers <n>` | 16 | Workers: clients that each send one request at a time, with their own connection and session |
 | `-Apis <list>` | Default | The end points: a `;` separated list of `All`, `Default`, `None`, modules (`Files`, `Images`, `Application`, `Auth`, `Types`, `Explore`, `Errors`) and end points (`Application.GetMenu` or `GetMenu`); `!` removes. A list that starts with a removal edits the selection of the file, ex: `"All;!Errors"`, `"!Explore"` |
 | `-Values POST\|GET` | POST | How the apis that take a value get it: the json body or the query string |
-| `-ValueCompression <c>` | None | Compression of the api values: None, br, gzip, deflate |
-| `-AcceptEncoding <c>` | All | The Accept-Encoding header: All, None, br, gzip, deflate |
+| `-ValueCompression <c>` | None | Compression of the api values: None, br, zstd, gzip, deflate |
+| `-AcceptEncoding <c>` | All | The Accept-Encoding header: All, None, br, zstd, gzip, deflate |
 | `-AnyCertificate true\|false` | true | Accept self signed, LAN and expired https certificates |
 | `-Timeout <s>` | 30 | Time out of one request (counted as an error) |
 | `-Drain <s>` | 5 | Time for the requests in flight at the end |
