@@ -1,0 +1,8 @@
+<Project>
+  <ItemGroup>
+    <!-- crossgen2 in the .NET 11 SDK (11.0.100) crashes with "An item with the same key has already been added"
+         (duplicate DelayLoadHelperImport) when ReadyToRun-compiling the obfuscated GemBox assembly.
+         Harmless for projects that don't reference GemBox. -->
+    <PublishReadyToRunExclude Include="GemBox.Spreadsheet.dll" />
+  </ItemGroup>
+</Project>
