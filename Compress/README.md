@@ -31,6 +31,7 @@ The prebuilt copy in [`SysWeaver/_tools/compress`](https://github.com/dosh1974/S
     - conditionals on compiler macros (`#if __VERSION__ >= 300`, they differ between the GLSL ES 3.00 / 1.00 builds) are kept as is if they only contain directives
     - with `-MinifyShaders`: if a kept define is used by a conditional (directly or through another macro), or a compiler macro conditional contains code, the shader is only stripped; the shader_minifier output (with and without aggressive inlining) is used only if it's smaller than stripping, and the source if nothing is smaller
     - the parser's candidate rules are mirrored in `CompressProgram_Shaders.cs` (keep them in sync with `ShaderParser` in SysWeaver.Media.Shader, was EffectWeaver.Common); bumping `ShaderTypeVersion` re-processes the cached shaders
+- JavaScript conversion (`-JsTarget`, off by default): `.js` / `.mjs` files (and the inline scripts and event handlers of `.html` / `.htm` / `.xhtml` files, unless `-JsInHtml false`) are converted to an older JavaScript version with [SysWeaver.Converter.Js](https://github.com/dosh1974/SysWeaver/blob/main/Converter/SysWeaver.Converter.Js/README.md) for old / embedded browsers, ex: `-JsTarget es5` or `-JsTarget "chrome 69"`; `-JsInclude` / `-JsExclude` force features on / off. The pipeline is **source → [minify] → [convert] → [compress]**, every step optional. The converted output is minified, without comments, with the helpers inlined and polyfills for missing built-ins. Conversion problems are printed as `<file> : warning JSC001 : ...` (the position refers to the minified file if the file was minified); a failed conversion ships the unconverted file with `warning CMP002` (`-FailOnTypeError`: `error CMP002`, exit code 4). The results are cached separately from the minify step (keyed by the converter version and the Js options)
 - Files whose type doesn't benefit from compression (by MIME type) are only copied, unless `-Force` is used (`.jpg`, `.jpeg` and `.ico` are always compressed)
 - Results are cached per source file, and outputs are only written when they changed, so incremental builds are fast
 - Files are processed in parallel (sequentially in DEBUG builds)
@@ -57,8 +58,13 @@ Compress [options] <SourceFiles> [DestFolder]
   -OptimizeWebFiles false  Don't minify web files (also -RecompressImages false, -OptimizeShaders false)
   -FailOnTypeError         A failed minify / shader minifier / png step fails the run (exit code 4) instead of shipping the original
   -MinifyShaders true      Also minify shaders with shader_minifier when smaller (verify the results, see above)
+  -JsTarget <target>       Convert JavaScript to an older version (es5, es2015, es2017, "chrome 69" ...)
+  -JsInclude / -JsExclude  JavaScript features to always / never transform (comma separated)
+  -JsInHtml false          Don't convert the scripts in html files
   -?                       Help (all options)
 ```
+
+Ex: `Compress -JsTarget "chrome 69" -Methods br .\srcWeb\*+ .\web` minifies, converts and Brotli compresses the web files for devices with an old browser.
 
 Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method (`-OnlyBest`), 4 if a type specific step failed with `-FailOnTypeError`, see [EXIT CODES](../README.md#exit-codes).
 
@@ -68,7 +74,7 @@ Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method
 
 - The helper executables in [`tools/`](tools) (`minify.exe`, `ZopfliPng.exe`, `preprocessor.exe`, `shader_minifier.exe`; `glsl_optimizer.exe` is shipped but currently unused) are Windows binaries copied next to the tool; if one fails (exit code, or an empty shader_minifier output), the file is reported with a warning (`warning CMP001`) and compressed without the type specific step (`-FailOnTypeError`: the run fails)
 - Temporary `.js` files (after removing the `//DEBUG_BEGIN` blocks) go to a folder of the process below `SysWeaver_JsTemp` (the `TempFolder` of the machine), so parallel Compress runs don't share one
-- Unknown names in `-Methods` are silently ignored; `org` (documented as "copy the original") and an empty entry (ex: a trailing comma) currently make the option validation throw, which ends with exit code 2
+- Unknown names in `-Methods` are silently ignored; `org` (or an empty entry, ex: a trailing comma) writes the original (processed) file next to the compressed ones
 - A file named `typescript.js` is copied as is (not minified)
 
 ## Folder layout
@@ -80,5 +86,5 @@ Exit codes: 0-2 as all tools, 3 if a file couldn't be compressed with any method
 ## Relationships
 
 - **Project:** [`Compress.csproj`](Compress.csproj)
-- **Builds on:** [SysWeaver.CommandLine](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.CommandLine/README.md), [SysWeaver.Common](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Common/README.md), [SysWeaver.Compression](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Compression/README.md), [SysWeaver.Compression.BrotliNativeNET](https://github.com/dosh1974/SysWeaver/blob/main/Compression/SysWeaver.Compression.BrotliNativeNET/README.md), [SysWeaver.Compression.ZstdSharp](https://github.com/dosh1974/SysWeaver/blob/main/Compression/SysWeaver.Compression.ZstdSharp/README.md), [SysWeaver.Serialization](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Serialization/README.md), [SysWeaver.Serialization.NewtonsoftJson](https://github.com/dosh1974/SysWeaver/blob/main/Serialization/SysWeaver.Serialization.NewtonsoftJson/README.md), [SysWeaver.Storage](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Storage/README.md)
+- **Builds on:** [SysWeaver.CommandLine](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.CommandLine/README.md), [SysWeaver.Common](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Common/README.md), [SysWeaver.Compression](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Compression/README.md), [SysWeaver.Compression.BrotliNativeNET](https://github.com/dosh1974/SysWeaver/blob/main/Compression/SysWeaver.Compression.BrotliNativeNET/README.md), [SysWeaver.Compression.ZstdSharp](https://github.com/dosh1974/SysWeaver/blob/main/Compression/SysWeaver.Compression.ZstdSharp/README.md), [SysWeaver.Converter.Js](https://github.com/dosh1974/SysWeaver/blob/main/Converter/SysWeaver.Converter.Js/README.md), [SysWeaver.Serialization](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Serialization/README.md), [SysWeaver.Serialization.NewtonsoftJson](https://github.com/dosh1974/SysWeaver/blob/main/Serialization/SysWeaver.Serialization.NewtonsoftJson/README.md), [SysWeaver.Storage](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.Storage/README.md)
 - **Third-party:** bundled executables: [minify](https://github.com/tdewolff/minify), [ZopfliPng](https://github.com/google/zopfli), [shader_minifier](https://github.com/laurentlb/shader-minifier) and a GLSL preprocessor

@@ -120,6 +120,9 @@
     <Project Path="../SysWeaver/Compression/SysWeaver.Compression.BrotliNativeNET/SysWeaver.Compression.BrotliNativeNET.csproj" />
     <Project Path="../SysWeaver/Compression/SysWeaver.Compression.ZstdSharp/SysWeaver.Compression.ZstdSharp.csproj" />
   </Folder>
+  <Folder Name="/_SysWeaver/Converter/">
+    <Project Path="../SysWeaver/Converter/SysWeaver.Converter.Js/SysWeaver.Converter.Js.csproj" />
+  </Folder>
   <Folder Name="/_SysWeaver/Internet/">
     <Project Path="../SysWeaver/Internet/SysWeaver.WebBrowser.Cef/SysWeaver.WebBrowser.Cef.csproj" />
     <Project Path="../SysWeaver/Internet/SysWeaver.WebBrowser.WebView2/SysWeaver.WebBrowser.WebView2.csproj" />
@@ -153,6 +156,7 @@
   <Project Path="Decompress/Decompress.csproj" />
   <Project Path="FolderSync/FolderSync.csproj" />
   <Project Path="HttpBench/HttpBench.csproj" />
+  <Project Path="JsConvert/JsConvert.csproj" />
   <Project Path="OnDuplicates/OnDuplicates.csproj" />
   <Project Path="RunComfyUi/RunComfyUi.csproj" />
   <Project Path="SearchAndReplaceAll/SearchAndReplaceAll.csproj" />

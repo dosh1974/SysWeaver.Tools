@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\SysWeaver\Serialization\SysWeaver.Serialization.NewtonsoftJson\SysWeaver.Serialization.NewtonsoftJson.csproj" />
     <ProjectReference Include="..\..\SysWeaver\SysWeaver.CommandLine\SysWeaver.CommandLine.csproj" />
+    <ProjectReference Include="..\..\SysWeaver\Converter\SysWeaver.Converter.Js\SysWeaver.Converter.Js.csproj" />
     <ProjectReference Include="..\..\SysWeaver\SysWeaver.Common\SysWeaver.Common.csproj" />
     <ProjectReference Include="..\..\SysWeaver\Compression\SysWeaver.Compression.BrotliNativeNET\SysWeaver.Compression.BrotliNativeNET.csproj" />
     <ProjectReference Include="..\..\SysWeaver\Compression\SysWeaver.Compression.ZstdSharp\SysWeaver.Compression.ZstdSharp.csproj" />

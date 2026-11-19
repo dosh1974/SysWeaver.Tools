@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.RegularExpressions;
+using SysWeaver.Converter.Js;
 
 namespace SysWeaver
 {
@@ -300,6 +301,56 @@ namespace SysWeaver
             }, TypeCacheDays, TypeVersion + (ShadersCompressors.ContainsKey(extension) ? "s" + ShaderTypeVersion : "") + opt.CacheKey);
         }
 
+        static readonly IReadOnlySet<String> JsExtensions = ReadOnlyData.Set(".js", ".mjs");
+
+        static readonly IReadOnlySet<String> HtmlExtensions = ReadOnlyData.Set(".html", ".htm", ".xhtml");
+
+        /// <summary>
+        /// Convert a JavaScript (or html) file to the JsTarget (cached), returns null or a negative size if the conversion failed.
+        /// Diagnostics (warnings and errors) are printed in the canonical "origin : warning code : text" form (MSBuild).
+        /// </summary>
+        static Task<CompMeta> GetJsConverted(String sourceFile, String originalFile, String extension, CompressParams opt)
+        {
+            return FileMetaData.ProcessAsync<CompMeta>("JsConvert" + extension, sourceFile, (file, baseName, data) =>
+            {
+                if (data != null)
+                {
+                    var fi = new FileInfo(data.Filename);
+                    if (fi.Exists && (fi.Length == data.Size))
+                        return null;
+                }
+                var dest = baseName + "JsConv" + extension;
+                data = new CompMeta
+                {
+                    Filename = dest,
+                };
+                data.SrcSize = new FileInfo(sourceFile).Length;
+                var src = File.ReadAllText(sourceFile);
+                var r = HtmlExtensions.Contains(extension)
+                    ? JsHtmlConverter.Convert(src, opt.JsParams)
+                    : JsConverter.Convert(src, opt.JsParams);
+                var full = Path.GetFullPath(originalFile);
+                //  The line numbers refer to the minimized file if the file was minimized first
+                var minimized = !String.Equals(Path.GetFullPath(sourceFile), full, StringComparison.OrdinalIgnoreCase);
+                foreach (var d in r.Diagnostics)
+                {
+                    if (d.Level == JsDiagnosticLevel.Info)
+                        continue;
+                    var where = d.Line > 0 && !minimized ? "(" + d.Line + "," + d.Column + ")" : "";
+                    var kind = d.Level == JsDiagnosticLevel.Error ? "error" : "warning";
+                    Console.Error.WriteLine(full + where + " : " + kind + " JSC001 : " + d.Message + (minimized && d.Line > 0 ? " (minimized file, line " + d.Line + ", column " + d.Column + ")" : ""));
+                }
+                if (r.Code == null)
+                {
+                    data.Size = -1;
+                    return data;
+                }
+                File.WriteAllText(dest, r.Code, new UTF8Encoding(false));
+                data.Size = new FileInfo(dest).Length;
+                return data;
+            }, TypeCacheDays, opt.JsCacheKey);
+        }
+
         static bool Copy(String source, String dest)
         {
             var fs = new FileInfo(source);
@@ -333,6 +384,7 @@ namespace SysWeaver
         {
             bool copyOriginal = opt.CopyOriginal;
             bool onlyBetter = opt.OnlyBetter;
+            var originalFile = sourceFile;
             var filename = Path.GetFileName(sourceFile);
             var destFilename = Path.Combine(destFolder, filename);
             var srcSize = new FileInfo(sourceFile).Length;
@@ -375,6 +427,25 @@ namespace SysWeaver
                     }
                     break;
                 }
+            }
+            //  Convert JavaScript to an older version (after minimizing, before compressing)
+            if (opt.JsParams != null && (JsExtensions.Contains(key) || (opt.JsInHtml && HtmlExtensions.Contains(key))))
+            {
+                var g = await GetJsConverted(sourceFile, originalFile, key, opt).ConfigureAwait(false);
+                if ((g == null) || (g.Size < 0))
+                {
+                    var full = Path.GetFullPath(originalFile);
+                    if (opt.FailOnTypeError)
+                    {
+                        msg.AddMessage(relSource.ToQuoted() + " Failed to convert the JavaScript!", MessageLevels.Error);
+                        Console.Error.WriteLine(full + " : error CMP002 : the JavaScript conversion (-JsTarget) failed (-FailOnTypeError)");
+                        return ExitTypeCompressFailed;
+                    }
+                    msg.AddMessage(relSource.ToQuoted() + " Failed to convert the JavaScript!", MessageLevels.Warning);
+                    Console.Error.WriteLine(full + " : warning CMP002 : the JavaScript conversion (-JsTarget) failed: the unconverted file is compressed and shipped instead");
+                }
+                else
+                    sourceFile = g.Filename;
             }
             var uncompressable = !mime.Item2;
             if (opt.Force)
@@ -481,7 +552,8 @@ namespace SysWeaver
                 if (comp != null)
                     hs.Add(comp);
             }
-            opt.CompTypes = hs.OrderBy(x => x.HttpCode).ToArray();
+            //  null is "org" (the original), first (it threw a NullReferenceException when combined with other methods, ex: "org,br")
+            opt.CompTypes = hs.OrderBy(x => x?.HttpCode ?? "").ToArray();
             var tc = new List<Tuple<bool, IReadOnlyDictionary<string, TypeCompressor>>>();
             opt.TypeCompressors = tc;
             if (opt.RecompressImages)
@@ -490,6 +562,35 @@ namespace SysWeaver
                 tc.Add(Tuple.Create(false, WebCompressors));
             if (opt.OptimizeShaders)
                 tc.Add(Tuple.Create(false, ShadersCompressors));
+            //  JavaScript conversion
+            if (!String.IsNullOrWhiteSpace(opt.JsTarget))
+            {
+                var jp = new JsConverterParams
+                {
+                    Target = opt.JsTarget,
+                    Include = opt.JsInclude,
+                    Exclude = opt.JsExclude,
+                    Indent = 0,
+                    Minify = true,
+                    Comments = JsComments.None,
+                    BuiltIns = JsBuiltIns.Polyfill,
+                };
+                try
+                {
+                    JsConverter.GetFeatures(jp, out _);
+                }
+                catch (ArgumentException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Invalid JsTarget / JsInclude / JsExclude: " + ex.Message);
+                    Console.ResetColor();
+                    return FilesToFolderTool.ExitInvalidArguments;
+                }
+                opt.JsParams = jp;
+                //  The key is part of a file name: a (stable) hash of the converter version and the options
+                var keyText = String.Join("|", JsConverter.Version, jp.Target, jp.Include, jp.Exclude, Version);
+                opt.JsCacheKey = "_" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(keyText)), 0, 8);
+            }
             return 0;
         }
 

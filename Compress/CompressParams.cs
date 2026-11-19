@@ -66,6 +66,35 @@ namespace SysWeaver
         /// </summary>
         public bool FailOnTypeError = false;
 
+        /// <summary>
+        /// If set, .js / .mjs files (and html files, see JsInHtml) are converted to this JavaScript target with SysWeaver.Converter.Js (after minimizing, before compressing),
+        /// ex: "es5", "es2017", "chrome 69", "chrome 69, safari 12".
+        /// The output is minified without comments and polyfills are added for missing built-ins.
+        /// </summary>
+        public String JsTarget = null;
+
+        /// <summary>
+        /// JavaScript features to always transform (even if JsTarget supports them), separated by ',' (see JsConvert / SysWeaver.Converter.Js for the feature names).
+        /// </summary>
+        public String JsInclude = null;
+
+        /// <summary>
+        /// JavaScript features to never transform (even if JsTarget doesn't support them), separated by ','.
+        /// </summary>
+        public String JsExclude = null;
+
+        /// <summary>
+        /// If true (and JsTarget is set), the inline scripts and event handlers of .html / .htm / .xhtml files are converted too.
+        /// </summary>
+        public bool JsInHtml = true;
+
+        internal SysWeaver.Converter.Js.JsConverterParams JsParams;
+
+        /// <summary>
+        /// The cache key of the JavaScript conversion step
+        /// </summary>
+        internal String JsCacheKey;
+
         internal ICompType[] CompTypes;
 
         internal List<Tuple<bool, IReadOnlyDictionary<String, CompressProgram.TypeCompressor>>> TypeCompressors;
