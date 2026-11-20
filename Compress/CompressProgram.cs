@@ -170,7 +170,7 @@ namespace SysWeaver
                 return 0;
             }
 //            return ExternalProcess.Run(ToolMinify, "--js-keep-var-names --js-version 2019 --html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
-            var res = ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
+            var res = ExternalProcess.Run(ToolMinify, "--html-keep-default-attrvals --html-keep-quotes --html-keep-document-tags --svg-precision 0 --js-precision 0 --json-precision 0 --json-keep-numbers -o " + dest.ToQuoted() + " " + source.ToQuoted());
             if (tempFile != null)
             {
                 //  The process folder goes when its last file goes (another file of this process still in use: kept, deleted later)
