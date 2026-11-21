@@ -30,7 +30,7 @@ Push and Pull use the [SysWeaver.FolderSync](https://github.com/dosh1974/SysWeav
   - `Push <Server> <RepoName> <LocalFolder>..` — update a managed folder on the sync service from one or more local folders (`-Ignore` masks, `-Comment`, `-OnNew` / `-OnNop` API to call afterwards with the same session)
   - `Pull <Server> <RepoName> <LocalFolder>` — update a local folder from a shared folder on the sync service
   - `Add`, `Compact`, `Expand`, `Recover`, `Verify`, `Touch`, `Stats` — add files to the local chunk store, create / expand `.swcompact` archives (`Recover` replaces missing chunks with a marker), verify them, mark their chunks as used, or show statistics; arguments are files or folders with wildcards
-  - `Report`, `QuickReport`, `Prune [days]` — report chunk store usage, or PERMANENTLY remove chunks unused for a number of days (default 400, minimum 3)
+  - `Report [days]`, `QuickReport [days]`, `Prune [days]` — report chunk store usage (`QuickReport` skips the chunk decompression), or PERMANENTLY remove chunks unused for a number of days; `days` is the number of days a chunk must be unused to count as old (default 400, minimum 3)
 - Push and Pull activate the synchronised folder unless `-NoActivate` is given, and use content-defined chunking unless `-NoCdc` is given
 - The local chunk store folders come from the SysWeaver folder configuration ([`SwSyncTool.Config.json`](SwSyncTool.Config.json), `AllFolders` / `UserFolders`) or `-Folders`
 

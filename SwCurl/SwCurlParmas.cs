@@ -8,6 +8,10 @@ namespace SwCurl
 
     #pragma warning disable CS0649
 
+    /// <summary>
+    /// The command line options of SwCurl (parsed by SysWeaver.CommandLine, the XML docs of the fields are the help text),
+    /// the credentials (User, Password, CredFile) are inherited from CredentialParams.
+    /// </summary>
     sealed class SwCurlParmas : CredentialParams
     {
         /// <summary>

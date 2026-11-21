@@ -136,7 +136,7 @@ namespace FolderSync
                         Console.WriteLine("Network bytes: " + V(res.TransferredNetworkSize) + " / " + V(res.TransferredSourceBytes) + "  ( " + (100M * res.TransferredNetworkSize / Math.Max(1, res.TransferredSourceBytes)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
                         if (res.ChunkCount > 0)
                         {
-                            Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.NewChunkCount)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
+                            Console.WriteLine("Chunks: " + V(res.NewChunkCount) + " / " + V(res.ChunkCount) + "  ( " + (100M * res.NewChunkCount / Math.Max(1, res.ChunkCount)).ToString("0.00", CultureInfo.InvariantCulture) + " % )");
                             Console.WriteLine("New chunk bytes: " + V(res.NewChunkSize));
                         }
                     }

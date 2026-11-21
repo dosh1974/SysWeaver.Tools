@@ -38,6 +38,7 @@ FolderSync [options] <Source> <Server> <Name>
   -Comment <text>                Optional comment
   -NoSwitch                      Don't switch the server to the new version
   -NoCdc                         Don't use content-defined chunking
+  -IgnoreCertErrors              Accept any server certificate (not recommended)
   -?                             Help
 ```
 
@@ -46,7 +47,6 @@ Exit codes: 0-2 as all tools (no arguments is 2), 3 if the sync completed but re
 ## Limitations and considerations
 
 - `-IgnoreCertErrors` accepts any server certificate; only use it for tests
-- The "Chunks" percentage in the summary is always 100 % (it divides the new chunk count by itself)
 
 ## Relationships
 

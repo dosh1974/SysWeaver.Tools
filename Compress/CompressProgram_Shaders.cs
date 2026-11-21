@@ -15,7 +15,7 @@ namespace SysWeaver
     /// Shader optimization (.glsl / .frag).
     /// <para>
     /// A minimized shader must work exactly like the original in Effect Weaver (Effect Saver, Effect Vj, the shader editor), so everything
-    /// its shader parser (EffectWeaver.Common ShaderParser) reads from the source is kept (unless RemoveShaderVars is set):
+    /// its shader parser (ShaderParser in SysWeaver.Media.Shader, was EffectWeaver.Common) reads from the source is kept (unless RemoveShaderVars is set):
     /// </para>
     /// <list type="bullet">
     /// <item>The tunable variable candidates: "#define NAME literal" (top level or in an "#ifndef NAME" guard) and "const T NAME = literal;" with

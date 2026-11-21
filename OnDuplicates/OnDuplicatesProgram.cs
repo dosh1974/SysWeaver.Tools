@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 namespace SysWeaver
 {
 
+    /// <summary>
+    /// OnDuplicates has no options, only the positional arguments (Folders and Action): an empty options object for CommandLine.ParseObject.
+    /// </summary>
     class Params
     {
 

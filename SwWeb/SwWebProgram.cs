@@ -8,7 +8,8 @@ using SwWeb.Checking;
 namespace SwWeb
 {
     /// <summary>
-    /// SwWeb: build, lint and migration tool for the SysWeaver web front end (bundle, check, migrate).
+    /// SwWeb: build, lint and migration tool for the SysWeaver web front end (bundle, check, migrate, upgrade, verify-build, contracts,
+    /// and the helper commands mapping, rules, tokens and icons).
     /// </summary>
     internal static class SwWebProgram
     {
@@ -30,7 +31,8 @@ namespace SwWeb
         internal const int ExitInvalidArguments = 2;
         /// <summary>
         /// Exit code: problems found: "check" found errors (or warnings with --strict), "bundle --check" found an out of date bundle,
-        /// or a bundle definition / source is invalid.
+        /// a bundle definition / source is invalid or a bundle is over its size budget, "migrate" / "upgrade" left warnings,
+        /// "verify-build" or "contracts" found a problem.
         /// </summary>
         internal const int ExitProblems = 3;
         /// <summary>

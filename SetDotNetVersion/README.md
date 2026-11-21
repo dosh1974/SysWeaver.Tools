@@ -47,7 +47,7 @@ SetDotNetVersion [Options] <Folder>
 | `-net8.0`, `-net9.0`, `-net10.0`, `-net11.0` | The target framework to set (`-net10` etc works too) |
 | `-rasync` | Enable runtime async (requires `net11.0` or later). Without a framework option it's applied to projects already targeting `net11.0`+ |
 | `-rasync-` | Disable (remove) runtime async |
-| `-dry` | Only show what would be changed |
+| `-dry` | Only show what would be changed, no files are written (also `-dryrun` or `-whatif`) |
 
 Examples:
 ```

@@ -6,11 +6,6 @@ using SwWeb.Lexing;
 namespace SwWeb.Checking
 {
     /// <summary>
-    /// Page level rules of a new-format HTML page together with its own scripts (traps that pass every file rule but break the page):
-    /// a library API used without its include (<see cref="Rule.MissingInclude"/>), an inline script that uses <c>Sw</c> before the
-    /// deferred bundles ran (<see cref="Rule.ScriptOrder"/>) and a page body without <c>sw-root</c> (<see cref="Rule.DesignSwRoot"/>).
-    /// </summary>
-    /// <summary>
     /// Which pages load which scripts and libraries (paths relative to the web root): a shared helper script (ex: ServerManager/smShared.js)
     /// may use a library in a function that only the pages that load the library call, so its uses only count when no other page of the
     /// script loads the library.
@@ -99,6 +94,11 @@ namespace SwWeb.Checking
         public readonly String Text;
     }
 
+    /// <summary>
+    /// Page level rules of a new-format HTML page together with its own scripts (traps that pass every file rule but break the page):
+    /// a library API used without its include (<see cref="Rule.MissingInclude"/>), an inline script that uses <c>Sw</c> before the
+    /// deferred bundles ran (<see cref="Rule.ScriptOrder"/>) and a page body without <c>sw-root</c> (<see cref="Rule.DesignSwRoot"/>).
+    /// </summary>
     public static class PageChecker
     {
         /// <summary>

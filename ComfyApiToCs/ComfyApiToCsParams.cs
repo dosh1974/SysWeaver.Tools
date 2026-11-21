@@ -4,6 +4,10 @@ using SysWeaver.AI;
 namespace SysWeaver
 {
 
+    /// <summary>
+    /// The command line options of ComfyApiToCs (parsed by SysWeaver.CommandLine FilesToFolderTool, the XML docs of the fields are the help text).
+    /// The values are passed on to ComfyUiTypeGenerator.
+    /// </summary>
     public sealed class ComfyApiToCsParams
     {
         /// <summary>

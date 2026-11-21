@@ -1,15 +1,29 @@
 ﻿namespace SwCurl
 {
+    /// <summary>
+    /// The compression of the request payload (the -Compression option).
+    /// </summary>
     enum SwCompression
     {
         /// <summary>
-        /// No payload compression at all.
-        /// If auth method in SysWeaver, Brotli compression is used.
+        /// Brotli if the SysWeaver login is used and the payload has a compressible MIME type, else no compression.
         /// </summary>
         Auto,
+        /// <summary>
+        /// No payload compression.
+        /// </summary>
         None,
+        /// <summary>
+        /// Brotli ("br") compression.
+        /// </summary>
         Brotli,
+        /// <summary>
+        /// Deflate compression.
+        /// </summary>
         Deflate,
+        /// <summary>
+        /// GZip compression.
+        /// </summary>
         GZip,
     }
 

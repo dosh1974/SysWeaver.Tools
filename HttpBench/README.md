@@ -6,12 +6,18 @@
 
 | | |
 |---|---|
-| **Kind** | Console tool (exe) |
-| **Engine** | [SysWeaver.HttpBench.Core](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.HttpBench.Core/README.md) |
-| **Options** | `HttpBenchOptions.cs`, parsed with `CommandLine.ParseObject` (SysWeaver.CommandLine) |
-| **Prebuilt** | [`SysWeaver/_tools/HttpBench`](https://github.com/dosh1974/SysWeaver/blob/main/_tools/README.md) (updated by `Publish_All.bat`) |
+| **Layer** | Tool (command line) |
+| **Kind** | Command line tool |
 
-## Syntax
+## Purpose
+
+Runs the load tests of the HTTP bench page from a script or a build server, against any SysWeaver server, and keeps the results as a markdown report (and optionally json) that can be compared between runs.
+
+## How it fits into SysWeaver
+
+The test engine, the parameter files and the report are [SysWeaver.HttpBench.Core](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.HttpBench.Core/README.md), the same code the HTTP bench page of [SysWeaver.HttpBench](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.HttpBench/README.md) uses, so a parameter file exported from the page runs the same test here. The options ([`HttpBenchOptions`](HttpBenchOptions.cs)) are parsed with `CommandLine.ParseObject` of [SysWeaver.CommandLine](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.CommandLine/README.md). A prebuilt copy is kept in [`SysWeaver/_tools/HttpBench`](https://github.com/dosh1974/SysWeaver/blob/main/_tools/README.md) (updated by `Publish_All.bat`).
+
+## Using it
 
 ```
 HttpBench [options] [report_name]
@@ -44,7 +50,7 @@ The parameters are taken from (later wins): the defaults, the parameter file (`-
 | `-NoRun` | | Only show (and save) the parameters |
 | `-List` | | List the modules and end points |
 
-## Examples
+### Examples
 
 ```bat
 HttpBench -File ServerTest.json
@@ -54,18 +60,26 @@ HttpBench -Server https://myserver/ -Duration 300 -Workers 64 -Apis "All;!Errors
 
 The first one runs the test of `ServerTest.json` and writes `Report_[server].md`, the second one runs it against `https://localhost:1212/` and writes `LocalTest.md`.
 
-## Phases
+### Phases
 
 1. **Wait for the server**: `serverTime` is requested (once a second) until it answers, at most `-WaitForServer` seconds (exit code 4 if it never does). When it didn't answer the first request it was starting: HttpBench waits `-StartDelay` seconds more.
 2. **Warm up** (`-WarmUp`, on by default): the test runs for `-WarmUpSeconds`, then a pause of `-WarmUpPause` seconds with one `serverTime` request per second. A server that just started compiles and caches on the first requests; the warm up keeps that out of the results.
 3. **Test**: the report and the summary are of this phase only.
 
-## Output
+### Output
 
 The console shows the parameters (one line each), a progress line while the test runs (bar, percent, time, requests/s of the last second, average and P95 response time, errors; a line every 10 % when the output is redirected) and a short summary. Terminals that support it (Windows Terminal) also show the progress on the tab / task bar. The first Ctrl+C stops the test (the report is still written), a second one ends the program.
 
 The report has the key results on top (requests/s, response times: average, median, P90, P95, P99, min / max, time to first byte; errors, traffic), then the parameters and the tables: end points, modules, status codes, errors, the timeline and the response time distribution (see [SysWeaver.HttpBench.Core](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.HttpBench.Core/README.md#the-markdown-report)).
 
-Exit codes: 0 completed, 1 failed (or the report could not be written), 2 invalid arguments or parameter file, 3 stopped with Ctrl+C (before the test: no report), 4 the server didn't answer within `-WaitForServer` seconds.
+Exit codes: 0 completed, 1 failed (or the report could not be written), 2 invalid arguments or parameter file, 3 stopped with Ctrl+C (before the test: no report), 4 the server didn't answer within `-WaitForServer` seconds, see [EXIT CODES](../README.md#exit-codes).
 
-Note: the server must accept the host name of the url, a SysWeaver server that listens on `http://localhost:7480/` answers `http://127.0.0.1:7480/` with 400 Bad Request (counted as errors).
+## Limitations and considerations
+
+- The server must accept the host name of the url: a SysWeaver server that listens on `http://localhost:7480/` answers `http://127.0.0.1:7480/` with 400 Bad Request (counted as errors)
+- `-AnyCertificate` is on by default (test servers often have self signed certificates); use `-AnyCertificate false` to validate certificates
+
+## Relationships
+
+- **Project:** [`HttpBench.csproj`](HttpBench.csproj)
+- **Builds on:** [SysWeaver.HttpBench.Core](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.HttpBench.Core/README.md), [SysWeaver.CommandLine](https://github.com/dosh1974/SysWeaver/blob/main/SysWeaver.CommandLine/README.md)

@@ -4,6 +4,9 @@ namespace FolderSync
 {
 
 
+    /// <summary>
+    /// The command line options of FolderSync (parsed by SysWeaver.CommandLine, the XML docs of the properties are the help text).
+    /// </summary>
     public sealed class Params
     {
 

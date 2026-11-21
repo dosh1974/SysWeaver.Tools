@@ -24,7 +24,7 @@ A prebuilt copy is kept in [`SysWeaver/_tools/OnDuplicates`](https://github.com/
 ## Key features
 
 - Hashes all files in the folders and their sub folders in parallel
-- In each group of identical files the first path (ordinal sort) is kept as the original, every other file is a duplicate
+- In each group of identical files the first path (sorted with the default, culture sensitive, string comparison) is kept as the original, every other file is a duplicate
 - Without an action, prints `"<duplicate>" same as "<original>"` for each duplicate
 - With an action, runs it once per duplicate: the first word is the executable, the rest is the argument string where `{0}` is replaced by the duplicate and `{1}` by the original
 

@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace SysWeaver
 {
+    /// <summary>
+    /// The command line options of Compress (parsed by SysWeaver.CommandLine FilesToFolderTool, the XML docs of the public fields are the help text).
+    /// </summary>
     sealed class CompressParams
     {
         /// <summary>
@@ -20,7 +23,7 @@ namespace SysWeaver
         public bool OnlyBetter = false;
 
         /// <summary>
-        /// If true, image files such as png and jpeg may be re-compressed, trying to make smaller
+        /// If true, .png files are re-compressed with ZopfliPng (lossless, the result replaces the original in the output folder)
         /// </summary>
         public bool RecompressImages = true;
 
@@ -30,22 +33,23 @@ namespace SysWeaver
         public bool CopyOriginal = false;
 
         /// <summary>
-        /// The compression methods to use (br, zgip, zstd, deflate), or use "org" to copy the original (or the type compressed version)
+        /// The compression methods to use (HTTP codes, comma separated: br, gzip, zstd, deflate; unknown names are ignored), or use "org" to copy the original (or the type compressed version)
         /// </summary>
         public String Methods = "br,gzip,zstd";
 
         /// <summary>
-        /// If true, .js files will be minimized
+        /// If true, web files (.js, .mjs, .css, .htm, .html, .xhtml, .json, .svg, .xml, .rss, .webmanifest) are minified with minify
+        /// (//DEBUG_BEGIN .. //DEBUG_END blocks are removed from .js files first)
         /// </summary>
         public bool OptimizeWebFiles = true;
 
         /// <summary>
-        /// If true, .glsl files will be optimized
+        /// If true, .glsl / .frag shaders are optimized (stripped, see MinifyShaders)
         /// </summary>
         public bool OptimizeShaders = true;
 
         /// <summary>
-        /// If true, shader variables will be removed
+        /// If true, the tunable shader variables and iMouse control comments (that Effect Weaver reads from the source) aren't kept when optimizing shaders
         /// </summary>
         public bool RemoveShaderVars = false;
 

@@ -182,9 +182,9 @@ namespace SwWeb.Checking
         public static readonly Rule DesignPillFacts = new Rule("design-pill-facts", Severity.Warning, false, "Page css draws pills / stat chips (a class named *-stat, *-pill or *-fact with a border or radius in a flex row): facts belong in a facts strip (Sw.Facts, dl.sw-facts), pills / badges only for status and filters (Sw.Badge, Sw.Chip)", true);
         /// <summary>A px / rem radius in page css instead of the radius tokens.</summary>
         public static readonly Rule DesignRadius = new Rule("design-radius", Severity.Warning, false, "A fixed border-radius in page css (px / rem / em other than 0 and 50%): use the radius tokens --sw-radius-sm / --sw-radius / --sw-radius-md / --sw-radius-lg / --sw-radius-pill (Pro and Hacker have their own scale)", true);
-        /// <summary>A fieldset used as a group frame (Design v2: cards).</summary>
         /// <summary>A meter (Sw.Kpi Meter / Sw.Meter) without thresholds: a plain bar (the old default warn / danger levels are gone).</summary>
         public static readonly Rule DesignMeterLevels = new Rule("design-meter-levels", Severity.Warning, false, "A meter (Sw.Kpi({ Meter: true / { Max } }), Sw.Meter({ ... })) without Warn / Danger / Levels: it is a plain bar (the old default levels 0.8 / 0.92 are gone); give Warn / Danger for a use, Good: \"high\" when more is better, or Levels: false for a plain bar", true);
+        /// <summary>A fieldset used as a group frame (Design v2: cards).</summary>
         public static readonly Rule DesignFieldset = new Rule("design-fieldset", Severity.Warning, false, "A <fieldset> / <legend> (or el(\"fieldset\")) used as a group frame: the most dated look; use a card (Sw.Card, Sw.Group, section.sw-card) or a flat section title", true);
 
         /// <summary>
@@ -334,10 +334,13 @@ namespace SwWeb.Checking
         /// <summary>UX-FBK-7: a timer that rebuilds rows.</summary>
         public static readonly Rule UxFbk7 = Ux("FBK-7", "A timer that rebuilds rows (a setInterval callback, or a polling function that reschedules itself with setTimeout, that sets innerHTML / replaceChildren of a tbody or a row list): the order jumps under the pointer and the focus is lost; use Sw.Table with SetRows(rows, true)");
 
+        /// <summary>UX-SAF-12: page code that rewrites its history entry (pushState, a replaceState that drops the state).</summary>
         public static readonly Rule UxSaf12 = Ux("SAF-12", "Page code that rewrites its history entry (history.replaceState / pushState): the frame url, Back and Sw.History state break; keep view state with Sw.History");
 
+        /// <summary>UX-FBK-9: Sw.Net.ShouldReportAsync tested without await, or .then on the boolean Sw.Net.ShouldReport.</summary>
         public static readonly Rule UxFbk9 = Ux("FBK-9", "Sw.Net.ShouldReportAsync(e) used as a condition without await (a Promise is always true), or .then(...) on the boolean Sw.Net.ShouldReport(e)");
 
+        /// <summary>UX-FBK-5: a failure the user never sees (empty or log only catch, an unhandled request) or a result said twice.</summary>
         public static readonly Rule UxFbk5 = Ux("FBK-5", "A failure the user never sees or a result said twice: a \"Saved\" / \"Updated\" toast for a result shown in place (an OnClick, the OnChange of an auto-saving control), an async OnClick that resolves false without saying why, a catch that is empty or only logs, .catch(() => {}) / .catch(console.error), a request in an event listener or timer whose failure nobody handles, Sw.Work.Report twice, a dialog button that closes its dialog and then fails");
 
         //  The families of series 4 round 3: security, formatting, pointer events other than click, silent failures

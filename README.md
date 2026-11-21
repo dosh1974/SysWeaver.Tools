@@ -36,7 +36,7 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | [Decompress](Decompress/README.md) | `decompress` | Decompresses Brotli, gzip, zstd and deflate compressed files (the reverse of Compress). |
 | [FolderSync](FolderSync/README.md) | | Pushes one or more local folders to a managed folder on a SysWeaver folder sync service (push-only). |
 | [HttpBench](HttpBench/README.md) | `HttpBench` | Performance tests a SysWeaver web server from the command line (options or a parameter file exported from the HTTP bench page) and writes the results as a markdown report. |
-| [JsConvert](JsConvert/README.md) | | Converts JavaScript files and the scripts in html pages to older JavaScript versions (ES2017, ES2015, ES5 or a browser list) for old and embedded browsers, like Babel's preset-env. |
+| [JsConvert](JsConvert/README.md) | `JsConvert` | Converts JavaScript files and the scripts in html pages to older JavaScript versions (ES2017, ES2015, ES5 or a browser list) for old and embedded browsers, like Babel's preset-env. |
 | [OnDuplicates](OnDuplicates/README.md) | `OnDuplicates` | Finds files with identical content in folder trees and lists them, or runs a command for each duplicate. |
 | [RunComfyUi](RunComfyUi/README.md) | `RunComfyUi` | Runs a ComfyUI workflow (API format json) with its inputs as command line options and saves the results; the input and output types are generated and compiled at runtime. |
 | [SearchAndReplaceAll](SearchAndReplaceAll/README.md) | | Renames folders and files and replaces text in source files for a set of `Key=Value` replacements, ex: to turn a copied project into a new one. |
@@ -45,12 +45,14 @@ Command line tools built on [SysWeaver](https://github.com/dosh1974/SysWeaver). 
 | [SvgOpt](SvgOpt/README.md) | `svg_opt` (build) | Optimises SVG files with SysWeaver.Minifier.Svg and can write an HTML page comparing the originals with the results. |
 | [SwCurl](SwCurl/README.md) | `SwCurl` | A curl-like HTTP client for SysWeaver APIs (SysWeaver login, compression, Tor) with HTTP results as exit codes. |
 | [SwSyncTool](SwSyncTool/README.md) | `SwSyncTool` | Pushes and pulls folders to and from a SysWeaver folder sync service, and maintains local `.swcompact` archives and their chunk store. |
-| [SwWeb](SwWeb/README.md) | | Builds the SysWeaver web front end bundles (`sw/bundles.json`) and lints `srcWeb` folders for the server contract rules (translation calls, template variables, file / folder names, JSDoc headers, legacy globals) and migrates old format pages to the new `Sw` format (`migrate`). |
+| [SwWeb](SwWeb/README.md) | | Builds the SysWeaver web front end bundles (`sw/bundles.json`) and lints `srcWeb` folders for the server contract rules (translation calls, template variables, file / folder names, JSDoc headers, legacy globals), migrates old format pages to the new `Sw` format (`migrate`, `upgrade`), and checks the compressed build outputs (`verify-build`) and the contract tests of the framework READMEs (`contracts`). |
 | [Touch](Touch/README.md) | | Sets the last write time of all files matching one or more file masks to now. |
 | [VsClean](VsClean/README.md) | `VsClean` | Deletes build output folders (`bin` / `obj` next to a `.csproj`, generated `web` / `data` next to `srcWeb` / `srcData`); used by the `Clean_All.bat` scripts. |
 
+[SwWeb.Tests](SwWeb.Tests/README.md) holds the unit tests of SwWeb (not a tool).
+
 ## BUILD  
-Building requires the .NET 10 SDK and that the [SysWeaver](https://github.com/dosh1974/SysWeaver) repository is cloned to the same folder as the [SysWeaver.Tools](https://github.com/dosh1974/SysWeaver.Tools) repository (the projects reference `..\..\SysWeaver\...`):  
+All projects target `net11.0` (with runtime async on); building requires the .NET 11 SDK and that the [SysWeaver](https://github.com/dosh1974/SysWeaver) repository is cloned to the same folder as the [SysWeaver.Tools](https://github.com/dosh1974/SysWeaver.Tools) repository (the projects reference `..\..\SysWeaver\...`):  
 ```
 C:\Dev\SysWeaver
 C:\Dev\SysWeaver.Tools
@@ -91,11 +93,11 @@ Tool specific codes:
 | SwCurl | 7 | The request timed out |
 | SwSyncTool | 3 | The operation failed for one or more items (an archive failed to expand / verify / touch / recover / stat, or push / pull reported errors; missing chunks found by verify are only reported) |
 | FolderSync | 3 | The sync completed but reported errors |
-| SwWeb | 3 | Problems found: `check` reported errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, or a bundle definition / source is invalid, `migrate` warnings that need manual follow-up |
+| SwWeb | 3 | Problems found: `check` reported errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, a bundle definition / source is invalid or a bundle is over its size budget, `migrate` / `upgrade` warnings that need manual follow-up, `verify-build` or `contracts` problems |
 | SwWeb | 4 | `bundle`: one or more source files listed in the manifest don't exist |
 | SetDotNetVersion | 3 | One or more files couldn't be processed (the others are) |
 | SearchAndReplaceAll | 3 | Replacing failed in one or more files (the others are processed) |
 | VsClean | 3 | One or more folders couldn't be deleted (the others are deleted) |
 
 SwCurl writes the HTTP status to the console (unless `-Silent`) and, for an error status, to the `-Save` file (the status line, ex: `<404> - Not found`, then the response body).  
-SvgOpt, OnDuplicates, AcmeCertUtil and Touch only use 0-2 (Touch and SeedMatch: 0 or 1, no arguments is a no-op).  
+SvgOpt, OnDuplicates and AcmeCertUtil only use 0-2; Touch and SeedMatch only use 0 or 1 (no arguments is 0: Touch does nothing, SeedMatch shows the help).  

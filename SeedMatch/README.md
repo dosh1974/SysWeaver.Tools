@@ -19,13 +19,14 @@ The theme only depends on a few random values (main hue, saturation, complement 
 ## Using it
 
 ```
-SeedMatch [Name=]#rrggbb[*weight] [..] [-tries:N] [-top:N] [-start:N]
+SeedMatch [Name=]#rrggbb[*weight] [..] [-tries:N] [-top:N] [-start:N] [-name:AppName]
 ```
 
 - `Name=#rrggbb` compares the color with that theme color: `Background` (`--ThemeBackground`), `Main` (`--ThemeMain`), `Acc1` (`--ThemeAcc1`) or `Acc2` (`--ThemeAcc2`)
 - `#rrggbb` (no name) compares the color with the closest of the four theme colors
 - `*weight` weights a color (default 1), ex: `Main=#e522a4*2`
-- `-tries:N` the number of random seeds to test (default 1000000), `-top:N` the number of distinct themes to list (default 5), `-start:N` the seed of the generator that picks the seeds (default 1: the same input always gives the same result)
+- `-tries:N` the number of random seeds to test (default 1000000), `-top:N` the number of distinct themes to list (default 5), `-start:N` the seed of the generator that picks the seeds (default 1: the same input always gives the same result), `-name:AppName` the app name passed to the theme generator (default `App`; only used by seed 0, which is never tested, so it doesn't change the result)
+- Colors can also be given as `#rgb`; options can also start with `/`
 
 The distance is the OKLab distance * 100 (about 1 is just noticeable), weighted and averaged over the given colors. Seed 0 (derive the seed from the app name) is never tested.
 
@@ -37,7 +38,7 @@ SeedMatch Background=#08190b Main=#e522a4 Acc1=#50e55c Acc2=#50e575
 Best AppSeed: 1241796862
 ```
 
-Exit codes: 0 on success or for help, 1 on an error (ex: an invalid color), see [EXIT CODES](../README.md#exit-codes).
+Exit codes: 0 on success or for help (no arguments also shows the help), 1 on an error (ex: an invalid color or an unknown option), see [EXIT CODES](../README.md#exit-codes).
 
 ## Relationships
 

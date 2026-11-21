@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace SysWeaver
 {
+    /// <summary>
+    /// The command line options of Decompress (parsed by SysWeaver.CommandLine FilesToFolderTool, the XML docs of the public fields are the help text).
+    /// </summary>
     sealed class DecompressParams
     {
         /// <summary>

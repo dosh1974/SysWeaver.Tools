@@ -590,9 +590,6 @@ namespace SwWeb.Checking
         }
 
         /// <summary>
-        /// Paths of the shared library / bundle files (not page scripts).
-        /// </summary>
-        /// <summary>
         /// The rule no-framework for one HTML page: a UI page that loads no SysWeaver bundle (see <see cref="FrameworkFreeChecker"/>) is reported,
         /// an error with --strict inside a srcWeb folder, plus its port steps at their lines (warnings) in the page and its own scripts / style sheets.
         /// </summary>
@@ -638,6 +635,9 @@ namespace SwWeb.Checking
         /// <summary>The generated bundles (sw/): their sources are checked instead.</summary>
         internal static bool IsBundlePath(String rel) => rel.StartsWith("sw/", StringComparison.Ordinal);
 
+        /// <summary>
+        /// Paths of the shared library / bundle files (not page scripts): sw/, core/, ui/, shell/, common/common.js and app/application.js.
+        /// </summary>
         internal static bool IsLibraryPath(String rel) =>
             rel.StartsWith("sw/", StringComparison.Ordinal) || rel.StartsWith("core/", StringComparison.Ordinal) || rel.StartsWith("ui/", StringComparison.Ordinal) || rel.StartsWith("shell/", StringComparison.Ordinal)
             || (rel == "common/common.js") || (rel == "app/application.js");

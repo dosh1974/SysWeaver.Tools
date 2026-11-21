@@ -562,9 +562,6 @@ namespace SwWeb.Migrating
         }
 
         /// <summary>
-        /// The web root of a file: the nearest parent folder named "srcWeb" or "srcData" (inside the migrated folder), else the migrated folder.
-        /// </summary>
-        /// <summary>
         /// True if a file is in a srcData folder (server side templates and data: no UI pages).
         /// </summary>
         static bool IsBelowDataRoot(String file, String rootFull)
@@ -579,6 +576,9 @@ namespace SwWeb.Migrating
             return false;
         }
 
+        /// <summary>
+        /// The web root of a file: the nearest parent folder named "srcWeb" or "srcData" (inside the migrated folder), else the migrated folder.
+        /// </summary>
         static String WebRootOf(String file, String rootFull)
         {
             var d = Path.GetDirectoryName(file);

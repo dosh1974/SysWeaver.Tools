@@ -4,6 +4,10 @@ using SysWeaver.Minifier;
 namespace SysWeaver
 {
 
+    /// <summary>
+    /// The command line options of SvgOpt: all SvgMinifierParams members plus Compare (parsed by SysWeaver.CommandLine FilesToFolderTool,
+    /// the XML docs of the fields are the help text).
+    /// </summary>
     public sealed class SvgOptParams : SvgMinifierParams
     {
 

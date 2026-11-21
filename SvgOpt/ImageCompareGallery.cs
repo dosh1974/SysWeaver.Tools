@@ -6,11 +6,14 @@ using System.Web;
 
 namespace SysWeaver
 {
+    /// <summary>
+    /// Writes the comparison page of SvgOpt (-Compare): an html page with each original image next to its optimised version.
+    /// </summary>
     public static class ImageCompareGallery
     {
 
         /// <summary>
-        /// Creates an html files that can be used to compare images
+        /// Creates an html file that can be used to compare images
         /// </summary>
         /// <param name="dest">Name of the output html file</param>
         /// <param name="imagePairs">Each pair contains an original and modified filename</param>

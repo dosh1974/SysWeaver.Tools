@@ -11,7 +11,7 @@
 
 ## Purpose
 
-[`Compress.csproj`](../Compress.csproj) copies these files to the output folder (`CopyToOutputDirectory` `PreserveNewest`), and [`CompressProgram`](../CompressProgram.cs) runs them from the `tools` folder next to the executable. If a helper fails, the file is reported with a warning and compressed without that step; each step can be turned off (`-OptimizeWebFiles false`, `-RecompressImages false`, `-OptimizeShaders false`). [`Publish_All.bat`](../../Publish_All.bat) syncs them with the rest of the tool into [`SysWeaver/_tools/compress/tools`](https://github.com/dosh1974/SysWeaver/blob/main/_tools/compress/tools/README.md), where the SysWeaver builds use them.
+[`Compress.csproj`](../Compress.csproj) copies these files to the output folder (`CopyToOutputDirectory` `PreserveNewest`), and [`CompressProgram`](../CompressProgram.cs) runs them from the `tools` folder next to the executable. If a helper fails, the file is reported with a warning and compressed without that step; each step can be turned off (`-OptimizeWebFiles false`, `-RecompressImages false`, `-OptimizeShaders false`). [`Publish_All.bat`](../../Publish_All.bat) syncs them with the rest of the tool into [`SysWeaver/_tools/compress/tools`](https://github.com/dosh1974/SysWeaver/tree/main/_tools/compress/tools), where the SysWeaver builds use them.
 
 ## Contents
 
@@ -31,4 +31,4 @@
 
 - **Part of:** [Compress](../README.md)
 - **Used by:** [`CompressProgram`](../CompressProgram.cs)
-- **Published copy:** [SysWeaver/_tools/compress/tools](https://github.com/dosh1974/SysWeaver/blob/main/_tools/compress/tools/README.md)
+- **Published copy:** [SysWeaver/_tools/compress/tools](https://github.com/dosh1974/SysWeaver/tree/main/_tools/compress/tools)

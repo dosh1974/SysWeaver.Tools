@@ -8,6 +8,11 @@ namespace SwSyncTool
         
         #pragma warning disable CS0649
 
+        /// <summary>
+        /// The command line options of SwSyncTool (parsed by SysWeaver.CommandLine, the XML docs of the fields are the help text),
+        /// the credentials (User, Password, CredFile) for Push / Pull are inherited from CredentialParams.
+        /// The [..] prefix of a comment lists the operations that use the option.
+        /// </summary>
         sealed class SyncToolParmas : CredentialParams
         {
             /// <summary>
@@ -24,7 +29,7 @@ namespace SwSyncTool
 
             /// <summary>
             /// [Push, Pull]
-            /// If true, and server cert errors are ignored. NOT reccomended!
+            /// If true, server certificate errors are ignored. NOT recommended!
             /// </summary>
             public bool IgnoreCertErrors;
 
@@ -42,7 +47,7 @@ namespace SwSyncTool
 
             /// <summary>
             /// [Push, Pull]
-            /// If true, Content Dependency Chunking optimizations won't be used.
+            /// If true, content-defined chunking (CDC) optimizations won't be used.
             /// </summary>
             public bool NoCdc;
 

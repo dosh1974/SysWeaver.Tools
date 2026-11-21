@@ -29,11 +29,11 @@ SwWeb check <srcWeb> --strict --design                               # until 0 f
 
 ## Using it
 
-**Getting the tool**: SwWeb is a plain .NET console app without dependencies. Build it from this repository (.NET 10 SDK) and run the exe, or use `dotnet run`:
+**Getting the tool**: SwWeb is a plain .NET console app without dependencies. Build it from this repository (.NET 11 SDK) and run the exe, or use `dotnet run`:
 
 ```
 git clone https://github.com/dosh1974/SysWeaver.Tools
-dotnet build SysWeaver.Tools/SwWeb -c Release        # -> SwWeb/bin/Release/net10.0/SwWeb.exe (SwWeb.dll + legacy_globals.txt next to it)
+dotnet build SysWeaver.Tools/SwWeb -c Release        # -> SwWeb/bin/Release/net11.0/SwWeb.exe (SwWeb.dll + legacy_globals.txt next to it)
 dotnet run --project SysWeaver.Tools/SwWeb -c Release -- check D:\MyApp\srcWeb --strict --design
 dotnet test SysWeaver.Tools/SwWeb.Tests              # the tests
 ```
@@ -41,8 +41,8 @@ dotnet test SysWeaver.Tools/SwWeb.Tests              # the tests
 Copy the whole output folder if you want it elsewhere (the mapping table is embedded; `legacy_globals.txt` next to the exe overrides the embedded copy).
 
 ```
-SwWeb bundle <srcWebRoot> [--check] [--manifest <path>]
-SwWeb check <folder> [--strict] [--design] [--skip <pattern>].. [--no-default-skip] [--template-var <name>]..
+SwWeb bundle <srcWebRoot> [--check] [--manifest <path>] [--no-verify]
+SwWeb check <folder> [--strict] [--design] [--framework] [--skip <pattern>].. [--no-default-skip] [--template-var <name>]..
                      [--legacy <file>] [--full-paths] [--quiet]
 SwWeb migrate <folder> [--dry-run] [--backup <dir>] [--report <file>] [--include <glob>].. [--exclude <glob>]..
                        [--level includes|api|design] [--map <file>] [--legacy <file>] [--keep-legacy] [--force-includes] [--no-jsdoc-header] [--quiet]
@@ -56,7 +56,7 @@ SwWeb tokens <folder>
 SwWeb verify-build <folder> [--full-paths] [--quiet]
 ```
 
-Options start with `--` (or `-`) and are case insensitive. `-?`, `-h`, `--help` show the usage.
+Options start with `--` (or `-`) and are case insensitive. `-?`, `/?`, `-h`, `-help`, `--help`, `/help` or `help` (as the command or after it) show the usage; no arguments at all show it with exit code 2.
 
 ### bundle
 
@@ -64,7 +64,7 @@ Builds every bundle of `<srcWebRoot>/sw/bundles.json` (or `--manifest <path>`; t
 
 - `--check`: writes nothing; exit code 3 if a bundle is missing or differs from what would be generated, or is over its size budget (`MaxKB`, `MaxGzipKB`). Both modes print each bundle's size.
 - A bundle is only written when its content changes (the file time stamp of an up to date bundle is untouched).
-- A missing source file is reported with its relative and full path, that bundle is not written (other bundles are) and the exit code is 4.
+- A missing source file is reported with its relative and full path, that bundle is not written (other bundles are) and the exit code is 4 (also when other bundles failed).
 - **Source verification** (so a half edited file can't break every page): a `.js` bundle is not written, and the previous bundle stays in place, when a source doesn't lex or balance its brackets (the `syntax` rule of `check`), when the joined bundle doesn't, or when a source calls a bare name (`name(...)`, `new Name(...)`) that no JavaScript source of any bundle of the manifest declares (function, class, `var` / `let` / `const` incl. destructuring, parameters, catch bindings) and that is no browser / language global. Errors name the source and line: `ui/controls.js(1234,9): undefined: "endSave(...)" calls a name that no bundle source declares`; exit code 3. A name that another script defines (loaded by the pages) is known when a comment of the source names it (`/* global Edit, EditOptions */`, or a description such as "needs the edit/ scripts: Edit, EditOptions"); member calls (`window.x()`, `Sw.X()`) are not checked. `--no-verify` skips the verification. The bundle is written to `<out>.tmp` and moved over the old one.
 
 #### bundles.json
@@ -88,7 +88,7 @@ Builds every bundle of `<srcWebRoot>/sw/bundles.json` (or `--manifest <path>`; t
 | Member | Meaning |
 |---|---|
 | `Out` | The output file, relative to the web root, `.js` or `.css`, a single dot in the file name. Each `Out` may only be used once |
-| `Files` | The source files in concatenation order, relative to the web root (inside it), all with the extension of `Out`, no duplicates |
+| `Files` | The source files in concatenation order, relative to the web root (inside it), all with the extension of `Out`, no duplicates, not the output itself. The file name case must match the file on disk (urls are case sensitive) |
 | `Header` | Optional text added to the header comment (may contain new lines) |
 | `LoadOnce` | Optional, `.js` only: wrap every source in a load once guard, so a source that several bundles of one page contain runs once (ex: `sw/session.js` + `sw/core.js`, `sw/session.js` + `sw/theme.js` + `common/common.js`). A `.js` bundle that shares a source with a `LoadOnce` bundle must be `LoadOnce` too: it fails otherwise ("ui/base.js is also in common/common.js (LoadOnce): set "LoadOnce": true here too ..."; AS6-1). See "Load once" below |
 | `MaxKB`, `MaxGzipKB` | Optional size budget of the output in KB (as written, and gzip compressed at the smallest size, about `gzip -9`). A bundle over its budget fails `bundle` and `bundle --check` (exit code 3; it is still generated): a small bundle (`sw/session.js`) can't grow back into the full core unnoticed. Raise it only when the growth is intended. `bundle` prints every bundle's size (`sw/session.js: up to date (10 files, 198.5 KB of 218, 49.3 KB gzip of 54)`) |
@@ -142,7 +142,7 @@ my-folder/: folder-name-dash: folder name "my-folder" contains '-' (embedded as 
 3d/: folder-name-digit: warning: folder name "3d" starts with a digit (embedded as '_3d')
 ```
 
-Format: `path(line,col): rule: message` (1-based line and column, UTF-16 chars); names rules have no position (`path: rule: message`); warnings have a `warning: ` message prefix.
+Format: `path(line,col): rule: message` (1-based line and column, UTF-16 chars); name rules have no position (`path: rule: message`); warnings have a `warning: ` message prefix.
 
 #### Rules
 
@@ -167,9 +167,9 @@ Format: `path(line,col): rule: message` (1-based line and column, UTF-16 chars);
 | `tr-untranslated` | warning | A user visible literal text in code without `_T`: a Sw option (`Title`, `Text`, `Description`, `Label`, `Placeholder`, `Tooltip`, `Hint`, `Content`, `Message`, `EmptyText`, `OkText`, `CancelText`, `AriaLabel`, `Html`; `text`, `title`, `placeholder`, `html`, `aria-label`, `alt`), the texts of `Sw.Toast` / `Sw.Info` / `Sw.Fail` / `Sw.Dialog.Alert` / `Confirm` / `Prompt` and `document.createTextNode`, `textContent` / `innerText` / `title` / `placeholder` / `ariaLabel` / `alt` assignments, `setAttribute("title" / "aria-label" / "placeholder" / "alt", ...)`, and the words between the tags of an html string (`innerHTML`, `outerHTML`, `insertAdjacentHTML`). A text is a literal with a word (not a lower case key, a class, a url, a file, css, a key combination like `Ctrl+C`). And a new-format page whose own scripts make texts (a literal with two words) but never call `_T` (the step "no translated text" of a framework-free page after the includes). The page's html text and its `title` / `placeholder` / `alt` attributes are translated by the server and not reported. Not checked: the generated bundles, `common/common.js`, `app/application.js`, `ui/compat*.js`, the brand hook `app/app.js`, files only loaded by `SwWeb:no-framework` pages. Exceptions: `SwWeb:no-tr (why)` on the line or the line before, `SwWeb:no-tr-file (why)` in the first 2000 characters of a developer-only file. `migrate --level design` wraps the plain ones |
 | `theme-include` | warning | A page that links `sw/ui.css` (or `sw/shell.css`) without `common/theme.css` before it: the Sw tokens keep their light defaults, so the page stays light in Dark, Pro, Application and Hacker while the shell around it switches (also reported when the theme is linked after `sw/ui.css`). `migrate` adds it |
 | `tr-format` | error | Arguments that don't match the placeholders (they break the page text at run time): `_TF` / `_TFH` with format arguments after the text and the optional context (they never format: the page shows `{0}`; once translated the server passes them to `_T` with the context as `{0}`), or `_T` / `_TH` whose highest placeholder `{n}` has no argument (a trailing quoted literal is the context, not an argument: `_T("{0} is {1}", a, "on")`). Warnings: `_T` with arguments but no placeholder, `_T` with a placeholder and no arguments at all (a format filled later is marked with `_TF`). A spread argument is not counted |
-| `template-var` | error | `${` in a templated file (`index.html`, `debug.html`, `app/manifest.json`, `app/Home.html`, `common/theme.css`; case sensitive paths) that isn't a known template variable (`Color.*`, `Env.*`, `EnvInfo.*`, `Server.UTC`, `Request.Prefix/IP`, `Session.Lang/User/UserName/Email/Domain/NickName`, `TrN`, `VrN`, `--template-var` names) with optional case / encoding prefixes (`_^~` `@#%$£¤*!/`) |
+| `template-var` | error | `${` in a templated file (`index.html`, `debug.html`, `app/manifest.json`, `app/Home.html`, `common/theme.css`; case sensitive paths) that isn't a known template variable (`Color.Background/Color/Acc1/Acc2/Focus/Scheme`, `Env.*`, the known `EnvInfo.*` names (`AppName`, `AppVersion`, `MachineName` ...), `Client.OptimizedSend`, `Server.UTC`, `Request.Prefix/IP`, `Session.Lang/User/UserName/Email/Domain/NickName`, `Tr<n>`, `Vr<n>`, `--template-var` names) with optional case / encoding prefixes (`_^~` `@#%$£¤*!/`) |
 | `template-css` | error | A template variable in templated CSS outside a `--custom-property` value (the minifier drops the `;` after it) |
-| `template-literal-var` | error | `${Session.`, `${Env.`, `${EnvInfo.`, `${Color.`, `${Server.`, `${Request.` or `${TrN}` in a JS template literal (or in a JS string / comment of a non templated file): the server template engine replaces it |
+| `template-literal-var` | error | `${Session.`, `${Env.`, `${EnvInfo.`, `${Color.`, `${Server.`, `${Request.`, `${Tr<n>}` or `${Vr<n>}` in a JS template literal (or in a JS string / comment of a non templated file): the server template engine replaces it |
 | `jsdoc-header` | error | A `.js` file that doesn't start with a JSDoc file header `/** ... @file ... */` (a leading `"use strict";` is allowed). The brand hook `app/app.js` (also below a folder) is exempt: it is a deployment config file, see `_docs/WebBranding.md` |
 | `debug-markers` | error | Unbalanced `//DEBUG_BEGIN` / `//DEBUG_END` lines (Compress removes the lines between them; a missing end removes the rest of the file) |
 | `minifier-reorder` | error | A destructuring default value or computed key reads a name declared earlier in the same `var` / `let` / `const` declaration. Consecutive declarations of the same kind count as one, because the minifier merges them. The build's minifier (`Compress.exe` -> `minify.exe`, tdewolff minify v2.24.19) moves the first destructuring declarator whose *initializer* doesn't name an earlier declarator to the front, and it ignores the pattern itself. Example: `const s = t.length, { end: o = s - 1 } = i` (or the same as two statements) becomes `const{end:o=s-1}=i,s=t.length`. The release build then throws "Cannot access 's' before initialization" (with `var`, a silent `undefined`), while the unminified srcWeb works. Fix: compute the default after the destructuring (`const { end } = i; const o = end === undefined ? s - 1 : end;`), or put another statement (or a different declaration kind) between the two. Splitting into two adjacent statements of the same kind does **not** help. A deliberate case is marked with `SwWeb:allow minifier-reorder` on the line or the line before |
@@ -207,6 +207,7 @@ Format: `path(line,col): rule: message` (1-based line and column, UTF-16 chars);
 | `design-radius` | warning, design | A fixed `border-radius` (any corner) in page css: a px / rem / em length other than 0 outside `var()` (`50%` is fine). Use the radius tokens (Pro and Hacker have their own scale) |
 | `design-fieldset` | warning, design | A `<fieldset>` in HTML, or `el("fieldset")` / `createElement("fieldset")` in a script, used as a group frame: use a card (`Sw.Card`, `Sw.Group`, `section.sw-card`) or a flat section title |
 | `design-confirm` | warning, design | A `Sw.Dialog.Confirm(title, text, okText, options)` whose literal title or OK text is a destructive action (Delete, Remove, Kill, Terminate, Drop, Revoke, Reset, End ...) without `Danger` in the options (danger button, Cancel focused, Enter never confirms; or `Sw.Cells.ConfirmDanger`), or with a "Yes ..." OK text or a "No ..." `CancelText` (buttons are verbs, the way out is "Cancel"; ui/README.md Dialog rules). `migrate` fixes the old `Confirm(...)` calls it rewrites: `Danger: true` for destructive calls (a call without an OK text gets the title verb), "Yes, Delete!" / "No, Keep it!" become "Delete" / "Cancel" (also inside `_T`), and one warning per call lists what needs a person (a title that is no question, "Are you sure?" in the text, labels that are not literals). check reports the same wording on a `Sw.Dialog.Confirm` (a destructive literal title without `?` and without `Target`, "Are you sure?" in the text), so the worksheet and the gate agree |
+| `design-confirm-options` | warning, design | An options object literal of `Sw.Dialog.Confirm` (the options form `Sw.Dialog.Confirm({ ... })` or the 4th argument) that names an option Confirm doesn't have (a typo or another api's option, ex: `Confirm: "Clear"` for `OkText`: the button reads "OK"); it is ignored at run time. Valid: `CancelText`, `Danger`, `Safe`, `OkIcon`, `CancelIcon`, `OkTitle`, `CancelTitle`, `Icon`, `Target`, `Id`, `Owner`, plus `Title`, `Text`, `OkText` in the options form (the run time schema of `ui/overlay.js`; a test keeps them equal) |
 | `design-error-twice` | warning, design | Page code that shows the error of `Sw.Edit`'s `Validate(true)` again: a `Sw.Fail(...)` / `Sw.Toast(...)` with `[1]` (the message) in its arguments within the next statements of the same block. `Validate(true)` shows the error once itself, under the field, and toasts only when the field can't be seen (the result has `Shown: true`); remove the own toast. Not migrated (a person removes the call) |
 | `design-own-ui` | warning, design | Page code that does itself what the framework does (the native dialogs and an own `<dialog>` are reported as `ux-pop-9` / `ux-pop-1`, see [UX guide rules](#ux-guide-rules)): an own `fetch(...)` / `new XMLHttpRequest` (Sw.Net.Send; not reported: a request with `credentials`, `mode`, `redirect`, `referrerPolicy`, `signal`, `integrity`, `keepalive` or an `Authorization` header, also through a `new Request(...)` made before, a download of bytes `.blob()` / `.arrayBuffer()`, a line with `SwWeb:allow-online`, a document that loads no Sw bundle), `prefers-color-scheme` in page css or a script string, an own colour palette (8 or more literal colours in non `--sw-*` custom properties; not `app/app.css`). After `migrate` put a framework-free page on the bundles, this keeps those port steps in the gate (PORTING.md A0, A5, B16) |
 | `a11y-focus` | warning, design | A page css rule with `:focus` / `:focus-visible` that sets `outline: none` / `0` (or `outline-style` / `-width`) without a replacement in the same rule (`box-shadow`, an outline or border colour, a background): keyboard users lose their place (WCAG 2.4.7) |
@@ -344,7 +345,7 @@ The `ux-*` rules check the rules of the [SysWeaver UX guide](https://github.com/
 
 Guide rules tagged `lint:` that existing rules check: INP-1 / INP-21 `a11y-custom-control`, FOC-3 `a11y-focus`, TIP-1 / TIP-2 / FRM-1 / ACC-5 / ACC-10 `a11y-name`, TXT-1..4 `tr-*`, MOT-2 `unknown-token`, POP-9 / SAF-1 / SAF-2 `design-confirm`, FRM-3 `design-error-twice`, LST-6 `design-navigate`, LAY-6 `design-font` / `external-resource`, PRF-3 `external-resource`.
 
-The legacy global names are read from [`legacy_globals.txt`](legacy_globals.txt) (one name per line, `#` comments): the copy next to `SwWeb.exe` if present, else the embedded copy, or `--legacy <file>`. The permanent globals `_T`, `_TF`, `_TH`, `_TFH`, `setTheme`, `resetTheme`, `toggleTheme`, `Build` and `appMain` are always allowed. The list was generated from the top level declarations of the old `common/common.js` and `app/application.js`.
+The legacy global names are read from [`legacy_globals.txt`](legacy_globals.txt) (one name per line, `#` comments): the copy next to `SwWeb.exe` if present, else the embedded copy, or `--legacy <file>`. The permanent globals `_T`, `_TF`, `_TH`, `_TFH`, `setTheme`, `resetTheme`, `toggleTheme`, `appendTheme`, `getTheme`, `applyTheme`, `Build` and `appMain` are always allowed (they are ignored when a list names them). The list was generated from the top level declarations of the old `common/common.js` and `app/application.js`.
 
 ### migrate
 
@@ -477,7 +478,7 @@ The default table is [`migrate_map.json`](migrate_map.json) (embedded; print it 
 
 `Css` entries: key `.Class`, `#id` or an element name, value a string (the new selector) or `{ "New", "Safe", "Note", "OwnUi" }` (`OwnUi`: the core still draws the old element on pages without `sw/ui.css`, ex: `SysWeaver-ServerBlock`; `upgrade` reports a page's rule for it as info).
 
-`Tokens` entries: key a custom property (`--name`), value a string (the suggestion, reported) or `{ "New", "Safe", "Note" }`; a `Safe` entry needs a custom property as `New` and must be a real alias (the old token is defined as `var(--new)` wherever it exists), its `var()` uses are renamed. The default `design` section holds the Design v2 aliases (safe) and the legacy `--Theme*` / `--SysWeaverEdit*` variables (reported with the role token to use).
+`Tokens` entries: key a custom property (`--name`), value a string (the suggestion, reported) or `{ "New", "Safe", "Note", "Apply", "TextNew" }` (`Apply`: `migrate --level design` renames the uses to `New`; `TextNew`: the token for text colour properties, also renamed by `--level design`; both need custom property names); a `Safe` entry needs a custom property as `New` and must be a real alias (the old token is defined as `var(--new)` wherever it exists), its `var()` uses are renamed. The default `design` section holds the Design v2 aliases (safe) and the legacy `--Theme*` / `--SysWeaverEdit*` variables (reported with the role token to use).
 
 Section members: `Description`, `Globals`, `Css`, `Tokens`, and `Library` (the file that still provides the section's names as legacy aliases: their warnings say so, and they never make a page need `sw/compat.js`).
 
@@ -519,6 +520,16 @@ SwWeb verify-build D:\SysWeaver            # after a build: every web/**/*.br, d
 
 The parity gate's `release-js` / `release-glsl` scenarios (SysWeaver.Tests `ParityTests/Plugins/ReleaseAssetsPlugin.cs`) parse every built script with the browser's own parser and compile and link every built shader with the built `media_effect_program.js` in WebGL. `SwWeb.Tests` runs `verify-build` on the sibling SysWeaver repository (`BuildVerifierTests.TheSysWeaverBuildOutputsVerify`, as of its last build).
 
+### Other commands
+
+| Command | What |
+|---|---|
+| `SwWeb mapping` | Prints the embedded default mapping table of `migrate` (json, see "Mapping file") |
+| `SwWeb rules` | Lists the `check` rules: id, severity, `strict` / `design` and the description |
+| `SwWeb tokens <folder>` | Prints the `--sw-*` tokens the web roots below `<folder>` define; `SwWeb tokens <SysWeaver repository> > SwWeb/sw_tokens.txt` regenerates the list of rule `unknown-token` |
+| `SwWeb icons <folder>` | Prints the framework's inline icon names; `SwWeb icons <SysWeaver repository> > SwWeb/sw_icons.txt` regenerates the list of rule `design-icon` |
+| `SwWeb contracts <folder> [--out <file>]` | The contract tests from the framework READMEs (see "Contract tests from the READMEs" above); exit code 3 on a problem |
+
 ### Exit codes
 
 0-2 as all tools, see [EXIT CODES](../README.md#exit-codes):
@@ -527,8 +538,8 @@ The parity gate's `release-js` / `release-glsl` scenarios (SysWeaver.Tests `Pari
 |---|---|
 | 0 | Success (bundles built or up to date, no check errors), also when help was requested |
 | 1 | Generic error (an exception, ex: invalid json in the manifest) |
-| 2 | Invalid command line (unknown command or option, missing folder / manifest) |
-| 3 | Problems found: `check` errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, or a bundle definition / source is invalid, `migrate` warnings that need manual follow-up, `verify-build` problems |
+| 2 | Invalid command line (no arguments, unknown command or option, an option without its value, missing folder / manifest / map / legacy file, invalid `--level`) |
+| 3 | Problems found: `check` errors (or warnings with `--strict`), `bundle --check` found an out of date bundle, a bundle definition / source is invalid or a bundle is over its size budget, `migrate` / `upgrade` warnings that need manual follow-up, `verify-build` or `contracts` problems |
 | 4 | `bundle`: one or more source files listed in the manifest don't exist |
 
 ## Code layout
@@ -538,8 +549,8 @@ The parity gate's `release-js` / `release-glsl` scenarios (SysWeaver.Tests `Pari
 | `Lexing/JsLexer.cs`, `Lexing/JsToken.cs` | Error tolerant JavaScript tokenizer: strings, template literals with nested `${}`, regex vs division (context heuristics: keywords, control-statement parens, block vs object literal braces), line / block / HTML-like comments, hashbang, private names, numeric separators. Tokens cover every char of the input (round-trip safe), `Tokenize(text, start, end)` lexes a range (script element bodies) |
 | `Lexing/HtmlScanner.cs` | HTML tokenizer: start / end tags with quoted, unquoted and valueless attributes (with value offsets), comments, declarations, text, raw text elements (`script`, `style`, `textarea`, `title`, ...); `GetScripts` lists script elements with their body range |
 | `Lexing/SourceText.cs` | UTF-8 decoding (BOM, invalid UTF-8 detection) and offset to line / column mapping |
-| `Bundling/*.cs` | `bundles.json` model and the bundler |
-| `Checking/*.cs` | Rules, options (skip list, templated files, legacy globals), path patterns and the checker |
+| `Bundling/BundleManifest.cs`, `Bundler.cs`, `BundleVerifier.cs` | The `bundles.json` model, the bundler (concatenation, load once guards, size budgets) and the source verification (syntax, undefined calls, names declared twice) |
+| `Checking/Rules.cs`, `CheckOptions.cs`, `PathMatcher.cs`, `Checker.cs` | The rule list, the options (skip list, templated files, legacy globals), the path patterns and the checker (folder walk, name, translation, template and contract rules) |
 | `Checking/DesignChecker.cs` | The Design v2 porting rules (`--design`): css declaration walker, shadows, gradients, hard-coded colours, tokens, class hooks, inline styles, accessible custom controls, page header, viewport |
 | `Checking/UxChecker.cs`, `UxPatterns.cs` | The `ux-*` rules of the UX guide: css, markup, the script rules per call and handler |
 | `Checking/UxFamilies.cs` | The rule families of round 3 (security, formatting, pointer events other than click, silent failures, untranslated errors, Sw api misuse, the weaker danger confirmation, css blocks: endless blink, clipped text, selection of content) |
@@ -559,9 +570,10 @@ The parity gate's `release-js` / `release-glsl` scenarios (SysWeaver.Tests `Pari
 | `Migrating/CssMigrator.cs` | CSS selector hooks |
 | `Migrating/TokenMigrator.cs`, `Migrating/DesignMigrator.cs`, `Migrating/DialogWording.cs` | Design token alias renames (`var()` uses, overrides found in the run block them), the `--level design` legacy theme variable renames and shadow rewrite, the dialog wording of `Confirm` calls (shared with `design-confirm`) |
 | `Migrating/Migrator.cs`, `Migrating/MigrateModel.cs` | Folder walk, skip rules, script resolution across web roots, applying edits (encoding / BOM / line endings), backup, report |
+| `sw_bundles.json` | The embedded copy of the framework's `sw/bundles.json` (rule `bundle-overlap` when the checked web root has none; a test keeps it equal to SysWeaver's) |
 | `SwWebProgram.cs` | Command line |
 
-Tests: [`SwWeb.Tests`](../SwWeb.Tests) (xUnit, `dotnet test`), including `UxVariantTests` (the generated mistake / right pattern variants per family), `CorpusTests` (the frozen corpus), including a fixture test that lexes every `.js` / `.html` file under the sibling `SysWeaver` repository's `srcWeb` folders (vendored libraries included) and requires full coverage without unterminated tokens.
+Tests: [`SwWeb.Tests`](../SwWeb.Tests/README.md) (xUnit, `dotnet test`), including `UxVariantTests` (the generated mistake / right pattern variants per family), `CorpusTests` (the frozen corpus) and a fixture test that lexes every `.js` / `.html` file under the sibling `SysWeaver` repository's `srcWeb` folders (vendored libraries included) and requires full coverage without unterminated tokens.
 
 ## Limitations and considerations
 
@@ -581,5 +593,5 @@ Tests: [`SwWeb.Tests`](../SwWeb.Tests) (xUnit, `dotnet test`), including `UxVari
 
 ## Relationships
 
-- **Project:** [`SwWeb.csproj`](SwWeb.csproj), tests [`SwWeb.Tests.csproj`](../SwWeb.Tests/SwWeb.Tests.csproj)
+- **Project:** [`SwWeb.csproj`](SwWeb.csproj) (.NET 11 console app, no package or project references), tests [`SwWeb.Tests`](../SwWeb.Tests/README.md)
 - **Bundle manifest:** `SysWeaver.HttpServer/srcWeb/sw/bundles.json` in the SysWeaver repository
