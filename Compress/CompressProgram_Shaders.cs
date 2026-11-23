@@ -22,7 +22,7 @@ namespace SysWeaver
     /// a comment, each on its own line with its comment (comment continuation lines are joined, "var: {...}" annotations are compacted).
     /// The candidates are found with the parser's rules (mirrored here), names defined more than once are no candidates.</item>
     /// <item>The iMouse channel comments ("// iMouse.x = Name | Description | Default"), as compact lines at the top.</item>
-    /// <item>The media line of an image / audio / audio2 / collage effect ("//  media: kind refs"), compact, at the top (also without the variables).</item>
+    /// <item>The media line of an image / video / audio / legacyaudio / collage effect ("//  media: kind refs"), compact, at the top (also without the variables).</item>
     /// <item>The entry points (main, mainImage and vertexMain, the optional vertex stage).</item>
     /// </list>
     /// <para>
@@ -432,9 +432,9 @@ namespace SysWeaver
         }
 
         /// <summary>The media line of an effect ("//  media: kind refs", Effect Weaver's EffectMedia.LineRx), keep in sync with it</summary>
-        static readonly Regex MediaLineRx = new Regex(@"^[ \t]*//[ \t]*media[ \t]*:[ \t]*(image|audio2|audio|collage)\b([^\r\n]*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        static readonly Regex MediaLineRx = new Regex(@"^[ \t]*//[ \t]*media[ \t]*:[ \t]*(image|video|legacyaudio|audio2|audio|collage)\b([^\r\n]*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-        /// <summary>The first media line of a shader as a compact comment ("//media:audio2 stock:a.flac"), null if none</summary>
+        /// <summary>The first media line of a shader as a compact comment ("//media:audio stock:a.flac"), null if none</summary>
         static String GetMediaLine(String[] lines)
         {
             foreach (var line in lines)
@@ -660,7 +660,7 @@ namespace SysWeaver
                 var keepVars = !p.RemoveShaderVars;
                 //  The iMouse channel comments (names, descriptions and defaults of the controls), the preprocessor removes all comments
                 var header = keepVars ? GetMouseComments(lines) : new List<String>();
-                //  The media line (the kind of an image / audio / audio2 / collage effect and its media): kept even without the variables (it decides
+                //  The media line (the kind of an image / video / audio / legacyaudio / collage effect and its media): kept even without the variables (it decides
                 //  the texture the effect gets)
                 var mediaLine = GetMediaLine(lines);
                 if (mediaLine != null)
