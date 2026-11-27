@@ -47,7 +47,7 @@ SwSyncTool <Operation> [Arguments..] [options]
   -?                             Help (all options, operations and the exit codes)
 ```
 
-Example: `SwSyncTool Push https://myserver/ MyApp .\bin\Release\publish -Ignore *.pdb -User deploy -Password secret`
+Example: `SwSyncTool Push https://myserver/ MyApp .\bin\Release\publish -Ignore *.pdb -CredFile deploy.cred`
 
 Exit codes: 0-2 as all tools, 3 if the operation failed for one or more items, see [EXIT CODES](../README.md#exit-codes).
 
